@@ -1,0 +1,32 @@
+# --- secrets: never commit ---
+.env
+*.env
+!.env.example
+**/token.txt
+**/secrets.json
+*.pem
+*.key
+
+# --- generated workflow (may embed credential ids / tokens) ---
+**/batch-shorts.json
+**/_import.json
+
+# --- media / bulk ---
+*.mp4
+*.mov
+*.mkv
+incoming/
+local-files/
+renders/
+
+# --- python / node ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
