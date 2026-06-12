@@ -109,8 +109,11 @@ def run_render(scene_class, log):
     """Shell out to the manim venv. Returns the produced mp4 path or raises."""
     env = dict(os.environ)
     env["PATH"] = FFMPEG_BIN + os.pathsep + MIKTEX_BIN + os.pathsep + env.get("PATH", "")
+    # -r 1080,1920 forces 9:16 VERTICAL (matches render_spectro.ps1 "short").
+    # Without it manim defaults to 16:9 landscape — which makes Shorts/Reels/X
+    # videos render horizontal and unwatchable.
     cmd = [VENV_PY, "-m", "manim", f"-q{QUALITY}", "--fps", "30",
-           SCENES_FILE, scene_class]
+           "-r", "1080,1920", SCENES_FILE, scene_class]
     log.append("RUN: " + " ".join(cmd))
     try:
         proc = subprocess.run(cmd, cwd=MANIM_DIR, env=env,

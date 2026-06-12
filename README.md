@@ -16,6 +16,10 @@ Privacy Policy and Terms of Service for the automation app, served at:
 These are the URLs referenced by the social-platform developer apps.
 
 ### 2. Pipeline tooling — [`pipeline/`](pipeline/)
+
+**📖 [pipeline/USAGE.md](pipeline/USAGE.md)** — the detailed how-to: workflows,
+the form, every platform, music + Drive integrations, limits, troubleshooting.
+
 A sanitized copy of the automation stack:
 
 - **`docker-compose.yml` / `Dockerfile`** — self-hosted [n8n](https://n8n.io)
