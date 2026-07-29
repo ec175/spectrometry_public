@@ -1,3 +1,21 @@
+# --- manim output ---
+# manim.cfg sets media_dir = ./renders, so everything rendered lands there.
+renders/
+renders_*/
+media/
+*.mp4
+*.mov
+*.mkv
+
+# --- python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
 # --- secrets: never commit ---
 .env
 *.env
@@ -7,26 +25,8 @@
 *.pem
 *.key
 
-# --- generated workflow (may embed credential ids / tokens) ---
-**/batch-shorts.json
-**/_import.json
-
-# --- media / bulk ---
-*.mp4
-*.mov
-*.mkv
-incoming/
-local-files/
-renders/
-
-# --- python / node ---
-.venv/
-venv/
-__pycache__/
-*.pyc
-node_modules/
-
 # --- os / editor ---
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/

@@ -3,18 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spectrometry Shorts — Legal</title>
+<title>Spectrometry Shorts</title>
 <style>
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:740px;
        margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a;background:#fafafa}
-  h1{font-size:1.6rem} a{color:#0a58ca} .card{background:#fff;border:1px solid #e5e5e5;
-  border-radius:10px;padding:20px 24px;margin:16px 0}
+  h1{font-size:1.6rem;margin-bottom:.2rem} a{color:#0a58ca}
+  h2{font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:#666;
+     margin:32px 0 8px}
+  .card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;
+        padding:20px 24px;margin:16px 0}
+  .card p{margin:.4rem 0 0;color:#555;font-size:.95rem}
+  code{background:#eef0f2;padding:2px 6px;border-radius:4px;font-size:.9em}
 </style>
 </head>
 <body>
   <h1>Spectrometry Shorts</h1>
-  <p>A personal automation tool that publishes the operator's own short-form
-     educational chemistry videos to their own social accounts.</p>
+  <p>Drug profiles built in manim — a molecule spinning over the NMR and infrared
+     spectra that identify it, with the peaks numbered to match the atoms.</p>
+
+  <h2>Watch</h2>
+  <div class="card">
+    <a href="https://www.youtube.com/channel/UChtdNI2BC1SmkmHEERA4dzg">YouTube — spectrometry.mp4</a>
+    <p>Also on X, <a href="https://x.com/spectrometrymp4">@spectrometrymp4</a>.</p>
+  </div>
+
+  <h2>Render one yourself</h2>
+  <div class="card">
+    <a href="https://github.com/ec175/spectrometry_public">Source on GitHub</a>
+    <p>Clone it, <code>pip install -r requirements.txt</code>, and render.
+       Python 3.10+ and ffmpeg; no LaTeX needed.</p>
+  </div>
+  <div class="card">
+    <a href="https://github.com/ec175/spectrometry_public/blob/main/drug_profiles/GUIDE.md">Full guide</a>
+    <p>Install, every render flag, how to author a new molecule, and the complete
+       data contract.</p>
+  </div>
+
+  <h2>Legal</h2>
+  <p>For the publishing automation — a personal tool that posts the operator's own
+     videos to their own social accounts.</p>
   <div class="card"><a href="/privacy.html">Privacy Policy</a></div>
   <div class="card"><a href="/terms.html">Terms of Service</a></div>
 </body>

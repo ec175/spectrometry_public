@@ -1,45 +1,86 @@
 # spectrometry_public
 
-Public home for **Spectrometry Shorts** — a personal, self-hosted pipeline that
-batches short-form educational chemistry videos and publishes them to social
-platforms (YouTube, with TikTok and Instagram Reels in progress). It also holds
-the creator/end-user licensing documents the platform developer apps require.
+**Drug profiles, built in [manim](https://www.manim.community/).**
 
-This repo holds two things:
+A drug profile is a vertical short that shows one molecule and the spectra that
+identify it — the structure spins over its ¹³C and ¹H NMR spectra with the peaks
+numbered to match the atoms, cross-fades to an FTIR trace, and then plays each
+infrared vibration mode while a cursor tracks the band it produces.
 
-### 1. Legal pages (GitHub Pages)
-Privacy Policy and Terms of Service for the automation app, served at:
+This repo is the **source and the instructions**, so you can render one yourself.
 
-- Privacy: <https://ec175.github.io/spectrometry_public/privacy.html>
-- Terms:   <https://ec175.github.io/spectrometry_public/terms.html>
+### Where to watch them
 
-These are the URLs referenced by the social-platform developer apps.
+- YouTube — [**spectrometry.mp4**](https://www.youtube.com/channel/UChtdNI2BC1SmkmHEERA4dzg)
+- X — [**@spectrometrymp4**](https://x.com/spectrometrymp4)
 
-### 2. Pipeline tooling — [`pipeline/`](pipeline/)
+<!-- The YouTube link uses the channel ID, which cannot go stale. Swap it for the
+     vanity /@handle URL if you prefer. TikTok and Instagram are omitted on purpose
+     -- add them here once those accounts are actually publishing. -->
 
-**📖 [pipeline/USAGE.md](pipeline/USAGE.md)** — the detailed how-to: workflows,
-the form, every platform, music + Drive integrations, limits, troubleshooting.
+---
 
-A sanitized copy of the automation stack:
+## Render one
 
-- **`docker-compose.yml` / `Dockerfile`** — self-hosted [n8n](https://n8n.io)
-  with `ffmpeg` baked in.
-- **`render_service/`** — a small stdlib HTTP service that renders/locates the
-  source videos on the host and stages them for n8n (the host↔container bridge).
-- **`workflows/build_workflow.js`** — generates the n8n batch workflow
-  (form → AI captions → render-if-missing → multi-platform post) as importable
-  JSON.
+```bash
+git clone https://github.com/ec175/spectrometry_public.git
+cd spectrometry_public/drug_profiles
 
-#### Configuration
-Nothing secret lives here. Copy `pipeline/.env.example` to `.env` and fill in
-your own values (encryption key, basic-auth password, tunnel URL). Credential
-IDs and the render-service token are read from environment variables — see the
-top of `build_workflow.js`.
+python -m venv .venv
+source .venv/bin/activate         # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-```
-cp pipeline/.env.example pipeline/.env   # then edit
-cd pipeline && docker compose up -d
+manim -qh -r 1080,1920 drug_profile.py VerticalProfile_Aspirin
 ```
 
-> Personal project. The published videos and any source scene code are not part
-> of this repository.
+You need Python 3.10+ and ffmpeg. **You do not need LaTeX** — these scenes use Pango
+text rather than `MathTex`, so the usual manim LaTeX setup does not apply.
+
+Output lands in `drug_profiles/renders/videos/drug_profile/1920p30/`.
+
+> ### 📖 [**drug_profiles/GUIDE.md**](drug_profiles/GUIDE.md)
+> The detailed walkthrough: installing from scratch, every quality flag and which to
+> actually use, how to read the output tree, **how to author a new molecule**, the
+> full data contract attribute by attribute, and troubleshooting.
+
+---
+
+## What is in here
+
+| path | what |
+|------|------|
+| [`drug_profiles/drug_profile.py`](drug_profiles/drug_profile.py) | the `VerticalProfile` scene — all the choreography — plus `VerticalProfile_Aspirin` as a fully worked example |
+| [`drug_profiles/spectro_lib.py`](drug_profiles/spectro_lib.py) | the object library: palette, axes, molecule builders, line-broadening maths, gradient fills |
+| [`drug_profiles/GUIDE.md`](drug_profiles/GUIDE.md) | the detailed how-to |
+| [`drug_profiles/requirements.txt`](drug_profiles/requirements.txt) | pinned dependencies |
+| [`drug_profiles/manim.cfg`](drug_profiles/manim.cfg) | canonical dark background, 30 fps, output into `renders/` |
+
+A new molecule is **one subclass** — every molecule-specific value is a class
+attribute. `VerticalProfile_Aspirin` is the template; read it top to bottom and you
+have the entire data contract. GUIDE.md §6 walks through it.
+
+### A note on the data
+
+The spectra are **representative, not measured**. Peak positions are seeded from
+literature values and group-contribution estimates, then hand-corrected so the
+diagnostic bands are right. They are good enough to teach with and are not a
+substitute for a real acquisition. If you author a molecule, check every shift and
+every band against a reference before you render — nothing in the code validates
+them, and a wrong assignment is a factual error displayed on screen.
+
+---
+
+## Also here
+
+Privacy Policy and Terms of Service for the publishing automation, served via
+GitHub Pages and referenced by the social-platform developer apps:
+
+- <https://ec175.github.io/spectrometry_public/privacy.html>
+- <https://ec175.github.io/spectrometry_public/terms.html>
+
+---
+
+## License / use
+
+Personal project, shared so the method is reproducible. The rendered videos are not
+part of this repository. If you build on it, a credit is appreciated.
