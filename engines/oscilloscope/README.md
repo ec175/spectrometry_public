@@ -173,4 +173,4 @@ and re-seed their statics per size.
 - **`build_circle_format.py`** — the builder for the split ASCII-cover-plus-scope format. It
   imports the withheld compositions, so it could not ship; the format itself is described in the
   catalogue and there are four frames from it.
-- **The drug-profile format**, which has its own engine: [drug-scope](../drug-scope/).
+- **The chemical-profile format**, which has its own engine: [chemical-scope](../chemical-scope/).

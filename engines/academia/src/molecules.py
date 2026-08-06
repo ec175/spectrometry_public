@@ -12,7 +12,7 @@ otherwise black skeleton).
     big  = mol.render_rgba(smi, font_scale=2.9, halo=True)        # big symbols + knockout halo
 
 `halo=True` reproduces the functional-group treatment from the manim and
-Oscilloscope videos (see Oscilloscope\\osc\\drugscope.py): symbols are enlarged
+Oscilloscope videos (see Oscilloscope\\osc\\chemscope.py): symbols are enlarged
 and a snug ring of skeleton ink is cleared around each one, so a letter never
 sits on a bond. Defaults are unchanged, so the existing figure sets (BCS,
 cannabinoids, amino acids, steroids, ...) render byte-identical.
@@ -80,7 +80,7 @@ def _disk(r):
 def _knockout_halo(rgba_labelled, rgba_bare, halo_px, inner_px):
     """Clear a snug ring of skeleton ink around every atom symbol.
 
-    Mirrors the knockout halo in Oscilloscope\\osc\\drugscope.py: bonds are drawn
+    Mirrors the knockout halo in Oscilloscope\\osc\\chemscope.py: bonds are drawn
     full-length, then a glyph-sized region is zeroed so a letter never sits on a
     bond. Here the glyph footprint is recovered by differencing the labelled
     render against a `noAtomLabels` render of the same molecule -- RDKit shortens
@@ -120,7 +120,7 @@ def _draw(m, size, *, pad, bond_width, font_scale, bw_base, label_pad,
     # Do NOT uncap it (-1): baseFontSize is in MOLECULE units, so RDKit scales the
     # font with the drawing scale and a tiny molecule (isoxazole, 5 atoms) gets
     # letters big enough to swallow its own ring. The clamp is the same trick as
-    # drugscope's sym_px_max.
+    # chemscope's sym_px_max.
     o.maxFontSize = int(max_font_px)
     o.baseFontSize = 0.6 * font_scale          # larger O / OH / N / H labels
     o.additionalAtomLabelPadding = label_pad   # RDKit's own bond-shortening gap

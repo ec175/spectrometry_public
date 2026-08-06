@@ -29,7 +29,7 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 | `dsc.py` | technique | Step-aware DSC parsing, per-trace offsetting, and glass-transition / melt annotation. |
 | `gaussian.py` | DFT | Gaussian 16 output to line lists — IR, Raman and NMR shieldings. The primary engine, because that is what the lab's DFT data is. |
 | `registry.py` | data access | The only place that knows where measured data lives. Sample and measurement indices, queries by technique, and URL resolution. |
-| `../../drug_profiles/spectro_lib.py` | subproject | The manim spectroscopy library — the animated counterpart to all of the above. Axes, traces, molecule builders, peak callouts and the transitions between techniques. Lives at the repository root beside a worked scene and its guide, not under this engine. |
+| `../../chemical_profiles/spectro_lib.py` | subproject | The manim spectroscopy library — the animated counterpart to all of the above. Axes, traces, molecule builders, peak callouts and the transitions between techniques. Lives at the repository root beside a worked scene and its guide, not under this engine. |
 
 
 ## Figure scripts — the deliverables
@@ -76,11 +76,11 @@ Each is a SMILES dict in `chem_data.py`, and adding one is a dict plus a call. T
 
 ## manim subproject
 
-An older, unrelated body of work kept here because it is the animated counterpart to the same chemistry — and because the CRT drug-profile format in the [drug-scope engine](../drug-scope/) was transcribed from its vertical-profile scenes. The library itself ships at the repository root as `drug_profiles/`, with a worked scene and a guide; this directory holds the supporting data modules and build tools it does not carry. Needs manim, which nothing else here does.
+An older, unrelated body of work kept here because it is the animated counterpart to the same chemistry — and because the CRT chemical-profile format in the [chemical-scope engine](../chemical-scope/) was transcribed from its vertical-profile scenes. The library itself ships at the repository root as `chemical_profiles/`, with a worked scene and a guide; this directory holds the supporting data modules and build tools it does not carry. Needs manim, which nothing else here does.
 
 | object | what it is | notes |
 |---|---|---|
-| `drug_profiles/spectro_lib.py` | The library: axes and trace builders, molecule construction, peak callouts, and the transitions between techniques. About 2,000 lines, and the part worth reading. | Ships at the repository root with a worked scene, a guide, pinned requirements and a verified no-LaTeX render path — read that copy. The rest of the choreography is withheld, as everywhere else here. |
+| `chemical_profiles/spectro_lib.py` | The library: axes and trace builders, molecule construction, peak callouts, and the transitions between techniques. About 2,000 lines, and the part worth reading. | Ships at the repository root with a worked scene, a guide, pinned requirements and a verified no-LaTeX render path — read that copy. The rest of the choreography is withheld, as everywhere else here. |
 | `crystal_structures` | Crystal lattice geometry for the structure animations. | Data, not choreography. |
 | `morph_sequences` | The molecule-to-molecule morph sequences — which structure becomes which, and in what order. |  |
 | `isoxazole_video_data` | Geometry and line-list data for the arylidene-isoxazolone series. | Paired with the format note in `ISOXAZOLE_MORPH_FORMAT.md`. |

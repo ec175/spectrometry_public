@@ -1,4 +1,4 @@
-# Drug Scope
+# Chemical Scope
 
 **Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope
 screen.** Molecule above, spectrum below, both stroked as phosphor traces.
@@ -85,7 +85,7 @@ pip install -r src/requirements.txt
 
 ```python
 import sys; sys.path.insert(0, "src")
-from drug_data import MOLECULES
+from chemical_data import MOLECULES
 
 print(len(MOLECULES), "molecules")
 m = MOLECULES["Morphine"]
@@ -93,7 +93,7 @@ print(len(m["AT"]), "atoms,", len(m["BONDS"]), "bonds,", len(m["ir_lines"]), "IR
 ```
 
 ```bash
-python src/drug_profile.py Morphine --preview      # one molecule
+python src/chemical_profile.py Morphine --preview      # one molecule
 python src/render_optimal.py                       # the whole set, 3 GPU lanes
 ```
 
@@ -154,7 +154,7 @@ This shares its CRT core with the [oscilloscope engine](../oscilloscope/) — th
 buffer, the film filter, the config and the GPU backend are the same code. It carries its own copy
 so each engine stands alone; if you change one, change both.
 
-The format itself is a remake. The original is [`drug_profiles/`](../../drug_profiles/) at the
+The format itself is a remake. The original is [`chemical_profiles/`](../../chemical_profiles/) at the
 repository root — the manim `VerticalProfile` scene, which spins the molecule over its NMR
 spectra, cross-fades to FTIR, and then plays each vibration mode. These molecule geometries were
 transcribed one-to-one from that scene family. Render the manim original to see where the format

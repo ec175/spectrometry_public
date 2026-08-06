@@ -1,25 +1,25 @@
 {
-  "engine": "drug-scope",
-  "title": "Drug Scope",
+  "engine": "chemical-scope",
+  "title": "Chemical Scope",
   "tagline": "Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen.",
   "method": "The molecule sits above and its spectrum below, both stroked onto a simulated scope face. Three additive buffers composite over a faint graticule: a decaying persistence buffer carrying the spectrum as a scope trace, a second holding the skeletal BONDS, and a third holding the functional-group SYMBOLS and all text. Each gets a half-resolution bloom and then the CRT film filter. Two methods run in sequence, FTIR then Raman, cross-dissolving through the phosphor at the midpoint, with the transition signalled by a one-second ASCII scramble of the lower text rather than a fade.\n\nThe two methods are genuinely different, which took work: the same band POSITIONS are reweighted by selection rules, since IR intensity goes with dipole change (C=O, C-O and S=O strong) while Raman goes with polarisability change (C=C, ring breathing and C-C skeletal strong). The Raman legend is the same diagnostic modes REORDERED by Raman strength.",
   "output": {
     "native": "1080x1920 @60, 15 s, silent",
-    "note": "The layout is driven by a handful of fractional y-coordinates on `DrugScope` (`sub1_y`, `sub2_y`, `header_bot`, `title_y`, `method_top`), so re-proportioning for a landscape frame is a matter of those numbers plus the molecule's `target_w_frac` — not of the drawing code."
+    "note": "The layout is driven by a handful of fractional y-coordinates on `ChemScope` (`sub1_y`, `sub2_y`, `header_bot`, `title_y`, `method_top`), so re-proportioning for a landscape frame is a matter of those numbers plus the molecule's `target_w_frac` — not of the drawing code."
   },
   "modules": [
     {
-      "path": "drug_data.py",
+      "path": "chemical_data.py",
       "kind": "data",
       "what": "The catalogue itself. Per molecule: atom coordinates (2-D or 3-D), bonds, labels in role tokens, a fixed bounding box for stable scale, IR line positions and intensities, the diagnostic vibrational bands, titles and metadata. Raman lines and bands are synthesised at import by reweighting the IR set through the selection rules."
     },
     {
-      "path": "osc/drugscope.py",
+      "path": "osc/chemscope.py",
       "kind": "compositor",
       "what": "The screen. Three additive buffers, the power-on intro, the FTIR-to-Raman handover, the red line playhead, the symbol knockout, the text flare, and the 3-D projection with its two motion modes."
     },
     {
-      "path": "drug_profile.py",
+      "path": "chemical_profile.py",
       "kind": "driver",
       "what": "Render one molecule, or one frame chunk of one. `--preview` for a fast look, `--frames LO:HI --out seg` for a chunk."
     },
@@ -60,8 +60,8 @@
       "intro": "The parts that are reusable independently of which molecule is on screen.",
       "items": [
         {
-          "name": "DrugScope",
-          "signature": "DrugScope(cfg, molecule, duration=15.0, intro_t=1.5)",
+          "name": "ChemScope",
+          "signature": "ChemScope(cfg, molecule, duration=15.0, intro_t=1.5)",
           "what": "The compositor. Owns the three buffers, the layout, and the timeline.",
           "notes": ""
         },
@@ -115,7 +115,7 @@
         },
         {
           "name": "IR-to-Raman reweighting",
-          "signature": "drug_data._raman_factor",
+          "signature": "chemical_data._raman_factor",
           "what": "Same positions, different intensity envelope, by selection rule.",
           "notes": "Spectra are ILLUSTRATIVE — group-contribution positions with a heuristic Raman reweight, not measured or DFT. Positions are sound, relative intensities approximate, and only about 600–1900 cm-1 is shown. Do not cite them."
         }
@@ -470,25 +470,25 @@
     },
     {
       "name": "intro_t",
-      "where": "DrugScope",
+      "where": "ChemScope",
       "meaning": "Power-on sweep length.",
       "range": "1.5 s; 0 disables"
     },
     {
       "name": "t_switch",
-      "where": "DrugScope",
+      "where": "ChemScope",
       "meaning": "FTIR-to-Raman handover time.",
       "range": "duration/2, so it follows the clip length automatically"
     },
     {
       "name": "title_y / method_top / header_bot / sub1_y / sub2_y",
-      "where": "DrugScope",
+      "where": "ChemScope",
       "meaning": "The layout. The molecule zone is the gap between `header_bot` and `method_top`.",
       "range": "Both the normal and intro text paths read these — keep them in sync"
     },
     {
       "name": "rock_deg / rock_period",
-      "where": "DrugScope",
+      "where": "ChemScope",
       "meaning": "Billboard rock amplitude and period.",
       "range": "Global: 32 deg over 13 s"
     },

@@ -1,8 +1,8 @@
-"""drug_data.py — molecule + spectrum data for the CRT-scope "drug profile" format.
+"""chemical_data.py — molecule + spectrum data for the CRT-scope "chemical profile" format.
 
 Transcribed 1:1 from the manim VerticalProfile_* subclasses in
 the project's manim spectroscopy scenes (AT / BONDS / LBL_ATOM / ir_lines /
-titles / vib_modes). Colours (per-symbol trace hue, bond green) live in `osc.drugscope.ROLE`.
+titles / vib_modes). Colours (per-symbol trace hue, bond green) live in `osc.chemscope.ROLE`.
 
 Coordinate convention matches the manim builders: build-space (x right, y UP); BB = fixed
 bounding box for a stable scale. An AT value may be (x, y) OR (x, y, z) — a z coord makes the

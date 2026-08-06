@@ -1,7 +1,7 @@
 """
-drug_profile.py — the vertical "drug profile" format, as one runnable scene file.
+chemical_profile.py — the vertical "chemical profile" format, as one runnable scene file.
 
-A drug profile is a 9:16 short built in three phases:
+A chemical profile is a 9:16 short built in three phases:
 
   Phase 1  the molecule eases in over the top half, NUMBER-labelled for NMR
            assignment, and spins one full turn above its 13C and 1H NMR spectra.
@@ -16,7 +16,7 @@ EVERY molecule-specific value is a class attribute, so a new molecule is just a
 subclass that overrides them. `VerticalProfile_Aspirin` at the bottom of this file
 is the worked example: read it top to bottom and you have the whole data contract.
 
-    manim -qh -r 1080,1920 drug_profile.py VerticalProfile_Aspirin
+    manim -qh -r 1080,1920 chemical_profile.py VerticalProfile_Aspirin
 
 See GUIDE.md for installation, every flag, and how to author a new molecule.
 
@@ -57,7 +57,7 @@ class VerticalProfile(Scene):
           factual error on screen. Check each shift against a reference before rendering.
         • vib_modes (bands + wn ranges) and ir_lines must be this molecule's IR, not the
           template's.
-    Render: manim -qh -r 1080,1920 drug_profile.py VerticalProfile_Aspirin"""
+    Render: manim -qh -r 1080,1920 chemical_profile.py VerticalProfile_Aspirin"""
 
     # ---- per-molecule config (override in a subclass) ----
     title = "MOLECULE"
@@ -572,7 +572,7 @@ class VerticalProfile_Aspirin(VerticalProfile):
     sets), then the spectra (13C, 1H, FTIR), then the vibration sweep. A new molecule is
     a copy of this class with every value replaced -- see GUIDE.md section 6.
 
-    Render: manim -qh -r 1080,1920 drug_profile.py VerticalProfile_Aspirin"""
+    Render: manim -qh -r 1080,1920 chemical_profile.py VerticalProfile_Aspirin"""
     title = "ASPIRIN"
     subtitle = "C₉H₈O₄  ·  180.16 g/mol  ·  Melting Point 135 °C"
     subtitle2 = "Salicylate  ·  Acidic  ·  Analgesic"

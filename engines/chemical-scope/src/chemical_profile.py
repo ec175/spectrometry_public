@@ -1,11 +1,11 @@
-"""drug_profile.py — render a CRT-scope "drug profile" short (molecule above, spectrum below).
+"""chemical_profile.py — render a CRT-scope "chemical profile" short (molecule above, spectrum below).
 
-manim-free remake of the vertical drug profiles, drawn as an oscilloscope screen and finished
+manim-free remake of the vertical chemical profiles, drawn as an oscilloscope screen and finished
 with crtfilm.FilmLook (the "filmed off a CRT" screen filter) + the `hers` bow-out + ambilight.
 
-  .\.venv\Scripts\python.exe drug_profile.py Glycine
-  .\.venv\Scripts\python.exe drug_profile.py Alanine --preview      # 540x960 @15 quick look
-  .\.venv\Scripts\python.exe drug_profile.py all                    # Glycine+Alanine+Valine
+  .\.venv\Scripts\python.exe chemical_profile.py Glycine
+  .\.venv\Scripts\python.exe chemical_profile.py Alanine --preview      # 540x960 @15 quick look
+  .\.venv\Scripts\python.exe chemical_profile.py all                    # Glycine+Alanine+Valine
 
 GPU (CuPy + NVENC) is the project default; OSC_CUPY=0 / OSC_NVENC=0 force CPU.
 """
@@ -19,8 +19,8 @@ import numpy as np
 
 from osc.config import OUT, encoder_args, find_ffmpeg
 from osc.crtfilm import FilmLook, film_config_for_phosphor
-from osc.drugscope import DrugScope
-from drug_data import MOLECULES
+from osc.chemscope import ChemScope
+from chemical_data import MOLECULES
 
 
 def render_one(name, *, preview=False, seconds=None, fps=30, bow=0.05, glow=1.2,
@@ -40,14 +40,14 @@ def render_one(name, *, preview=False, seconds=None, fps=30, bow=0.05, glow=1.2,
     lo = 0 if frame_lo is None else max(0, frame_lo)
     hi = n if frame_hi is None else min(n, frame_hi)
 
-    scope = DrugScope(mol, w=w, h=h, duration=dur)
+    scope = ChemScope(mol, w=w, h=h, duration=dur)
     # multi-colour content (green trace + blue/red atoms) -> neutral-white phosphor film config
     cfg = film_config_for_phosphor((255, 255, 255), halation_boost=glow)
     look = FilmLook(w, h, fps, n, seed=seed, ambient_gain=ambient, barrel_k=bow,
                     bevel=bevel, bevel_frac=bevel_frac, **cfg)
 
     if out_path is None:
-        out_path = os.path.join(OUT, f"drug_scope_{name.lower()}{'_preview' if preview else ''}.mp4")
+        out_path = os.path.join(OUT, f"chemical_scope_{name.lower()}{'_preview' if preview else ''}.mp4")
     os.makedirs(os.path.dirname(out_path) or OUT, exist_ok=True)
     tmp = out_path + ".part.mp4"
     ffmpeg = find_ffmpeg()

@@ -1,4 +1,4 @@
-# Drug Scope — object catalogue
+# Chemical Scope — object catalogue
 
 > Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen.
 
@@ -6,7 +6,7 @@ The molecule sits above and its spectrum below, both stroked onto a simulated sc
 
 The two methods are genuinely different, which took work: the same band POSITIONS are reweighted by selection rules, since IR intensity goes with dipole change (C=O, C-O and S=O strong) while Raman goes with polarisability change (C=C, ring breathing and C-C skeletal strong). The Raman legend is the same diagnostic modes REORDERED by Raman strength.
 
-**Output.** 1080x1920 @60, 15 s, silent. The layout is driven by a handful of fractional y-coordinates on `DrugScope` (`sub1_y`, `sub2_y`, `header_bot`, `title_y`, `method_top`), so re-proportioning for a landscape frame is a matter of those numbers plus the molecule's `target_w_frac` — not of the drawing code.
+**Output.** 1080x1920 @60, 15 s, silent. The layout is driven by a handful of fractional y-coordinates on `ChemScope` (`sub1_y`, `sub2_y`, `header_bot`, `title_y`, `method_top`), so re-proportioning for a landscape frame is a matter of those numbers plus the molecule's `target_w_frac` — not of the drawing code.
 
 
 ## Modules
@@ -15,9 +15,9 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 
 | module | kind | what it gives you |
 |---|---|---|
-| `drug_data.py` | data | The catalogue itself. Per molecule: atom coordinates (2-D or 3-D), bonds, labels in role tokens, a fixed bounding box for stable scale, IR line positions and intensities, the diagnostic vibrational bands, titles and metadata. Raman lines and bands are synthesised at import by reweighting the IR set through the selection rules. |
-| `osc/drugscope.py` | compositor | The screen. Three additive buffers, the power-on intro, the FTIR-to-Raman handover, the red line playhead, the symbol knockout, the text flare, and the 3-D projection with its two motion modes. |
-| `drug_profile.py` | driver | Render one molecule, or one frame chunk of one. `--preview` for a fast look, `--frames LO:HI --out seg` for a chunk. |
+| `chemical_data.py` | data | The catalogue itself. Per molecule: atom coordinates (2-D or 3-D), bonds, labels in role tokens, a fixed bounding box for stable scale, IR line positions and intensities, the diagnostic vibrational bands, titles and metadata. Raman lines and bands are synthesised at import by reweighting the IR set through the selection rules. |
+| `osc/chemscope.py` | compositor | The screen. Three additive buffers, the power-on intro, the FTIR-to-Raman handover, the red line playhead, the symbol knockout, the text flare, and the 3-D projection with its two motion modes. |
+| `chemical_profile.py` | driver | Render one molecule, or one frame chunk of one. `--preview` for a fast look, `--frames LO:HI --out seg` for a chunk. |
 | `render_optimal.py` | driver | The high-quality path. Splits every molecule into frame chunks and work-steals them across three GPU lanes, so idle lanes pick up the next chunk and the tail stays balanced, then concatenates per molecule. Seamless because each chunk warms the phosphor first and the film filter is absolute-frame indexed with a fixed seed. |
 | `osc/scope.py` | core | The CRT persistence buffer and graticule — shared with the oscilloscope engine. |
 | `osc/crtfilm.py` | post | The film filter, here with a neutral white-phosphor config because the content is multi-coloured. |
@@ -32,7 +32,7 @@ The parts that are reusable independently of which molecule is on screen.
 
 | object | what it is | notes |
 |---|---|---|
-| `DrugScope(cfg, molecule, duration=15.0, intro_t=1.5)` | The compositor. Owns the three buffers, the layout, and the timeline. |  |
+| `ChemScope(cfg, molecule, duration=15.0, intro_t=1.5)` | The compositor. Owns the three buffers, the layout, and the timeline. |  |
 | `intro_style='speedup'` | The screen flicks on, then an INVISIBLE vertical line sweeps left to right; only where it crosses an object is that slice lit into the phosphor, so the accelerating slice SMEARS through persistence into a solid line. The traces appear to speed up until solid. | Alternatives are a gentler ramp and a single wipe. Setting the intro length to zero disables it; the handover leaves the phosphor already primed either way. |
 | `t_switch = duration/2` | FTIR cross-dissolves to Raman through the phosphor, announced by a one-second ASCII scramble of all lower text. | A scramble rather than a fade — a fade reads as an accident, a scramble reads as an instrument changing mode. |
 | **line playhead** | A short bright red leading segment of the trace sweeps the curve with a phosphor comet-tail. | A LINE, not a dot. A dot on a spectrum reads as a cursor; a lit leading segment reads as acquisition. |
@@ -41,7 +41,7 @@ The parts that are reusable independently of which molecule is on screen.
 | `motion='rock'` | A bounded left-right rotation, never edge-on, that reveals depth on a molecule with a big flat face. | Global, the same for every molecule. A 3-D molecule 'moves badly' only when its geometry presents a small ring or non-flat face to the camera. |
 | `motion='tumble'` | Continuous rotation on three axes at incommensurate frequencies, plus a fixed in-plane spin. | Scale and centre come from the SAMPLED tumble envelope — the union bounding box over 96 sampled rotations — so a tumbling molecule never clips or drifts. |
 | `structure3d(smiles, plane_ring='pca')` | Orients by the whole-molecule principal plane, so the flattest face points at the camera and z-variance is minimised. | The fix for anything that sprawls off its aromatic ring. The default aromatic-ring rule is right for scaffolds that HAVE a big flat ring. |
-| `drug_data._raman_factor` | Same positions, different intensity envelope, by selection rule. | Spectra are ILLUSTRATIVE — group-contribution positions with a heuristic Raman reweight, not measured or DFT. Positions are sound, relative intensities approximate, and only about 600–1900 cm-1 is shown. Do not cite them. |
+| `chemical_data._raman_factor` | Same positions, different intensity envelope, by selection rule. | Spectra are ILLUSTRATIVE — group-contribution positions with a heuristic Raman reweight, not measured or DFT. Positions are sound, relative intensities approximate, and only about 600–1900 cm-1 is shown. Do not cite them. |
 
 
 ## Molecules — Original set
@@ -123,10 +123,10 @@ Per-molecule tuning is a small dict; the rest is global.
 | `sym_px` | MOLECULES[k]['size'] | Functional-group symbol size. | Scaled to the molecule by default |
 | `motion` | MOLECULES[k] | `rock` or `tumble`. | Only meaningful when the atom coordinates carry a z |
 | `plane_ring` | structure3d() | `aromatic` keys orientation on the aromatic ring; `pca` on the whole-molecule principal plane. | Use `pca` for anything that sprawls off its ring |
-| `intro_t` | DrugScope | Power-on sweep length. | 1.5 s; 0 disables |
-| `t_switch` | DrugScope | FTIR-to-Raman handover time. | duration/2, so it follows the clip length automatically |
-| `title_y / method_top / header_bot / sub1_y / sub2_y` | DrugScope | The layout. The molecule zone is the gap between `header_bot` and `method_top`. | Both the normal and intro text paths read these — keep them in sync |
-| `rock_deg / rock_period` | DrugScope | Billboard rock amplitude and period. | Global: 32 deg over 13 s |
+| `intro_t` | ChemScope | Power-on sweep length. | 1.5 s; 0 disables |
+| `t_switch` | ChemScope | FTIR-to-Raman handover time. | duration/2, so it follows the clip length automatically |
+| `title_y / method_top / header_bot / sub1_y / sub2_y` | ChemScope | The layout. The molecule zone is the gap between `header_bot` and `method_top`. | Both the normal and intro text paths read these — keep them in sync |
+| `rock_deg / rock_period` | ChemScope | Billboard rock amplitude and period. | Global: 32 deg over 13 s |
 | `breath` | _curve_points | Trace liveliness. | Keep it SMALL — plus or minus 0.5%. At 5% the curve bounced too much to read. |
 
 

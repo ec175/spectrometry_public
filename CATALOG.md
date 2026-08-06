@@ -13,7 +13,7 @@ Every object in this repository, grouped by the engine that makes it. Each engin
 | [Shape Physics](engines/shape-physics/) | Rigid-body-lite simulation for 'satisfying shapes' clips — and audio the simulation triggers, rather than the other way round. | 20 objects, 13 compositions, 27 frames |
 | [Attractors](engines/attractors/) | Tens of thousands of particles integrated through a strange-attractor flow at once — the picture is where they crowd. | 18 objects, 5 compositions, 14 frames |
 | [Oscilloscope](engines/oscilloscope/) | A simulated CRT screen — a phosphor persistence buffer, a film-off-a-real-screen filter, and a glitch layer. | 17 objects, 17 compositions, 57 frames |
-| [Drug Scope](engines/drug-scope/) | Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen. | 39 objects, 58 frames |
+| [Chemical Scope](engines/chemical-scope/) | Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen. | 39 objects, 58 frames |
 | [Academia](engines/academia/) | The figure code behind the PDF deliverables — stacked simulated spectra for whole compound classes, with structures drawn alongside. | 27 objects, 90 frames |
 
 
@@ -137,12 +137,12 @@ Every object in this repository, grouped by the engine that makes it. Each engin
 **Compositions** — `look/dimensional`, `look/dimensional2d`, `look/dimensional2d_67`, `look/loop_gears`, `look/loop_weave`, `look/loop_braid`, `stack/spectral_stack`, `circle_format`, `ascii/hers_ascii`, `test/filmtest`, `test/radial_sound`, `test/spectral_falls`, `test/wind_up`, `test/orbit_trace`, `test/lissajous_tour`, `test/pulse_to_shape`, `test/fourier_epicycles`
 
 
-## Drug Scope
+## Chemical Scope
 
-[README](engines/drug-scope/README.md) · [catalogue](engines/drug-scope/CATALOG.md) · [frames](engines/drug-scope/frames/) · [source](engines/drug-scope/src/)
+[README](engines/chemical-scope/README.md) · [catalogue](engines/chemical-scope/CATALOG.md) · [frames](engines/chemical-scope/frames/) · [source](engines/chemical-scope/src/)
 
 
-**Format machinery** — `DrugScope`, `power-on intro`, `method handover`, `line playhead`, `symbol knockout`, `text flare`, `billboard rock`, `multi-axis tumble`, `principal-plane orientation`, `IR-to-Raman reweighting`
+**Format machinery** — `ChemScope`, `power-on intro`, `method handover`, `line playhead`, `symbol knockout`, `text flare`, `billboard rock`, `multi-axis tumble`, `principal-plane orientation`, `IR-to-Raman reweighting`
 
 
 **Molecules — Original set** — `Proline`, `Ibuprofen`, `Baclofen`, `Indigo`, `MethyleneBlue`, `Sertraline`, `Morphine`, `Omeprazole`

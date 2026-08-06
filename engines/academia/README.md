@@ -126,10 +126,10 @@ the trace above.
 
 [`manim/`](manim/) holds an older body of work: the animated counterpart to the same chemistry.
 It is kept here because it is chemistry-adjacent and because it is the **origin of the CRT
-drug-profile format** in the [drug-scope engine](../drug-scope/) — those molecule geometries were
+chemical-profile format** in the [chemical-scope engine](../chemical-scope/) — those molecule geometries were
 transcribed one-to-one from its vertical-profile scenes.
 
-**The library itself lives at [`drug_profiles/spectro_lib.py`](../../drug_profiles/), not here** —
+**The library itself lives at [`chemical_profiles/spectro_lib.py`](../../chemical_profiles/), not here** —
 about 2,000 lines of axes, trace builders, molecule construction, peak callouts and the
 transitions between techniques. That copy is the one to read: it ships with a worked scene, a
 guide, pinned requirements, and a verified no-LaTeX render path. This directory holds only what
@@ -146,11 +146,11 @@ that one does not — the supporting data modules and build tools:
 
 This subproject shares no code with the figure pipeline above and has entirely different
 requirements — **manim** itself, and for some scenes a **LaTeX installation**. Nothing else in
-this repository needs either. (The drug profiles specifically do *not* need LaTeX; they use Pango
+this repository needs either. (The chemical profiles specifically do *not* need LaTeX; they use Pango
 text throughout.)
 
 The scene choreography is withheld, as everywhere else here — except for the one worked example in
-`drug_profiles/`.
+`chemical_profiles/`.
 
 ⚠️ **Never run two manim renders that share a media directory concurrently.** They clobber each
 other's partial-movie and text-SVG caches and produce crashes and truncated output. Render

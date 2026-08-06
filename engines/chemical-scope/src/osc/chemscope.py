@@ -1,6 +1,6 @@
-"""drugscope.py — CRT-scope "drug profile" compositor (molecule above, spectrum trace below).
+"""chemscope.py — CRT-scope "chemical profile" compositor (molecule above, spectrum trace below).
 
-A manim-free remake of the vertical drug-profile format, drawn as an oscilloscope screen:
+A manim-free remake of the vertical chemical-profile format, drawn as an oscilloscope screen:
   TOP half   — the molecule, its skeletal BONDS stroked as GREEN scope traces and its
                functional-group SYMBOLS drawn in per-role trace colours (N blue, O red,
                CHx dim-green). Symbol styling MIRRORS the manim `styled_molecule` recipe:
@@ -88,7 +88,7 @@ def _rot3(ax, ay, az):
     return Rz @ Ry @ Rx
 
 
-class DrugScope:
+class ChemScope:
     # symbol placement (mirrors styled_molecule / STRUCTURE_PRESET) ------------
     label_push = 1.0           # symbols sit ON their atom (honest placement; halo masks bonds).
     push_power = 1.4           # (>1 pushes symbols radially out — over-pushed far atoms off bonds)

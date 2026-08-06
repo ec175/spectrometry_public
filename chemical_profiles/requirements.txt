@@ -17,6 +17,6 @@ manim==0.19.1
 numpy>=2.0,<3
 
 # Used by two helpers in spectro_lib.py (the STFT and the curve interpolator). The
-# drug-profile scenes themselves do not call them, so you can drop scipy if you are
+# chemical-profile scenes themselves do not call them, so you can drop scipy if you are
 # only rendering profiles and never touch the spectrogram helpers.
 scipy>=1.11

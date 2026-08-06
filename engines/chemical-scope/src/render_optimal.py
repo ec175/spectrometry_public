@@ -1,4 +1,4 @@
-"""render_optimal.py — render the whole drug-scope set with maximally-utilised GPU lanes.
+"""render_optimal.py — render the whole chemical-scope set with maximally-utilised GPU lanes.
 
 Strategy: decompose EVERY molecule into contiguous frame CHUNKS, put all chunks in one pool,
 and let N GPU lanes (CuPy math + NVENC encode) WORK-STEAL from it. Because the unit of work is
@@ -26,7 +26,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from osc.config import OUT, find_ffmpeg
-from drug_data import MOLECULES
+from chemical_data import MOLECULES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PY = os.path.join(HERE, ".venv", "Scripts", "python.exe")
@@ -86,7 +86,7 @@ def main():
         with open(listf, "w") as fh:
             for ci in range(len(ranges)):
                 fh.write(f"file '{os.path.abspath(seg_path(m, ci))}'\n")
-        out_path = os.path.join(OUT, f"drug_scope_{m.lower()}.mp4")
+        out_path = os.path.join(OUT, f"chemical_scope_{m.lower()}.mp4")
         tmp = out_path + ".cat.mp4"
         r = subprocess.run([ffmpeg, "-y", "-v", "error", "-f", "concat", "-safe", "0",
                             "-i", listf, "-c", "copy", tmp])
@@ -104,7 +104,7 @@ def main():
     def run(task):
         m, ci, lo, hi = task
         r = subprocess.run(
-            [PY, os.path.join(HERE, "drug_profile.py"), m,
+            [PY, os.path.join(HERE, "chemical_profile.py"), m,
              "--seconds", str(args.seconds), "--fps", str(args.fps),
              "--frames", f"{lo}:{hi}", "--warm", str(args.warm), "--out", seg_path(m, ci)],
             env={**os.environ, **GPU_ENV}, cwd=HERE)

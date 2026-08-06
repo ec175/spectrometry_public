@@ -3,11 +3,11 @@ spectro_lib.py — reusable object library + CANONICAL FORMAT for the spectrosco
 manim explainers. Import everything with `from spectro_lib import *`.
 
 This module is the single source of truth for the house style; the scene file
-(`drug_profile.py`) is just choreography on top of these objects. Importing this
+(`chemical_profile.py`) is just choreography on top of these objects. Importing this
 module ALSO applies the canonical camera/background config (side effects below), so
 the same scene composes in both 16:9 and 9:16 just by changing `-r`.
 
-NB this library backs a wider set of spectroscopy scenes than the drug profiles
+NB this library backs a wider set of spectroscopy scenes than the chemical profiles
 published here, so it carries helpers the profiles never call (the STFT/heatmap
 machinery, the optics primitives). They are harmless; leave them or strip them.
 
@@ -35,7 +35,7 @@ AXES & MARKS (the look)
   TIP_LEN=TIP_W=0.11, tick thickness TICK_W=4, heatmap box frame FRAME_W=7, 3D axes
   AXIS_W3D=4. All in GRID color. Axis numbers/labels use Text (Pango, no LaTeX).
   Some scenes elsewhere use MathTex for formulae, which needs a LaTeX install — the
-  drug profiles do NOT, so you can render them with no LaTeX on the machine.
+  chemical profiles do NOT, so you can render them with no LaTeX on the machine.
 
 HEATMAPS
   Color via the inferno-like `_colormap` (6 anchor stops) with nearest-neighbor

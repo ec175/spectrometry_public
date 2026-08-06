@@ -1,4 +1,4 @@
-# Rendering a drug profile
+# Rendering a chemical profile
 
 Everything needed to go from a clean machine to a finished 1080×1920 MP4, and then
 to a molecule of your own.
@@ -16,7 +16,7 @@ to a molecule of your own.
 
 ## 1. What you are building
 
-A **drug profile** is a vertical (9:16) short that shows one molecule and the
+A **chemical profile** is a vertical (9:16) short that shows one molecule and the
 spectra that identify it. It runs in three phases, all in one continuous take:
 
 | phase | top half | bottom half |
@@ -34,7 +34,7 @@ Two files do all of it:
 | file | what it is |
 |------|-----------|
 | **`spectro_lib.py`** | the object library — palette, axes, molecule builders, line-broadening maths, gradient fills. Nothing here is scene-specific. |
-| **`drug_profile.py`** | the `VerticalProfile` scene class (the choreography) and `VerticalProfile_Aspirin` (the worked example). |
+| **`chemical_profile.py`** | the `VerticalProfile` scene class (the choreography) and `VerticalProfile_Aspirin` (the worked example). |
 
 ---
 
@@ -69,7 +69,7 @@ Check it: `ffmpeg -version`. If that prints a version, you are set.
 
 ```bash
 git clone https://github.com/ec175/spectrometry_public.git
-cd spectrometry_public/drug_profiles
+cd spectrometry_public/chemical_profiles
 
 python -m venv .venv
 source .venv/bin/activate         # macOS / Linux
@@ -88,10 +88,10 @@ manim --version          # v0.19.1
 
 ## 3. Render it
 
-From inside `drug_profiles/`:
+From inside `chemical_profiles/`:
 
 ```bash
-manim -qh -r 1080,1920 drug_profile.py VerticalProfile_Aspirin
+manim -qh -r 1080,1920 chemical_profile.py VerticalProfile_Aspirin
 ```
 
 That is the whole command. Broken down:
@@ -100,20 +100,20 @@ That is the whole command. Broken down:
 |------|---------|
 | `-qh` | **q**uality **h**igh — 1080p. See §5 for the other levels. |
 | `-r 1080,1920` | resolution, width first. **This is what makes it vertical.** Without it you get a 16:9 frame and the layout will be wrong — the format composes for portrait. |
-| `drug_profile.py` | the file |
+| `chemical_profile.py` | the file |
 | `VerticalProfile_Aspirin` | the scene class to render |
 
 **Iterate at low quality first.** A `-qh` pass takes several minutes; `-ql` takes
 well under one and is the right way to check that a change landed:
 
 ```bash
-manim -ql -r 540,960 drug_profile.py VerticalProfile_Aspirin
+manim -ql -r 540,960 chemical_profile.py VerticalProfile_Aspirin
 ```
 
 To render only the first couple of animations while you are working on the opening:
 
 ```bash
-manim -ql -r 540,960 -n 0,3 drug_profile.py VerticalProfile_Aspirin
+manim -ql -r 540,960 -n 0,3 chemical_profile.py VerticalProfile_Aspirin
 ```
 
 ---
@@ -123,10 +123,10 @@ manim -ql -r 540,960 -n 0,3 drug_profile.py VerticalProfile_Aspirin
 `manim.cfg` in this folder sets `media_dir = ./renders`, so everything lands under:
 
 ```
-drug_profiles/
+chemical_profiles/
 └── renders/
     └── videos/
-        └── drug_profile/
+        └── chemical_profile/
             ├── 1920p30/                      ← -qh -r 1080,1920
             │   └── VerticalProfile_Aspirin.mp4
             └── 480p15/                       ← -ql -r 540,960
@@ -195,7 +195,7 @@ class VerticalProfile_Caffeine(VerticalProfile):
 Then:
 
 ```bash
-manim -ql -r 540,960 drug_profile.py VerticalProfile_Caffeine
+manim -ql -r 540,960 chemical_profile.py VerticalProfile_Caffeine
 ```
 
 ### ⚠️ Things that are not auto-derived, and will be wrong if you copy them

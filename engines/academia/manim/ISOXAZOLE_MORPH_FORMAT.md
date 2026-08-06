@@ -15,8 +15,8 @@ frame — 18 compounds (isoxazole → 3-methylisoxazol-5(4H)-one → 16 aryliden
 ## One deliberate break from HORIZONTAL_FORMAT
 
 Structures are **flat 2D skeletal**, as that format specifies. The only deviation is that
-they are not static: each carries the **drugscope wag** — the bounded billboard rock from
-`Oscilloscope\osc\drugscope.py::_proj`:
+they are not static: each carries the **chemscope wag** — the bounded billboard rock from
+`Oscilloscope\osc\chemscope.py::_proj`:
 
 ```
 theta = ROCK_DEG * sin(2*pi*t / ROCK_PERIOD)     # 32 deg, 13 s

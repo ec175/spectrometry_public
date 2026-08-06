@@ -45,7 +45,7 @@ def main():
     ap.add_argument("--glitch", type=float, default=0.0,
                     help="error-prone acquisition level (0=off; ~0.8 subtle, ~1.8 heavy)")
     ap.add_argument("--glitch-seed", type=int, default=11)
-    # The drug-profile GLASS, exposed so any render can take it. These three are what make that
+    # The chemical-profile GLASS, exposed so any render can take it. These three are what make that
     # format read as a real CRT filmed by a real camera rather than as a green plot: a slight
     # bow, a tinted beveled edge that seats the glass into a bezel, and ambilight spilling the
     # screen's own colour into the surround. Defaults are OFF so existing calls are unchanged.

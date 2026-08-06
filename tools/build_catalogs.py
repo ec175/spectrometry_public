@@ -18,7 +18,7 @@ ROOT = os.path.dirname(HERE)
 ENG = os.path.join(ROOT, "engines")
 
 ORDER = ["wind-tunnel", "field-lines", "lattice-grid", "shape-physics",
-         "attractors", "oscilloscope", "drug-scope", "academia"]
+         "attractors", "oscilloscope", "chemical-scope", "academia"]
 
 
 def md_escape(s):
