@@ -1,0 +1,110 @@
+# Academia — object catalogue
+
+> The figure code behind the PDF deliverables — stacked simulated spectra for whole compound classes, with structures drawn alongside.
+
+A compound class is a dict of SMILES. RDKit turns each into a structure drawing and a functional-group inventory; a group-contribution estimator turns that inventory into an IR, Raman, UV or NMR line list; the shared spectroscopy core broadens those lines into a curve with the right line shape and axis convention for the technique; and the stacking layer lays the whole class out as one figure with each molecule's structure inset beside its trace. The output is a vector PDF, so it drops straight into a document at any size.
+
+The same core also parses real instrument scans — the technique modules accept either a registry sample id or an explicit source tuple, so a simulated trace and a measured one overlay through the same call.
+
+**Output.** Vector PDF, one per (class, technique). Everything is matplotlib, so page size, aspect and DPI are figure arguments. The stacked layout scales to any number of traces — the vertical offset and label spacing are computed from the count, not fixed.
+
+
+## Modules
+
+What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+
+| module | kind | what it gives you |
+|---|---|---|
+| `stacks.py` | figure engine | The layout that makes the deliverables. `stack_plot` lays a class out as offset traces with each molecule's structure image inset beside its label; `stack_overlay` does the same for a paired comparison, two traces per row. |
+| `predict.py` | estimator | Group-contribution prediction of IR, Raman, UV and 13C line lists from a structure. This is what makes a whole-class figure possible without a DFT job per molecule. |
+| `molecules.py` | chemistry | RDKit structure handling — drawing, functional-group SMARTS matching, and the acid/base variants used by the protonation comparisons. |
+| `chem_data.py` | data | The compound classes themselves, as SMILES dicts: amino acids, cannabinoids, lipids, neurotransmitters, peptides, steroids. |
+| `bcs_drugs.py` | data | The Biopharmaceutics Classification System drug set, grouped into the four classes. |
+| `spectra.py` | core | Technique-agnostic core: `load_xy`, `average`, `normalize01`, `broaden` (Gaussian / Lorentzian / pseudo-Voigt), `simulate`, `overlay`, and the per-technique configuration table covering FTIR, Raman, UV, XRD and NMR with their aliases. |
+| `ftir.py` | technique | FTIR parse, replicate averaging, normalisation, and a dual-panel broken-axis overlay with derivative-based peak finding and decluttered vertical peak labels. |
+| `raman.py` | technique | Single-panel Raman; reuses the FTIR peak finder. |
+| `uv.py` | technique | UV-Vis spectra — broadening TD-DFT lines in ENERGY space, which is where the line shape is physically Gaussian — plus dissolution kinetics. |
+| `nmr.py` | technique | Solid-state and liquid NMR loading, ppm-reversed plotting, simulation from a shift list, and GIAO shielding to chemical shift conversion. |
+| `xrd.py` | technique | Powder pattern loading, Q conversion for Cu K-alpha, crystalline and amorphous plotting, reflection-list overlay for polymorph identification, and simulation from a reflection list. |
+| `dsc.py` | technique | Step-aware DSC parsing, per-trace offsetting, and glass-transition / melt annotation. |
+| `gaussian.py` | DFT | Gaussian 16 output to line lists — IR, Raman and NMR shieldings. The primary engine, because that is what the lab's DFT data is. |
+| `registry.py` | data access | The only place that knows where measured data lives. Sample and measurement indices, queries by technique, and URL resolution. |
+| `manim/spectro_lib.py` | subproject | The manim spectroscopy library — the animated counterpart to all of the above. Axes, traces, molecule builders, peak callouts and the transitions between techniques. Its scene choreography is withheld like every other scenes module here. |
+
+
+## Figure scripts — the deliverables
+
+Each script writes one directory of PDFs. Run it and you get the figures; the preview links are JPEG renders of the shipped output.
+
+| object | what it is | notes | frames |
+|---|---|---|---|
+| `python amino_acid_sim_test.py` | Twenty amino acids stacked in four techniques — FTIR, Raman, UV and 1H NMR. | The reference implementation of the format. Read this one first. | [1](figures/amino_acids_FTIR.jpg) [2](figures/amino_acids_RAMAN.jpg) [3](figures/amino_acids_UV.jpg) [4](figures/amino_acids_NMR_1H.jpg) |
+| `python amino_acid_crystal_vs_amorphous_test.py` | The same twenty as a PAIRED comparison — crystalline against amorphous, two traces per row. | The comparison layout, and the core question of the amorphous-solid-dispersion work: what changes in a spectrum when a crystal is disordered. | [1](figures/amino_acids_FTIR_xtal_vs_amorphous.jpg) [2](figures/amino_acids_RAMAN_xtal_vs_amorphous.jpg) [3](figures/amino_acids_UV_xtal_vs_amorphous.jpg) [4](figures/amino_acids_NMR_13C_xtal_vs_amorphous.jpg) |
+| `python cannabinoid_sim_test.py` | Ten cannabinoids in four techniques, plus the neutral-against-acid pairing (the decarboxylation that turns an acid into its neutral form). | Eight PDFs. The neutral/acid pair is the class's own natural comparison, the way crystal/amorphous is for the others. | [1](figures/cannabinoids_FTIR.jpg) [2](figures/cannabinoids_RAMAN.jpg) [3](figures/cannabinoids_UV.jpg) [4](figures/cannabinoids_NMR_1H.jpg) [5](figures/cannabinoids_FTIR_neutral_vs_acid.jpg) [6](figures/cannabinoids_RAMAN_neutral_vs_acid.jpg) [7](figures/cannabinoids_UV_neutral_vs_acid.jpg) [8](figures/cannabinoids_NMR_1H_neutral_vs_acid.jpg) |
+| `python extra_classes_sim_test.py` | Four more classes at twenty compounds each, in four techniques, each with its own chemically appropriate pairing: lipids (free acid against salt), neurotransmitters (freebase against protonated), peptides (reduced against oxidised), steroids (free against ester). | Forty-eight PDFs, and the most useful script to read if you want to add a class of your own — the pairing is a per-class choice, not a fixed axis. | [1](figures/lipids_FTIR.jpg) [2](figures/lipids_FTIR_acid_vs_salt.jpg) [3](figures/neurotransmitters_FTIR.jpg) [4](figures/neurotransmitters_FTIR_freebase_vs_protonated.jpg) [5](figures/peptides_RAMAN.jpg) [6](figures/peptides_RAMAN_reduced_vs_oxidized.jpg) [7](figures/steroids_NMR_13C.jpg) [8](figures/steroids_NMR_13C_free_vs_ester.jpg) |
+| `python bcs_sim_test.py` | The Biopharmaceutics Classification System drugs, one figure set per class, all as crystalline-against-amorphous comparisons. | Sixteen PDFs. BCS class is a solubility/permeability grouping, so this set asks whether the spectral signature of amorphisation tracks the pharmacological class. | [1](figures/bcs_class1_FTIR_xtal_vs_amorphous.jpg) [2](figures/bcs_class2_FTIR_xtal_vs_amorphous.jpg) [3](figures/bcs_class3_FTIR_xtal_vs_amorphous.jpg) [4](figures/bcs_class4_FTIR_xtal_vs_amorphous.jpg) [5](figures/bcs_class1_13C_xtal_vs_amorphous.jpg) [6](figures/bcs_class1_Raman_xtal_vs_amorphous.jpg) [7](figures/bcs_class1_UV_xtal_vs_amorphous.jpg) |
+| `python examples.py` | One runnable end-to-end demo per technique — load, simulate, overlay. Doubles as a network smoke test for the data registry. | The quickest way to check the install works and to see each technique module's own plotting rather than the stacked layout. | [1](figures/example_ftir_overlay.jpg) [2](figures/example_raman_sim.jpg) [3](figures/example_uv_sim.jpg) [4](figures/example_uv_dissolution.jpg) [5](figures/example_nmr_sim.jpg) [6](figures/example_nmr_liquid.jpg) [7](figures/example_xrd_sim.jpg) [8](figures/example_xrd_polymorph.jpg) [9](figures/example_dsc.jpg) |
+| `python example_overlay.py` | The minimal simulated-over-experimental overlay, in about thirty lines. | Start here if you only want the overlay and not the class figures. | [1](figures/overlay_ftir_example.jpg) |
+
+
+## The figure engine
+
+| object | what it is | notes |
+|---|---|---|
+| `stack_plot(items, sim_for, title, xlabel, xrange, descending, outfile, image_zoom=..., ...)` | Lays a compound class out as vertically offset traces with each molecule's structure inset beside its label. | `descending` handles the axis-direction convention — FTIR and NMR run high to low, Raman and UV low to high. Getting it wrong is the most common way to produce a figure that is subtly, embarrassingly backwards. |
+| `stack_overlay(items, pair_for, title, xlabel, xrange, descending, outfile, ...)` | The same layout with two traces per row for a paired comparison. | `pair_for` returns both members, so the pairing rule is the caller's choice — crystal/amorphous, acid/salt, reduced/oxidised, whatever the class's natural axis is. |
+| `spectra.broaden(centers, intensities, grid, shape, fwhm)` | Line list to curve, in Gaussian, Lorentzian or pseudo-Voigt. | The line shape is not cosmetic: vibrational bands are Lorentzian, electronic bands are Gaussian in ENERGY (which is why UV broadening is done in eV and mapped back to nm), and powder reflections are pseudo-Voigt. |
+| `spectra.simulate(centers, intensities, technique, freq_scale=...)` | Broaden a line list onto the technique's own grid with its own defaults. | DFT harmonic frequencies are systematically high and need a scaling factor — about 0.967 for B3LYP/6-311++G(2d,3p), about 0.95 for wB97XD/6-31G*. |
+| `spectra.overlay(experimental, simulated, technique)` | Simulated over measured, normalised and on the right axis. | Every technique module accepts either a registry sample id or an explicit `(label, colour, sources)` tuple, which is what lets a module with no registered data still be driven. |
+| `predict.ir(mol)` | Group-contribution line lists from a structure. | This is the trade that makes whole-class figures feasible. It is an ESTIMATOR: positions are sound and relative intensities are approximate. For a congeneric series where the substituent IS the signal, a generic estimator erases exactly what you are looking for — use explicit line lists there instead. |
+
+
+## Compound classes
+
+Each is a SMILES dict in `chem_data.py`, and adding one is a dict plus a call. The paired comparison is a per-class choice.
+
+| object | what it is | notes |
+|---|---|---|
+| `chem_data.AMINO_SMILES` | 20 amino acids — Gly, Ala, Ser, Pro, Val, Thr, Cys, Leu, Ile and the rest. | Paired as crystalline against amorphous. |
+| `chem_data.CANNABINOID_SMILES` | 10 cannabinoids — CBG, THC, D8-THC, CBD, CBC, CBL, CBN, CBGV, CBDV, THCV. | Paired as neutral against acid. |
+| `chem_data.LIPID_SMILES` | 20 fatty acids, saturated and unsaturated — C10:0 through C22:0, plus palmitoleic, oleic and the polyunsaturates. | Paired as free acid against salt. |
+| `chem_data.NEUROTRANSMITTER_SMILES` | 20 neurotransmitters — dopamine, serotonin, norepinephrine, epinephrine, histamine, GABA, glutamate and others. | Paired as freebase against protonated. |
+| `chem_data.PEPTIDE_SMILES` | 20 small peptides and related compounds — reduced and oxidised glutathione, cysteine and cystine, carnosine, the glycine oligomers, aspartame. | Paired as reduced against oxidised, which is why both glutathione forms are in the set. |
+| `chem_data.STEROID_SMILES` | 20 steroids — cholesterol, testosterone, the estrogens, progesterone, the corticosteroids. | Paired as free against ester. |
+| `bcs_drugs.DRUGS` | The BCS drug set, grouped into the four solubility/permeability classes. | Each class gets its own crystalline-against-amorphous figure set. |
+
+
+## manim subproject
+
+An older, unrelated body of work kept here because it is the animated counterpart to the same chemistry — and because the CRT drug-profile format in the [drug-scope engine](../drug-scope/) was transcribed from its vertical-profile scenes. It needs manim and a LaTeX installation, neither of which anything else here does.
+
+| object | what it is | notes |
+|---|---|---|
+| `from spectro_lib import *` | The library: axes and trace builders, molecule construction, peak callouts, and the transitions between techniques. About 2,000 lines, and the part worth reading. | The scene choreography that sits on top of it is withheld, as everywhere else in this repository. |
+| `crystal_structures` | Crystal lattice geometry for the structure animations. | Data, not choreography. |
+| `morph_sequences` | The molecule-to-molecule morph sequences — which structure becomes which, and in what order. |  |
+| `isoxazole_video_data` | Geometry and line-list data for the arylidene-isoxazolone series. | Paired with the format note in `ISOXAZOLE_MORPH_FORMAT.md`. |
+| `python build_montage.py` | Assembles rendered clips into a montage. |  |
+| `python make_audio_bars.py` | Precomputes audio band data for the reactive bars. | The idea this implements was later lifted out of manim entirely — see the oscilloscope engine's spectral stack. |
+| `python render_scenes.py` | The render drivers. | ⚠️ Never run two manim renders that share a media directory concurrently — they clobber each other's partial-movie and text-SVG caches and produce crashes and truncated files. Render sequentially, or give each its own media directory. |
+
+
+## Parameters that matter
+
+Defaults live in the per-technique configuration table. These are the ones a new figure actually has to get right.
+
+| parameter | lives in | what it controls | usable range |
+|---|---|---|---|
+| `descending` | stack_plot / stack_overlay | Axis direction. | TRUE for FTIR (4000→400 cm-1) and NMR (high→low ppm); FALSE for Raman, UV and XRD. This is the single easiest thing to get backwards. |
+| `xrange` | stack_plot | The window actually plotted. | FTIR 600–3600 cm-1 · Raman 300–3150 cm-1 · UV 190–310 nm · 1H NMR 0.3–8.3 ppm · 13C NMR 0–200 ppm |
+| `fwhm` | spectra.TECH | Broadening width. | FTIR and Raman ~6 cm-1 · UV ~20 nm · XRD ~0.15 deg · 13C 0.5 ppm · 1H 0.02 ppm |
+| `line shape` | spectra.TECH | Gaussian, Lorentzian or pseudo-Voigt. | Lorentzian for vibrational and NMR, Gaussian for electronic, pseudo-Voigt for powder diffraction. Physically determined, not a preference. |
+| `freq_scale` | spectra.simulate | DFT harmonic frequency scaling. | ≈0.967 for B3LYP/6-311++G(2d,3p); ≈0.95 for wB97XD/6-31G* |
+| `image_zoom` | stack_plot | Size of the inset structure drawings. | Scale it with the trace count — twenty rows needs smaller insets than ten, or the structures collide with the traces above them. |
+| `offset` | stack_plot | Vertical spacing between traces. | Traces are normalised 0–1 before stacking, so the offset is in those units. |
+| `lambda (Cu K-alpha)` | xrd.calculate_Q | Wavelength for the 2-theta to Q conversion. | 1.542512 Å |
+
+
+---
+
+*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this file.*

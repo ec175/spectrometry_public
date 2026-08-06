@@ -1,0 +1,9 @@
+# Academia spectroscopy library — pinned for a dedicated venv (Academia\.venv).
+# numpy<2 matches the proven FTIR stack and stays clear of the global ML tooling.
+numpy<2
+scipy
+pandas
+matplotlib
+requests
+marimo
+rdkit          # molecule rendering (molecules.py) + SMILES->spectrum (predict.py)
