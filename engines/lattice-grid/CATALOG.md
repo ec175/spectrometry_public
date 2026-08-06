@@ -1,0 +1,116 @@
+# Lattice Grid — object catalogue
+
+> A fixed lattice of nodes and connectors whose content re-rolls on the beat, lit by a moving field.
+
+A lattice is generated once and never moves. Each site carries a glyph — empty, dot, ring or pad — and each adjacency may be lit as a connector; boxes are closed rings of connectors around one cell. That content re-rolls on the musical beat, only partly, so state at beat b depends on beat b-1. A smooth illumination field sweeps across gating which elements appear and how hot they are; a second, faster field assigns hue. Everything composites ADDITIVELY into a padded float buffer and blooms, so dense clusters run to white on their own. The swappable part is the lattice: two geometries differ by one class attribute.
+
+**Output.** 1080x1920 @60. World units are the 1080x1920 reference frame and `RenderConfig.scale` maps to output px. The lattice is generated to whatever `nx`/`ny` you give it at whatever pitch — a landscape frame is a different `RenderConfig`, not different code. Note the atlas must be baked PER OUTPUT SCALE (`atlas_for(cfg)`); this is the one place the format has bitten hard.
+
+
+## Modules
+
+What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+
+| module | kind | what it gives you |
+|---|---|---|
+| `lg/lattice.py` | substrate | The swappable part. `Lattice` base with CSR adjacency, site-pair to edge-id lookup and closed-loop boxes; `SquareLattice` (8-neighbour), `HexLattice` (`honeycomb` = hexagon cells at 3-neighbour, `triangular` = hex-packed at 6-neighbour), and `build()`. |
+| `lg/atlas.py` | render | Pre-baked anti-aliased alpha stamps at 4x4 sub-pixel phases: dot, ring, pad, and one per link direction-and-length. |
+| `lg/content.py` | animation | The beat-epoch timeline: glyph per site, lit edges, momentum-biased walks (PCB traces), boxes, endcaps, and the three-group crossfade. |
+| `lg/field.py` | fields | `Illumination` (clustered plane waves, wandering spiral arms, drifting flares, fractal octaves, with an ambient floor and a hot overdrive), `Twinkle` (independent per-element flicker), `Palette` (CDF-flattened noise into a bimodal LUT), `envelope` (the tempo arc). |
+| `lg/draw.py` | render | `Frame`: padded additive float32 buffer, `splat` with a buffered fast path for nodes and scatter-add for links, a decimated halo chain, an anamorphic streak, exposure tonemap, and frame-seeded grain. |
+| `lg/rgbdelay.py` | colour | `ChannelDelay` — a ring buffer that turns a stream of MONO frames into RGB by delaying the channels against each other. This is where the colour actually comes from. |
+| `lg/glitch.py` | vfx | The glitch LAYER: block displacement, copy, solid-lit blocks, row tears, drips. Applied to the mono frame BEFORE the delay. |
+| `lg/network.py` | content | The circuits: chains of up to ten nodes plus short branches, about 26% of sites, each chain lighting on ONE shared schedule. |
+| `lg/eye.py` | subject | A drawable eye that returns three fields — `lit`, `conn` (how wired-up) and `layer` (depth). Almond lids from two different curves, a foreshortening iris, an offset pupil, fibres, a limbal ring, specular, saccades and blinks. |
+| `lg/holo.py` | colour | Holofoil: a thin-film spectral LUT, band cycles, warp, depth-driven hue shift, specular sheen. |
+| `lg/panel.py` | surface | `transmission` (a cached distance transform of the rasterised seams) and `SourceGrid` (a coarse under-surface field with a cascading upsample). |
+| `lg/render.py` | render | `dry_report` / `render_stills` / `render_scene`, ffmpeg pipe, atomic output, and the RGB-delay pre-roll. |
+| `lg/config.py` | config | `RenderConfig`, `SOURCE_PITCH`, NVENC probe, ffmpeg resolution. Unlike the rest of this repository the rate defaults here are deliberately HIGH — see the parameters table. |
+| `tools/lattice_check.py` | validation | Substrate invariants: coordination number, link-stamp lengths against real edge lengths, and that a box is a closed ring. |
+
+
+## Lattice geometries
+
+Adding a geometry means a `Lattice` subclass providing `sites`, `edges`, `edge_kind`, `link_specs` and `sample_box`. Nothing downstream changes. Measured at the reference pitch on a 1080x1920 frame.
+
+| object | what it is | notes |
+|---|---|---|
+| `build('square', nx, ny, pitch)` | Square cells, 8-neighbour. Links at 0/45/90/135 deg. ~5,858 sites, ~22,957 edges. | The only geometry with long straight runs, so the only one that reaches the reference clip's filament coherence. |
+| `build('honeycomb', nx, ny, pitch)` | Hexagon cells, 3-neighbour. Links at 30/90/150 deg. ~5,252 sites, ~7,771 edges. | A honeycomb has NO straight runs — every second edge turns 60 deg — so its traces zigzag. That is inherent to the geometry, not a bug. The right density invariant across geometries is lit edges PER NODE, not lit-edge fraction: 38% of honeycomb edges is past percolation and the frame reads as continuous chicken-wire. |
+| `build('triangular', nx, ny, pitch)` | Hex-packed nodes, triangular cells, 6-neighbour. Links at 0/60/120 deg. ~7,140 sites, ~21,063 edges. | Registered and passes the substrate check, but has had no density pass — its constants are the pre-deep-pass ones. |
+
+
+## Glyphs and content
+
+| object | what it is | notes |
+|---|---|---|
+| `atlas.build(cfg)` | dot / ring / pad, plus one stamp per link direction-and-length, each baked at 4x4 sub-pixel phases. | The pitch is FRACTIONAL on purpose, so sites do not land on integer pixels. Rounding each stamp puts +/-0.5 px of jitter on a 5 px ring and the lattice reads as mush. The phases cost about 180 KiB. |
+| `Content(walks=...)` | Momentum-biased runs of lit edges — the PCB traces. | `walk_straight` near 0.93 selects the zigzag that holds a constant net heading, which is the best a honeycomb can do. |
+| `Lattice.sample_box(rng)` | Closed rings of connectors around one cell. |  |
+| `Content.blend(t, gate=None)` | The beat crossfade, split into THREE DISJOINT groups: unchanged at full, old-only fading out, new-only fading in. | Arithmetically identical to 'old at 1-w plus new at w', but it draws about 1.25x elements during a crossfade instead of 2x, AND it guarantees no site is splatted twice in one call — which is the precondition for the disjoint fast path. |
+| `network.build(...)` | Chains of up to ten nodes with short branches. The CHAIN is the unit that lights, not the node. | Every node and edge in a chain shares one schedule, so a circuit energises as a whole. Per-element independent flicker reads as noise precisely because nothing is connected to anything. Measured: 211 chains, 26.0% of sites, sizes 1–15. |
+
+
+## Fields
+
+| object | what it is | notes |
+|---|---|---|
+| `Illumination(drift, spin, octaves, octave_gain, octave_speed, axis_deg, axis_spread, ambient, hot)` | The gate — clustered plane waves plus wandering spiral arms, drifting flares and fractal octaves. | Octave SPEED stays low on purpose: octaves exist for spatial detail, and fast octaves generate high-frequency energy that is spatially SMOOTH, which is exactly what a field cannot be if you want independent per-element motion. `axis_spread` controls whether lit regions are isotropic blobs or elongated diagonal streaks. |
+| `Twinkle(amount, rate)` | Independent per-element flicker, indexed by ELEMENT rather than by position. | The only source of spatially uncorrelated fast motion in the engine — a band-limited field structurally cannot produce it. Under the RGB-delay colour model this is also the dominant control on saturation. Rate capped around 5 Hz: faster than 1/delay and an element completes a whole cycle inside the delay window, so the channels sample unrelated phases. |
+| `Palette(...)` | CDF-flattened noise indexed into a bimodal LUT. | Largely superseded — see the colour note in the README. A bell-shaped field indexed into a segmented LUT piles most sites in whichever segment straddles the middle, and the accent segment is never reached at all; push the field through its own CDF first or the LUT's widths mean nothing. |
+| `envelope(t)` | The tempo arc over the clip — build, climax, plateau, fade. |  |
+| `ChannelDelay(delays_seconds, fps)` | Turns mono frames into RGB by delaying the channels. Blue undelayed, green ~0.1 s, red ~0.2 s. | Delays are held in SECONDS so a 60 fps render matches a 30 fps reference. The buffer must be PRE-ROLLED before frame 0 or the first fifth of a second comes out greyscale and colour visibly switches on. |
+
+
+## The eye composition
+
+A second subject on the same substrate. Where the circuit scenes recreate a reference clip, this one uses the engine to DRAW something. Four mechanisms, each answering one direction.
+
+| object | what it is | notes |
+|---|---|---|
+| `Eye(...).fields(t)` | Three independent fields — brightness, how wired-up, and depth. Using all three independently is what produces depth on a flat grid. | Details that carry the illusion, in rough order of value: the limbal ring; fibres converging on the PUPIL rather than the iris centre (only visible because the pupil is offset, and the thing that stops it reading as a dartboard); the specular fixed to the LIGHT not the gaze; the lid shadow. |
+| `Eye(saccade_rate=...)` | The gaze HOLDS, then moves in about 60 ms. | A smoothly drifting gaze reads as a floating balloon. The hold-jump-hold rhythm is most of what makes it alive. |
+| `Eye(blink_rate=...)` | Close fast, open slower, both lids converging on one meeting line below centre. | Driving the two lids by independent fractions never actually shuts — it leaves a band open at full closure. |
+| `holo.foil(coord, depth, cycles, ...)` | Thin-film spectral colour, not a hue ramp. | Three properties separate it from a rainbow and all three are needed: hue cycles SEVERAL times across the frame so you see bands; the spectrum is thin-film weighted (dwelling in magenta/violet/blue/cyan, passing green quickly, with a wide gold shoulder) rather than perceptually uniform; and hue shifts with viewing DEPTH, which is the actual physics and also the cheapest depth cue available. Plus a narrow high-frequency sheen band that spikes near-white — without it the colour reads as coloured plastic rather than metal. |
+| `panel.transmission(...)` | A cached distance transform of the rasterised seams — about 1 at the seams and 0.03 mid-face — with a diffuse source composited UNDER it. | Elements splat on top, so they sit ON the surface while colour sits UNDER it. Every multi-scale upsample must CASCADE (double and blur repeatedly); expanding a small buffer in one jump paints visible blocks no subsequent blurring removes, and `SourceGrid.expand` doubles its way up so its divisor must be a power of two. |
+
+
+## Compositions
+
+Eight compositions in two families. The circuit set recreates a reference clip and is checkable against it; the eye set deliberately departs on blacks, palette and density and is not.
+
+| composition | what it does | status | frames |
+|---|---|---|---|
+| `circuit_square` | Square cells — the reference geometry. 8-neighbour, links at 0/45/90/135. | shipped 15 s | [1](frames/circuit_square_t020.jpg) [2](frames/circuit_square_t045.jpg) [3](frames/circuit_square_t075.jpg) |
+| `circuit_hex` | The literal read of 'square cells to hexagons' — the cells you see are hexagons. 3-neighbour. | shipped 15 s | [1](frames/circuit_hex_t020.jpg) [2](frames/circuit_hex_t045.jpg) [3](frames/circuit_hex_t075.jpg) |
+| `circuit_tri` | The other reading — a denser fabric closer to the square version's connectivity, with hexagonal rings as its box glyph. | registered, no density pass | — |
+| `eye_foil` | Baseline: balanced foil, readable panels, mid density. | shipped 15 s | [1](frames/eye_foil_t030.jpg) [2](frames/eye_foil_t065.jpg) |
+| `eye_foil_deep` | How far can the SURFACE go? Faces near-opaque, seams tight and hot — maximum 'light from underneath' before the picture turns to lace. | shipped 15 s | [1](frames/eye_foil_deep_t030.jpg) [2](frames/eye_foil_deep_t065.jpg) |
+| `eye_foil_wide` | Can COLOUR carry the layering instead of brightness? Half as many, twice as broad foil bands, and a big depth shift so sclera, iris and pupil separate by hue. | shipped 15 s | [1](frames/eye_foil_wide_t030.jpg) [2](frames/eye_foil_wide_t065.jpg) |
+| `eye_foil_dense` | Connectivity at its limit — the iris becomes a solid mesh while the sclera stays scattered dots. | shipped 15 s | [1](frames/eye_foil_dense_t030.jpg) [2](frames/eye_foil_dense_t065.jpg) |
+| `eye_foil_sparse` | The opposite end — few elements, source-dominant: the picture is mostly the glowing seams, nodes as accents. | shipped 15 s | [1](frames/eye_foil_sparse_t030.jpg) [2](frames/eye_foil_sparse_t065.jpg) |
+
+
+## Parameters that matter
+
+Ordered roughly by how much they move the picture. Several of these are pinned by measurement rather than taste, and the notes say which.
+
+| parameter | lives in | what it controls | usable range |
+|---|---|---|---|
+| `illum_lo` | Illumination | How far up the field a site must be to appear at all. The biggest lever by far — raising it thins lit regions into ARMS rather than shrinking them. |  |
+| `twinkle / twinkle_rate` | Illumination | Per-element flicker. Under the RGB-delay colour model this is the dominant control on saturation, because saturation IS how much the mono signal changes across the delay window at bright pixels. | 0.30 gives white 0.33 / sat 0.42; 0.80 gives 0.19 / 0.53. Rate capped near 5 Hz. Shares its high-frequency budget with `grain` — change one, re-measure the other. |
+| `node_p / edge_p / walks` | Content | Density. | On a new lattice, re-derive from EDGES PER NODE. Square: 8.2% of 8 = 0.66. Honeycomb wants about 22% of 3. |
+| `churn / xfade` | Content | What fraction of the lattice re-rolls per beat, and how hard the crossfade is. | ~34% churn. Re-rolling everything is a strobe; re-rolling nothing is a static board with a light moving over it. A LONG crossfade moves all three channels together and stays white — keep it snappy (~0.07). |
+| `ambient` | Illumination | The floor under the gate. | A high floor plus strong twinkle makes everything busy everywhere and the frame collapses into uniform confetti with no composition. On a honeycomb, where every edge joins up, a floor invisible on a square lattice draws a continuous faint MESH across the darks. |
+| `exposure` | RenderConfig | Tonemap gain. | Keep it LOW and get brightness from COVERAGE. A clipped pixel is white by definition, and white is the one thing a colour-delay look cannot afford. It is also the wrong control for whiteness generally — use `glow_gain`. |
+| `glow_sigma / glow_gain / glow2_gain` | RenderConfig | The halo — which is what smears adjacent elements' hues together before anything is measured. | Bloom is the ENEMY of a delay-based colour: a halo averages many elements, so it changes slowly even when the ink under it is switching hard, and slow-changing means white. |
+| `hot_gain` | Illumination | How far past the gate a crest drives its elements — the white cores. | Keep low (~0.95) for the same reason as exposure. |
+| `dark_depth` | scene | A separate slow field that multiplies everything and reaches TRUE zero, because the illumination gate has a floor by construction and can never take a region fully out. | Must reach 0. A 'depth' that multiplies by (1-d) + d*v leaves a permanent floor at any value below 1.0 — set to 0.62 it meant not one of 64 tiles ever went dark while the parameter looked reasonable. |
+| `grain / grain_floor` | RenderConfig | Per-frame noise, spatial and in the darks. | Per-frame noise in a dark region IS low-level blinking. For true black you need `ambient=0`, `grain_floor` low AND `bg` near zero — all three, or you spend an hour re-rendering. |
+| `streak_gain` | RenderConfig | Anamorphic horizontal halo stretch. | Near-linear in the setting. A streak you can obviously SEE is roughly 4x too strong. |
+| `cq / maxrate` | encoder | Encode rate target. | Grain is per-frame noise and therefore incompressible, so this format's encode cost is set almost entirely by `grain`. Measured first-generation: cq 19 / 40M destroys half the grain; cq 17 / 70M is on target. Do NOT measure this with a transcode — re-encoding a master flatters low bitrates by nearly 2x. |
+
+
+---
+
+*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this file.*
