@@ -1,0 +1,502 @@
+{
+  "engine": "drug-scope",
+  "title": "Drug Scope",
+  "tagline": "Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen.",
+  "method": "The molecule sits above and its spectrum below, both stroked onto a simulated scope face. Three additive buffers composite over a faint graticule: a decaying persistence buffer carrying the spectrum as a scope trace, a second holding the skeletal BONDS, and a third holding the functional-group SYMBOLS and all text. Each gets a half-resolution bloom and then the CRT film filter. Two methods run in sequence, FTIR then Raman, cross-dissolving through the phosphor at the midpoint, with the transition signalled by a one-second ASCII scramble of the lower text rather than a fade.\n\nThe two methods are genuinely different, which took work: the same band POSITIONS are reweighted by selection rules, since IR intensity goes with dipole change (C=O, C-O and S=O strong) while Raman goes with polarisability change (C=C, ring breathing and C-C skeletal strong). The Raman legend is the same diagnostic modes REORDERED by Raman strength.",
+  "output": {
+    "native": "1080x1920 @60, 15 s, silent",
+    "note": "The layout is driven by a handful of fractional y-coordinates on `DrugScope` (`sub1_y`, `sub2_y`, `header_bot`, `title_y`, `method_top`), so re-proportioning for a landscape frame is a matter of those numbers plus the molecule's `target_w_frac` — not of the drawing code."
+  },
+  "modules": [
+    {
+      "path": "drug_data.py",
+      "kind": "data",
+      "what": "The catalogue itself. Per molecule: atom coordinates (2-D or 3-D), bonds, labels in role tokens, a fixed bounding box for stable scale, IR line positions and intensities, the diagnostic vibrational bands, titles and metadata. Raman lines and bands are synthesised at import by reweighting the IR set through the selection rules."
+    },
+    {
+      "path": "osc/drugscope.py",
+      "kind": "compositor",
+      "what": "The screen. Three additive buffers, the power-on intro, the FTIR-to-Raman handover, the red line playhead, the symbol knockout, the text flare, and the 3-D projection with its two motion modes."
+    },
+    {
+      "path": "drug_profile.py",
+      "kind": "driver",
+      "what": "Render one molecule, or one frame chunk of one. `--preview` for a fast look, `--frames LO:HI --out seg` for a chunk."
+    },
+    {
+      "path": "render_optimal.py",
+      "kind": "driver",
+      "what": "The high-quality path. Splits every molecule into frame chunks and work-steals them across three GPU lanes, so idle lanes pick up the next chunk and the tail stays balanced, then concatenates per molecule. Seamless because each chunk warms the phosphor first and the film filter is absolute-frame indexed with a fixed seed."
+    },
+    {
+      "path": "osc/scope.py",
+      "kind": "core",
+      "what": "The CRT persistence buffer and graticule — shared with the oscilloscope engine."
+    },
+    {
+      "path": "osc/crtfilm.py",
+      "kind": "post",
+      "what": "The film filter, here with a neutral white-phosphor config because the content is multi-coloured."
+    },
+    {
+      "path": "osc/config.py",
+      "kind": "config",
+      "what": "`RenderConfig`, ffmpeg resolution, the NVENC probe."
+    },
+    {
+      "path": "osc/gpu.py",
+      "kind": "backend",
+      "what": "CuPy backend with numpy fallback."
+    },
+    {
+      "path": "osc/audio.py",
+      "kind": "audio",
+      "what": "Decode and mux helpers. Unused by this format, which ships silent, but present because the render path shares them."
+    }
+  ],
+  "objects": [
+    {
+      "group": "Format machinery",
+      "intro": "The parts that are reusable independently of which molecule is on screen.",
+      "items": [
+        {
+          "name": "DrugScope",
+          "signature": "DrugScope(cfg, molecule, duration=15.0, intro_t=1.5)",
+          "what": "The compositor. Owns the three buffers, the layout, and the timeline.",
+          "notes": ""
+        },
+        {
+          "name": "power-on intro",
+          "signature": "intro_style='speedup'",
+          "what": "The screen flicks on, then an INVISIBLE vertical line sweeps left to right; only where it crosses an object is that slice lit into the phosphor, so the accelerating slice SMEARS through persistence into a solid line. The traces appear to speed up until solid.",
+          "notes": "Alternatives are a gentler ramp and a single wipe. Setting the intro length to zero disables it; the handover leaves the phosphor already primed either way."
+        },
+        {
+          "name": "method handover",
+          "signature": "t_switch = duration/2",
+          "what": "FTIR cross-dissolves to Raman through the phosphor, announced by a one-second ASCII scramble of all lower text.",
+          "notes": "A scramble rather than a fade — a fade reads as an accident, a scramble reads as an instrument changing mode."
+        },
+        {
+          "name": "line playhead",
+          "signature": "—",
+          "what": "A short bright red leading segment of the trace sweeps the curve with a phosphor comet-tail.",
+          "notes": "A LINE, not a dot. A dot on a spectrum reads as a cursor; a lit leading segment reads as acquisition."
+        },
+        {
+          "name": "symbol knockout",
+          "signature": "label_push=1.0",
+          "what": "Each functional-group symbol carries a glyph-sized knockout ellipse that clears BONDS ONLY — never the graticule — so letters never sit on a bond while the grid still shows through behind them.",
+          "notes": "Symbols sit ON their atom. Pushing them further out moves N and O off their own bonds."
+        },
+        {
+          "name": "text flare",
+          "signature": "—",
+          "what": "Subtitles and legend lines occasionally scramble a couple of glyphs and return, on a 1.8–3.6 s gap.",
+          "notes": "Small enough to read as signal noise rather than as an effect."
+        },
+        {
+          "name": "billboard rock",
+          "signature": "motion='rock'",
+          "what": "A bounded left-right rotation, never edge-on, that reveals depth on a molecule with a big flat face.",
+          "notes": "Global, the same for every molecule. A 3-D molecule 'moves badly' only when its geometry presents a small ring or non-flat face to the camera."
+        },
+        {
+          "name": "multi-axis tumble",
+          "signature": "motion='tumble'",
+          "what": "Continuous rotation on three axes at incommensurate frequencies, plus a fixed in-plane spin.",
+          "notes": "Scale and centre come from the SAMPLED tumble envelope — the union bounding box over 96 sampled rotations — so a tumbling molecule never clips or drifts."
+        },
+        {
+          "name": "principal-plane orientation",
+          "signature": "structure3d(smiles, plane_ring='pca')",
+          "what": "Orients by the whole-molecule principal plane, so the flattest face points at the camera and z-variance is minimised.",
+          "notes": "The fix for anything that sprawls off its aromatic ring. The default aromatic-ring rule is right for scaffolds that HAVE a big flat ring."
+        },
+        {
+          "name": "IR-to-Raman reweighting",
+          "signature": "drug_data._raman_factor",
+          "what": "Same positions, different intensity envelope, by selection rule.",
+          "notes": "Spectra are ILLUSTRATIVE — group-contribution positions with a heuristic Raman reweight, not measured or DFT. Positions are sound, relative intensities approximate, and only about 600–1900 cm-1 is shown. Do not cite them."
+        }
+      ]
+    },
+    {
+      "group": "Molecules — Original set",
+      "intro": "Frame links are FTIR (first) and Raman (second) — the same molecule under the two methods.",
+      "items": [
+        {
+          "name": "Proline",
+          "signature": "MOLECULES['Proline']",
+          "what": "C5H9NO2 · 115.13 g/mol · 8 atoms / 8 bonds · 11 IR lines",
+          "notes": "",
+          "frames": [
+            "proline_t030.jpg",
+            "proline_t082.jpg"
+          ]
+        },
+        {
+          "name": "Ibuprofen",
+          "signature": "MOLECULES['Ibuprofen']",
+          "what": "C13H18O2 · 206.28 g/mol · 15 atoms / 15 bonds · 16 IR lines",
+          "notes": "",
+          "frames": [
+            "ibuprofen_t030.jpg",
+            "ibuprofen_t082.jpg"
+          ]
+        },
+        {
+          "name": "Baclofen",
+          "signature": "MOLECULES['Baclofen']",
+          "what": "C10H12ClNO2 · 213.66 g/mol · 14 atoms / 14 bonds · 12 IR lines",
+          "notes": "",
+          "frames": [
+            "baclofen_t030.jpg",
+            "baclofen_t082.jpg"
+          ]
+        },
+        {
+          "name": "Indigo",
+          "signature": "MOLECULES['Indigo']",
+          "what": "C16H10N2O2 · 262.27 g/mol · 20 atoms / 23 bonds · 11 IR lines",
+          "notes": "Sublimes rather than melts — the metadata line reflects that.",
+          "frames": [
+            "indigo_t030.jpg",
+            "indigo_t082.jpg"
+          ]
+        },
+        {
+          "name": "MethyleneBlue",
+          "signature": "MOLECULES['MethyleneBlue']",
+          "what": "C16H18N3S+ · 284.40 g/mol · 20 atoms / 22 bonds · 10 IR lines",
+          "notes": "A cation; the formula carries the charge.",
+          "frames": [
+            "methyleneblue_t030.jpg",
+            "methyleneblue_t082.jpg"
+          ]
+        },
+        {
+          "name": "Sertraline",
+          "signature": "MOLECULES['Sertraline']",
+          "what": "C17H17Cl2N · 306.23 g/mol · 20 atoms / 22 bonds · 10 IR lines",
+          "notes": "",
+          "frames": [
+            "sertraline_t030.jpg",
+            "sertraline_t082.jpg"
+          ]
+        },
+        {
+          "name": "Morphine",
+          "signature": "MOLECULES['Morphine']",
+          "what": "C17H19NO3 · 285.34 g/mol · 21 atoms / 25 bonds · 12 IR lines",
+          "notes": "3-D. The first molecule to use the billboard rock — depth read through a big flat aromatic ring.",
+          "frames": [
+            "morphine_t030.jpg",
+            "morphine_t082.jpg"
+          ]
+        },
+        {
+          "name": "Omeprazole",
+          "signature": "MOLECULES['Omeprazole']",
+          "what": "C17H19N3O3S · 345.42 g/mol · 24 atoms / 26 bonds · 11 IR lines",
+          "notes": "",
+          "frames": [
+            "omeprazole_t030.jpg",
+            "omeprazole_t082.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Molecules — Neurotransmitters, hormones and opioids",
+      "intro": "Frame links are FTIR (first) and Raman (second) — the same molecule under the two methods.",
+      "items": [
+        {
+          "name": "Dopamine",
+          "signature": "MOLECULES['Dopamine']",
+          "what": "C8H11NO2 · 153.18 g/mol · 11 atoms / 11 bonds · 10 IR lines",
+          "notes": "",
+          "frames": [
+            "dopamine_t030.jpg",
+            "dopamine_t082.jpg"
+          ]
+        },
+        {
+          "name": "Serotonin",
+          "signature": "MOLECULES['Serotonin']",
+          "what": "C10H12N2O · 176.22 g/mol · 13 atoms / 14 bonds · 10 IR lines",
+          "notes": "",
+          "frames": [
+            "serotonin_t030.jpg",
+            "serotonin_t082.jpg"
+          ]
+        },
+        {
+          "name": "Adrenaline",
+          "signature": "MOLECULES['Adrenaline']",
+          "what": "C9H13NO3 · 183.21 g/mol · 13 atoms / 13 bonds · 10 IR lines",
+          "notes": "",
+          "frames": [
+            "adrenaline_t030.jpg",
+            "adrenaline_t082.jpg"
+          ]
+        },
+        {
+          "name": "Estradiol",
+          "signature": "MOLECULES['Estradiol']",
+          "what": "C18H24O2 · 272.39 g/mol · 20 atoms / 23 bonds · 13 IR lines",
+          "notes": "",
+          "frames": [
+            "estradiol_t030.jpg",
+            "estradiol_t082.jpg"
+          ]
+        },
+        {
+          "name": "Testosterone",
+          "signature": "MOLECULES['Testosterone']",
+          "what": "C19H28O2 · 288.43 g/mol · 21 atoms / 24 bonds · 11 IR lines",
+          "notes": "",
+          "frames": [
+            "testosterone_t030.jpg",
+            "testosterone_t082.jpg"
+          ]
+        },
+        {
+          "name": "Oxycodone",
+          "signature": "MOLECULES['Oxycodone']",
+          "what": "C18H21NO4 · 315.37 g/mol · 23 atoms / 27 bonds · 10 IR lines",
+          "notes": "3-D, oriented on its aromatic ring like Morphine.",
+          "frames": [
+            "oxycodone_t030.jpg",
+            "oxycodone_t082.jpg"
+          ]
+        },
+        {
+          "name": "Glutathione",
+          "signature": "MOLECULES['Glutathione']",
+          "what": "C10H17N3O6S · 307.32 g/mol · 20 atoms / 19 bonds · 11 IR lines",
+          "notes": "The gamma-Glu-Cys-Gly tripeptide. Generated from SMILES.",
+          "frames": [
+            "glutathione_t030.jpg",
+            "glutathione_t082.jpg"
+          ]
+        },
+        {
+          "name": "Mitragynine",
+          "signature": "MOLECULES['Mitragynine']",
+          "what": "C23H30N2O4 · 398.50 g/mol · 29 atoms / 32 bonds · 13 IR lines",
+          "notes": "3-D. Chiral ring pucker and side chain read through depth. Generated from SMILES.",
+          "frames": [
+            "mitragynine_t030.jpg",
+            "mitragynine_t082.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Molecules — Eicosanoids (arachidonic-acid cascade)",
+      "intro": "Frame links are FTIR (first) and Raman (second) — the same molecule under the two methods.",
+      "items": [
+        {
+          "name": "ProstaglandinE2",
+          "signature": "MOLECULES['ProstaglandinE2']",
+          "what": "C20H32O5 · 352.47 g/mol · 25 atoms / 25 bonds · 12 IR lines",
+          "notes": "C/H/O only, like the rest of the eicosanoid batch.",
+          "frames": [
+            "prostaglandine2_t030.jpg",
+            "prostaglandine2_t082.jpg"
+          ]
+        },
+        {
+          "name": "ThromboxaneA2",
+          "signature": "MOLECULES['ThromboxaneA2']",
+          "what": "C20H32O5 · 352.47 g/mol · 25 atoms / 26 bonds · 11 IR lines",
+          "notes": "3-D. A strained bicyclic acetal cage — the case that forced principal-plane orientation, because the default aromatic-ring rule swung it edge-on and the labels collided.",
+          "frames": [
+            "thromboxanea2_t030.jpg",
+            "thromboxanea2_t082.jpg"
+          ]
+        },
+        {
+          "name": "LeukotrieneB4",
+          "signature": "MOLECULES['LeukotrieneB4']",
+          "what": "C20H32O4 · 336.47 g/mol · 24 atoms / 23 bonds · 11 IR lines",
+          "notes": "A linear conjugated-triene fatty acid, 4:1 aspect — needs a wide target width.",
+          "frames": [
+            "leukotrieneb4_t030.jpg",
+            "leukotrieneb4_t082.jpg"
+          ]
+        },
+        {
+          "name": "ThromboxaneB2",
+          "signature": "MOLECULES['ThromboxaneB2']",
+          "what": "C20H34O6 · 370.49 g/mol · 26 atoms / 26 bonds · 12 IR lines",
+          "notes": "The cyclic hemiketal, TXA2's hydrolysis product.",
+          "frames": [
+            "thromboxaneb2_t030.jpg",
+            "thromboxaneb2_t082.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Molecules — Cannabinoids and alkaloids",
+      "intro": "Frame links are FTIR (first) and Raman (second) — the same molecule under the two methods.",
+      "items": [
+        {
+          "name": "THC",
+          "signature": "MOLECULES['THC']",
+          "what": "C21H30O2 · 314.47 g/mol · 23 atoms / 25 bonds · 13 IR lines",
+          "notes": "",
+          "frames": [
+            "thc_t030.jpg",
+            "thc_t082.jpg"
+          ]
+        },
+        {
+          "name": "CBD",
+          "signature": "MOLECULES['CBD']",
+          "what": "C21H30O2 · 314.47 g/mol · 23 atoms / 24 bonds · 13 IR lines",
+          "notes": "A constitutional isomer of THC — open resorcinol plus terpene, against THC's fused pyran. Side by side they are the clearest demonstration in the set that the same formula is not the same spectrum.",
+          "frames": [
+            "cbd_t030.jpg",
+            "cbd_t082.jpg"
+          ]
+        },
+        {
+          "name": "THCA",
+          "signature": "MOLECULES['THCA']",
+          "what": "C22H30O4 · 358.48 g/mol · 26 atoms / 28 bonds · 12 IR lines",
+          "notes": "THC plus a carboxylic acid; decarboxylates to THC.",
+          "frames": [
+            "thca_t030.jpg",
+            "thca_t082.jpg"
+          ]
+        },
+        {
+          "name": "Cocaine",
+          "signature": "MOLECULES['Cocaine']",
+          "what": "C17H21NO4 · 303.35 g/mol · 22 atoms / 24 bonds · 13 IR lines",
+          "notes": "3-D with the multi-axis tumble rather than the single-axis rock.",
+          "frames": [
+            "cocaine_t030.jpg",
+            "cocaine_t082.jpg"
+          ]
+        },
+        {
+          "name": "Nicotine",
+          "signature": "MOLECULES['Nicotine']",
+          "what": "C10H14N2 · 162.23 g/mol · 12 atoms / 13 bonds · 12 IR lines",
+          "notes": "",
+          "frames": [
+            "nicotine_t030.jpg",
+            "nicotine_t082.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Molecules — Controlled substances",
+      "intro": "Frame links are FTIR (first) and Raman (second) — the same molecule under the two methods.",
+      "items": [
+        {
+          "name": "MDMA",
+          "signature": "MOLECULES['MDMA']",
+          "what": "C11H15NO2 · 193.25 g/mol · 14 atoms / 15 bonds · 16 IR lines",
+          "notes": "3-D tumble, oriented on its benzodioxole ring.",
+          "frames": [
+            "mdma_t030.jpg",
+            "mdma_t082.jpg"
+          ]
+        },
+        {
+          "name": "Fentanyl",
+          "signature": "MOLECULES['Fentanyl']",
+          "what": "C22H28N2O · 336.47 g/mol · 25 atoms / 27 bonds · 14 IR lines",
+          "notes": "3-D tumble on the PRINCIPAL PLANE — it sprawls off its aromatic ring, so the ring rule swung it edge-on (z-spread 6.2 down to 3.1 after the fix).",
+          "frames": [
+            "fentanyl_t030.jpg",
+            "fentanyl_t082.jpg"
+          ]
+        },
+        {
+          "name": "Methamphetamine",
+          "signature": "MOLECULES['Methamphetamine']",
+          "what": "C10H15N · 149.23 g/mol · 11 atoms / 11 bonds · 14 IR lines",
+          "notes": "3-D tumble, principal-plane oriented.",
+          "frames": [
+            "methamphetamine_t030.jpg",
+            "methamphetamine_t082.jpg"
+          ]
+        },
+        {
+          "name": "Alprazolam",
+          "signature": "MOLECULES['Alprazolam']",
+          "what": "C17H13ClN4 · 308.77 g/mol · 22 atoms / 25 bonds · 18 IR lines",
+          "notes": "3-D tumble, principal-plane oriented. Displayed under its trade name; the data key stays the chemical name.",
+          "frames": [
+            "alprazolam_t030.jpg",
+            "alprazolam_t082.jpg"
+          ]
+        }
+      ]
+    }
+  ],
+  "parameters_intro": "Per-molecule tuning is a small dict; the rest is global.",
+  "parameters": [
+    {
+      "name": "target_w_frac",
+      "where": "MOLECULES[k]['size']",
+      "meaning": "How wide the molecule draws as a fraction of the frame.",
+      "range": "0.62–0.74 for steroids, tripeptides and alkaloids; 0.82–0.88 for long fatty-acid chains"
+    },
+    {
+      "name": "sym_px",
+      "where": "MOLECULES[k]['size']",
+      "meaning": "Functional-group symbol size.",
+      "range": "Scaled to the molecule by default"
+    },
+    {
+      "name": "motion",
+      "where": "MOLECULES[k]",
+      "meaning": "`rock` or `tumble`.",
+      "range": "Only meaningful when the atom coordinates carry a z"
+    },
+    {
+      "name": "plane_ring",
+      "where": "structure3d()",
+      "meaning": "`aromatic` keys orientation on the aromatic ring; `pca` on the whole-molecule principal plane.",
+      "range": "Use `pca` for anything that sprawls off its ring"
+    },
+    {
+      "name": "intro_t",
+      "where": "DrugScope",
+      "meaning": "Power-on sweep length.",
+      "range": "1.5 s; 0 disables"
+    },
+    {
+      "name": "t_switch",
+      "where": "DrugScope",
+      "meaning": "FTIR-to-Raman handover time.",
+      "range": "duration/2, so it follows the clip length automatically"
+    },
+    {
+      "name": "title_y / method_top / header_bot / sub1_y / sub2_y",
+      "where": "DrugScope",
+      "meaning": "The layout. The molecule zone is the gap between `header_bot` and `method_top`.",
+      "range": "Both the normal and intro text paths read these — keep them in sync"
+    },
+    {
+      "name": "rock_deg / rock_period",
+      "where": "DrugScope",
+      "meaning": "Billboard rock amplitude and period.",
+      "range": "Global: 32 deg over 13 s"
+    },
+    {
+      "name": "breath",
+      "where": "_curve_points",
+      "meaning": "Trace liveliness.",
+      "range": "Keep it SMALL — plus or minus 0.5%. At 5% the curve bounced too much to read."
+    }
+  ]
+}
