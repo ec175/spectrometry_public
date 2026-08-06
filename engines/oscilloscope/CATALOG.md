@@ -1,0 +1,116 @@
+# Oscilloscope — object catalogue
+
+> A simulated CRT screen — a phosphor persistence buffer, a film-off-a-real-screen filter, and a glitch layer.
+
+The core is a phosphor persistence buffer. The electron beam is stroked each frame into an intensity layer that is added to a float buffer which decays a little every frame, exactly as P31 green afterglow does. That decay is what produces the orbiting ghost trails as a figure morphs or precesses, and faster beam travel means a dimmer trace (intensity goes as 1/segment-length), so Lissajous corners glow the way they do on real hardware. The buffer is colourised and given an additive gaussian bloom halo over a static graticule. On top of that sit two independent post layers — a three-stage physical model of filming a CRT with a camera, and an acquisition-fault layer — plus a video-to-ASCII front end that feeds the same filter.
+
+**Output.** 1080x1920 @60. The scope face is a rectangular graticule with square pixel cells, sized as a FRACTION of the frame (`face_w_frac`/`face_h_frac`), and `to_px` is deliberately anisotropic so vertical deflection fills a tall frame. For a landscape screen, set those fractions and the frame size and the mapping follows; nothing else changes. The film and glitch filters are resolution-agnostic and re-seed their statics per size.
+
+
+## Modules
+
+What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+
+| module | kind | what it gives you |
+|---|---|---|
+| `osc/scope.py` | core | The CRT. RGB persistence buffer, `to_px` (normalised to the screen face), the static graticule in three crossfadeable states, `beam()` stroking with 1/speed shading, `beam_transient()` for non-persistent overlays, and the compose pass. A negative grid state means no graticule at all. |
+| `osc/crtfilm.py` | post | `FilmLook` — filming a CRT with a camera, in three physically ordered stages. SCREEN in linear light (multi-scale glass halation, static phosphor grain in lit areas only, dust and smudges that light up under the trace, glass sheen); LENS (barrel distortion, transverse chromatic aberration per channel, corner defocus, vignette, sub-pixel hand-shake); CAMERA (exposure flicker, a drifting hum band, Reinhard-extended highlight blowout, tinted black lift, fine and coarse-chroma sensor noise). All statics are seeded and precomputed per resolution. |
+| `osc/glitchfx.py` | post | `GlitchFX` — an error-prone acquisition layer, split in two. `pre()` applies SIGNAL faults before the film pass so the camera films them (sync-tear band slips, vertical strip static with per-row jitter, drifting RF herringbone, 1–3 frame dropouts); `post()` applies SENSOR defects after it (fixed dead pixels, flickering hot pixels). Poisson-scheduled and seeded, with one of each forced early so a short sample shows everything. |
+| `osc/asciivid.py` | front-end | Video frame to coloured ASCII, vectorised. Luminance picks a glyph from a ramp, the SOURCE pixel colour is kept, near-black cells are dropped — and a whole frame is assembled at once through a precomputed glyph atlas and fancy indexing rather than a per-cell blit loop, which is what makes it fast enough for video. |
+| `osc/track.py` | front-end | Subject tracking for the ASCII crop. Asks WHICH WINDOW HOLDS THE MOST ACTION rather than where the mean is — the centroid of a saliency map barely moves (0.491 to 0.504 over a six-second test, i.e. the fixed centre crop with extra steps), because energy is spread broadly and roughly symmetrically across a frame. |
+| `osc/audio.py` | audio | Audio decode, per-band FFT magnitudes, and `mux_audio`. The sync rule is one line: build `start` must equal mux `-ss`. |
+| `osc/render.py` | render | Frame clock, beam strokes, ffmpeg rawvideo pipe, atomic output. Honours per-composition decay, grid state, transient flash traces, and `warmup` (loop pre-roll). |
+| `osc/config.py` | config | `RenderConfig` (resolution, fps, decay, beam, glow, colours), the graticule palette, ffmpeg resolution, the NVENC probe. |
+| `osc/gpu.py` | backend | CuPy backend with automatic numpy fallback. Backs the scope buffers, bloom, compose and the whole film filter; measured about 10x on render and 4x on the filter. Statics are generated from the seed so the look is identical CPU or GPU. |
+| `ascii_video.py` | pipeline | The full video-to-ASCII-to-CRT pipeline, end to end. Decode, ASCII, film, encode, and mux the source audio window back on. |
+| `filter_cli.py` | tool | Apply the film filter (and optionally the glitch layer) to ANY existing mp4. Probes size and fps, streams decode to process to encode, copies the source audio window. This is the most directly reusable thing in the engine — it needs nothing else from the repository. |
+
+
+## The CRT core
+
+| object | what it is | notes |
+|---|---|---|
+| `Scope(cfg)` | The screen. Owns the RGB persistence buffer and the transient head buffer. | The persistence buffer is RGB, not grayscale, so traces can be any colour rather than only phosphor green. |
+| `beam(pts, gain=1.0, color=None, width=None, speed_shade=True)` | Stroke a polyline into the PERSISTENT buffer, shaded by 1/segment-length. | Never use this for a flashed overlay — persistence burns a static bright shape in for the better part of a second of decay. |
+| `beam_transient(pts, gain, color)` | Stroke into a transient buffer that is cleared every frame. | The correct route for anything that must appear and vanish with no burn-in. |
+| `head(p)` | The hot beam dot, drawn into its own transient buffer. | Kept separate so the fast dot never smears into a chain of beads. The compose pass skips the head bloom entirely when the buffer is empty, which is most of the cost saved on dot-free compositions. |
+| `scope.render(grid_state)` | Three states crossfaded by a float: cartesian (0), radial rings and spokes (1), axes-only faint cross (2). Negative means none. | The scope's own `_grats` list can be replaced to offer a different set. |
+
+
+## The film filter
+
+A three-stage physical model, in the order light actually goes through the system. Every hue behaviour is parameterised with GREEN defaults, so existing green renders are byte-for-byte unchanged when a new option is added.
+
+| object | what it is | notes |
+|---|---|---|
+| `FilmLook(w, h, fps, n_frames, seed=7, **phosphor_cfg)` | The whole filter. Absolute-frame indexed and fixed-seed, so a clip rendered in chunks concatenates seamlessly. | `exposure` defaults to 1.75, which is tuned for a thin bright trace on black. A full-frame bright image needs about 0.72 or the whole field blows out to pastel. |
+| `film_config_for_phosphor(color, halation_boost=1.0)` | Derives the filter's hue behaviour from a trace colour: blowout keys off the LIT channels and bleeds into the DEFICIENT ones, so ANY hue blows to white, and blacks, dust and sheen tint toward the hue. | Pure and cheap, so it can be called per frame. This is what makes a dynamic-colour composition possible with no hand-tuning of the filter. |
+| `FilmLook(ambient_gain=...)` | A very wide colour-PRESERVING blur of the lit screen added into the surround, so content's own colour spills through the glass into the dark margins. | A cyan face glows cyan rather than producing a neutral white sheen. Defaults to off so existing renders are unchanged. |
+| `FilmLook(bevel=..., bevel_frac=..., bevel_tint=...)` | A tinted bevelled edge that seats flat glass into a bezel. | Defaults to off. |
+| `FilmLook(barrel_k=...)` | Glass bulge. | 0.03 is a flat CRT; 0.05 a subtle main-face bow; 0.12 an obvious glass bulge. |
+| `GlitchFX(w, h, fps, n_frames, level=0.8, seed=...)` | The acquisition-fault layer. `level` scales both rate and strength. | About 0.8 is subtle, 1.8 heavy. Strips are deliberately NARROW (1.5–5% of width); the first build used 8–22% and read as far too wide. |
+
+
+## The ASCII front end
+
+| object | what it is | notes |
+|---|---|---|
+| `AsciiVideo(w, h, font_px=..., crop_frac=1/3, hsqueeze=0.8, margin=...)` | Video frames to coloured ASCII through a precomputed glyph atlas. | Subject-fit: takes a centred slice of the source WIDTH and squeezes it horizontally — the same pixels at a narrower display aspect — so the slice stands tall and fills a vertical screen. `crop_frac=1.0` uses the whole frame. |
+| `subject_pan(frames, ...)` | Slides the crop window to follow the action rather than sitting at the centre. | Measures which WINDOW holds the most energy, not where the centroid is — see the module note. |
+| `film_config_for_phosphor((255,255,255))` | Full-colour ASCII must be filmed with a NEUTRAL white-phosphor config so every hue halates correctly. | Feeding it the green defaults wrecks a multi-colour image. |
+
+
+## Audio analysis
+
+| object | what it is | notes |
+|---|---|---|
+| `decode_mono(path, start, dur)` | Decode a window of a track to samples via ffmpeg. |  |
+| `audio.bands(...)` | Per-band FFT magnitudes over log-spaced frequency bins. | Log spacing matters: pitch is logarithmic, so linear bands put almost every musical note in the bottom bin. |
+| `mux_audio(video, song, start, out)` | Mux the same window back over a silent render. | Build `start` must equal mux `-ss`. This is the entire sync contract. |
+
+
+## Compositions
+
+The compositions are not shipped. They are catalogued by OUTPUT FAMILY — the way the author organises them on disk — because each family is a different reusable format rather than a different picture.
+
+| composition | what it does | status | frames |
+|---|---|---|---|
+| `look/dimensional` | The flagship. Winds up from the origin into a two-lobe figure, demonstrates angular nodes reflecting through the origin at 2 to 5 lobes morphing CONTINUOUSLY (signed-radius roses cross through the origin so the trace never disconnects), then collapses; then s, p, d and d_z2 orbitals each emerge from the origin, hold, and collapse back before the next. The clip loops — the final collapse plus a decay tail makes the last frame match the first. | shipped 37 s | [1](frames/look_dimensional_t012.jpg) [2](frames/look_dimensional_t035.jpg) [3](frames/look_dimensional_t062.jpg) [4](frames/look_dimensional_t088.jpg) |
+| `look/dimensional2d` | The 2-D extended cut as a SEAMLESS 27 s loop: 3-rose, 4-rose, 5-rose, 7-rose, harmonic superposition, a 3:2 Lissajous knot, a 5/2 rational rose, back to 3-rose. Opens already-formed. | shipped | [1](frames/look_dimensional2d_loop_t005.jpg) [2](frames/look_dimensional2d_loop_t030.jpg) [3](frames/look_dimensional2d_loop_t055.jpg) [4](frames/look_dimensional2d_loop_t080.jpg) [5](frames/look_dimensional2d_t045.jpg) |
+| `look/dimensional2d_67` | The same loop with a seven-segment '67' appearing for half a second via the transient buffer, so it vanishes with NO burn-in and the trace under it dims 70%. | shipped | [1](frames/look_dimensional2d_loop_67_t003.jpg) [2](frames/look_dimensional2d_loop_67_t050.jpg) |
+| `look/loop_gears` | Spirograph and guilloche rings — epitrochoids, star gears, lace. One of three 20 s seamless-loop journeys built on the same loop recipe with new shape content. | shipped, clean and filmed | [1](frames/look_loop_gears_t030.jpg) [2](frames/look_loop_gears_t070.jpg) [3](frames/look_loop_gears_filmed_t050.jpg) |
+| `look/loop_weave` | Lissajous-lattice knots with harmonics. | shipped, clean and filmed | [1](frames/look_loop_weave_t030.jpg) [2](frames/look_loop_weave_t070.jpg) [3](frames/look_loop_weave_filmed_t050.jpg) |
+| `look/loop_braid` | Counter-rotating three-term orbital braids. | shipped, clean and filmed | [1](frames/look_loop_braid_t030.jpg) [2](frames/look_loop_braid_t070.jpg) [3](frames/look_loop_braid_filmed_t050.jpg) |
+| `stack/spectral_stack` | Eighteen traces at FIXED heights, one per log-spaced band from 40 Hz to 8 kHz, bass at the bottom and treble at the top, so each region of the screen vibrates audibly synced to its slice of the mix. Each band draws its real band-passed CARRIER with the envelope divided out and scrolled slowly (3.5 down to 1.2 drawn cycles per second — hugely time-stretched at high frequency), sampled with cubic interpolation at float positions. The LIVE envelope sets each trace's height and heat, so the swell stays perfectly synced while the wiggle stays watchable. | shipped across 19 songs, clean and filmed, in green and pink | [1](frames/stack_spacesong_t045.jpg) [2](frames/stack_afterdark_t045.jpg) [3](frames/stack_duvet_t045.jpg) [4](frames/stack_feelgoodinc_t045.jpg) [5](frames/stack_summer2000_t045.jpg) [6](frames/stack_bluecoupe_t045.jpg) [7](frames/stack_spacesong_filmed_t045.jpg) [8](frames/stack_green_variant_t045.jpg) [9](frames/stack_pink_variant_t045.jpg) [10](frames/look_spectral_stack_t040.jpg) |
+| `circle_format` | A SAVED, reusable split format: an ASCII album cover in the top half, three overlaid scope circles in the bottom. Each ring traces the song's real band-passed WAVEFORM wrapped once around it — a true scope-XY read, detrended so the ends meet — so the shape genuinely redraws with the audio: bass punches a few big lobes, treble scatters fine spikes. Bass ring at the back and largest, treble at the front, smallest and brightest. Rings are built in round x-space then squashed by the face anisotropy so they render as TRUE circles. The CRT filter tracks the trace colour automatically. | shipped 20 s | [1](frames/circle_format_t020.jpg) [2](frames/circle_format_t050.jpg) [3](frames/circle_format_t080.jpg) [4](frames/circle_format_v1_t050.jpg) |
+| `ascii/hers_ascii` | The video-to-ASCII-to-CRT pipeline end to end: a source clip decoded, converted to coloured ASCII with subject tracking, put through the film filter with a neutral white phosphor, and re-muxed with its own audio window. | shipped | [1](frames/ascii_hers_t015.jpg) [2](frames/ascii_hers_t045.jpg) [3](frames/ascii_hers_t078.jpg) |
+| `test/filmtest` | The film-filter A/B set — before, after, side by side, and three strengths of the same pass. The most useful thing in this list if you are deciding how hard to push `filter_cli.py`. | reference | [1](frames/test_filmtest_before_t050.jpg) [2](frames/test_filmtest_after_t050.jpg) [3](frames/test_filmtest_sidebyside_t050.jpg) [4](frames/test_filmtest_method_subtle_t050.jpg) [5](frames/test_filmtest_method_tuned_t050.jpg) [6](frames/test_filmtest_method_heavy_t050.jpg) |
+| `test/radial_sound` | The node convention driven by a song: signed radius is a breathing base ring plus per-band petal harmonics, with bass-onset detection triggering a fast 180 deg orientation flip and an outward size pulse per beat. | preview | [1](frames/test_radial_sound_t035.jpg) [2](frames/test_radial_sound_t075.jpg) |
+| `test/spectral_falls` | The earlier audio waterfall, superseded by the stack: x is log frequency, so melodies visibly slide their peaks; every 0.42 s the live top ridge freezes and scrolls down, twenty-four ridges fading with age. | preview | [1](frames/test_spectral_falls_spacesong_t035.jpg) [2](frames/test_spectral_falls_spacesong_t075.jpg) |
+| `test/wind_up` | Dot to growing, precessing, breathing ellipses that speed up and grow harmonics, then collapse and settle into a standard calibration pulse. Spin is a precomputed cumulative integral of omega proportional to energy, so it visibly accelerates then decelerates. | preview | [1](frames/test_wind_up_t035.jpg) [2](frames/test_wind_up_t075.jpg) |
+| `test/orbit_trace` | One bright head orbits at steady angular rate; the only thing changing is the radial attraction versus angle, blended between shape profiles, so the TRAIL draws circle to triangle to square to star. | preview | [1](frames/test_orbit_trace_t035.jpg) [2](frames/test_orbit_trace_t075.jpg) |
+| `test/lissajous_tour` | Continuous morph through the classic Lissajous ratios with phase slowly sweeping, so each figure breathes. | preview | [1](frames/test_lissajous_tour_t035.jpg) [2](frames/test_lissajous_tour_t075.jpg) |
+| `test/pulse_to_shape` | The calibration pulse morphing into circle, square, triangle and star geometries and back. | preview | [1](frames/test_pulse_to_shape_t035.jpg) [2](frames/test_pulse_to_shape_t075.jpg) |
+| `test/fourier_epicycles` | DFT of a target outline into a chain of 48 rotating circles, an arm, and the traced curve. Swap the target for any closed path. | preview | [1](frames/test_fourier_epicycles_t035.jpg) [2](frames/test_fourier_epicycles_t075.jpg) |
+
+
+## Parameters that matter
+
+The look is set almost entirely by four numbers on the scope and one on the filter.
+
+| parameter | lives in | what it controls | usable range |
+|---|---|---|---|
+| `decay` | RenderConfig / per composition | Afterglow length — the fraction of the phosphor buffer surviving each frame. Higher means longer ghost trails. | 0.55 (audio scenes, where you want legibility) to 0.92 (attractor traces, where the figure IS the afterglow). 0.86 default. |
+| `beam_width / glow_sigma / glow_gain` | RenderConfig | Core thickness against bloom radius and strength. |  |
+| `beam_color / glow_color` | RenderConfig | Phosphor tint. P31 green by default; amber, magenta and pink have all been shipped. | Whatever you set here should also be handed to `film_config_for_phosphor` or the filter will blow the wrong channels out. |
+| `trail_gain` | per composition | How much light each frame's stroke adds. | 60 fps traces read FAINTER than a 15 fps preview — a shorter arc is drawn per frame, so less light accumulates per lap. 0.40 is conservative, 0.55–0.70 is the punch-up lever. |
+| `face_w_frac / face_h_frac` | RenderConfig | Screen face size as a fraction of the frame. The ratio between them IS the deflection anisotropy. | This is the setting to change for a landscape screen. |
+| `warmup` | per composition | Seconds of the composition's TAIL pre-rolled into the phosphor before frame 0. | Required for any seamless loop whose first frame is not black, because the persistence buffer starts empty. About 1.6 s at 60 fps gives a seam difference around 0.2%. |
+| `exposure` | FilmLook | Filter exposure. | 1.75 for a thin trace on black; ~0.72 for a full-frame bright image. |
+| `level` | GlitchFX | Fault rate and strength together. | 0.8 subtle, 1.8 heavy |
+| `substeps` | trail compositions | Sub-frame beam steps, so a fast dot leaves a CONTINUOUS trail rather than a dotted line. |  |
+
+
+---
+
+*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this file.*

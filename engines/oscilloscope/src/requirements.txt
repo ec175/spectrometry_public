@@ -1,0 +1,5 @@
+# Oscilloscope — manim-free CRT scope video engine. Light deps; ffmpeg is an external binary
+# (on PATH, or set OSC_FFMPEG, or drop bin\ffmpeg.exe). Install into .venv (see setup.ps1).
+numpy>=2.0
+Pillow>=10.0
+scipy>=1.11        # gaussian bloom (scipy.ndimage); optional — a Pillow GaussianBlur fallback exists
