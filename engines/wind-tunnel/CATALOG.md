@@ -1,0 +1,163 @@
+# Wind Tunnel — object catalogue
+
+> A real 2-D fluid solver driving a colour-field animation — nothing on screen is keyframed.
+
+Two solvers share one interface. `lbm.py` is a D2Q9 lattice-Boltzmann scheme with a BGK collision operator and a Smagorinsky LES term, using half-way bounce-back on a boolean mask so any closed polygon becomes a wall with no meshing step; a moving-wall term lets that mask change every step. `cns.py` is a compressible finite-volume Navier-Stokes solver — MUSCL reconstruction with a minmod limiter, an HLLC Riemann solver at every face, SSP-RK2 in time, plus viscous stress and Fourier conduction — which gives you temperature, internal energy and genuine shock capture. The velocity field is colour-mapped and overlaid with streaklines integrated backwards from their current positions, then piped as raw RGB24 to ffmpeg.
+
+**Output.** 1080x1920 @60 by default. The aspect ratio is a render setting, not a property of the solver — `RenderConfig` takes any `nx`/`ny`, and `--flow up|down|right` chooses which lattice axis becomes the screen's long one. A 16:9 landscape tunnel is `--flow right` at a wider `RenderConfig`.
+
+
+## Modules
+
+What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+
+| module | kind | what it gives you |
+|---|---|---|
+| `wt/lbm.py` | solver | D2Q9 lattice-Boltzmann, BGK + Smagorinsky LES. Half-way bounce-back on a boolean mask with a moving-wall term. Tunnel mode (inlet, zero-gradient outlet + sponge, free-slip sides) or `closed=True` for a sealed box. Carries `set_inlet`, `set_farfield`, `set_drive` (scalar or per-cell), `set_wall_velocity`, `set_inlet_turbulence`, `force_field`, `perturb`, `health`. |
+| `wt/cns.py` | solver | Compressible Navier-Stokes, finite volume. MUSCL + minmod, HLLC fluxes, SSP-RK2, explicit viscous stress and conduction at Pr 0.71, Smagorinsky. A real ideal gas at gamma = 1.4. Body by ghost-cell immersed boundary on the same mask. Validated against the exact Sod solution and oblique-shock theory. |
+| `wt/bodies.py` | physics | Free bodies the flow actually moves. `FreeBody` reads the momentum the fluid handed its surface, adds gravity and buoyancy, and integrates Newton-Euler. `BodySystem` owns per-body masks, the wall-velocity field, soft contacts, soft walls, containment, optional central and pairwise gravity, and liquid coalescence. |
+| `wt/shapes.py` | geometry | Bodies as closed polygons in unit-chord space, plus `place`/`rasterize` to put them on a lattice at any scale and angle. `image_body` traces a polygon straight out of a PNG alpha channel, so any silhouette becomes a solid. |
+| `wt/dye.py` | physics | Transported coloured species. One D2Q5 BGK lattice per species, advected by the fluid's own velocity and sharing its bounce-back, so dye and flow can never disagree about where the solid is. Diffusivity is kept tiny, so the mixing you see is the mixing the flow does. |
+| `wt/streaks.py` | render | The white dashes. Tails are integrated backwards from the current position every frame rather than kept as history, which means tail length is a free parameter and a respawn never desyncs. Particles die of a randomised age and respawn uniformly. |
+| `wt/colormap.py` | render | 256-entry LUTs: `jet`, `turbo`, `ice`, `inferno`, `vort`, `blues`, `reds`. The `blues`/`reds` pair track each other's stop luminances entry for entry, so swapping palette needs no re-tuning of `vmax` or `gamma`. |
+| `wt/render.py` | render | `Tunnel` — the simulation-plus-compositor object — and the `render_scene`/`render_stills` drivers. Owns the lattice-to-screen mapping, the frame clock, the ffmpeg pipe, the divergence guard, and the optional HUD/legend overlays. |
+| `wt/config.py` | config | `RenderConfig`: everything tunable. `nx`/`ny` (simulated) and `vis_*` (visible window) derive from `flow`, `scale` and `overscan`. NVENC probe with automatic libx264 fallback, and ffmpeg resolution. |
+| `wt/gpu.py` | backend | CuPy backend with automatic numpy fallback. Scrubs a stale `CUDA_PATH` for the process only, so a system pinned to an older toolkit does not break the JIT. |
+| `wt/rig.py` | helper | Scene-side rigging helpers — the small amount of bookkeeping that sits between a composition and the solver. |
+| `wt/film.py` | post | Bridge to the CRT film filter in the oscilloscope engine, handed a neutral white-phosphor config. Mandatory here: the green-phosphor defaults are only correct for a single-hue trace and would wreck a full-colour field. |
+| `tools/sod_check.py` | validation | The compressible solver against the exact Sod shock-tube solution. |
+| `tools/shock_check.py` | validation | Measured oblique-shock angle and post-shock state against the theta-beta-Mach relation. |
+| `tools/seam_check.py` | validation | Whether a clip built as a loop actually loops — compares first and last frame numerically. |
+| `tools/calib.py` | validation | Lattice-to-physical calibration: what a chosen `u0`, chord and Reynolds number actually mean in cells and steps. |
+
+
+## Shape generators
+
+Every one returns a closed polygon in unit-chord space. `place(pts, chord, cx, cy, aoa_deg, pivot)` scales, rotates about the quarter-chord and translates it; `rasterize(polys, nx, ny, supersample=2)` turns a list of them into the boolean mask the solvers take. Because the mask is re-made from scratch each step, a body can move, rotate or change shape with no meshing anywhere.
+
+| object | what it is | notes |
+|---|---|---|
+| `naca4(code='2412', n=140, closed_te=True)` | Any NACA 4-digit section from its code. | '0012' for symmetric, '2412' for the cambered reference section. |
+| `circle(n=160)` | Unit-diameter cylinder. | The von Karman vortex-street case; the standard 2-D solver validation body. |
+| `square(n=4)` | Square plate. | Unlike a disc it feels a torque, so a free one tumbles. |
+| `plate(thick=0.045)` | Thin flat plate. | The dynamic-stall body — sharp leading edge, so separation is fixed and not Reynolds-dependent. |
+| `wedge(half=0.30)` | Wedge, apex forward. | The oblique-shock generator on the compressible solver. |
+| `wedge_rev(half=0.30)` | Wedge, flat face forward. | Bluff-body counterpart — the drag comparison against `wedge`. |
+| `ellipse(thick=0.30, n=140)` | Ellipse at any thickness ratio. | The continuous knob between `circle` and `plate`. |
+| `teardrop(thick=0.34, n=150)` | Rounded nose, tapered tail. | Streamlined bluff body; the low-drag end of a shape tour. |
+| `turbofan(r_lip=0.175, r_throat=0.160, r_exit=0.105, r_out=0.330, r_spin=0.055, ...)` | A 2-D section through a ducted jet engine. Returns a dict — `cowl`, `spinner`, and the radius closures `duct_r`/`spin_r`/`outer_r`/`r_out` — not a single polygon. | Two mirrored cowl halves make a real duct the flow passes THROUGH. The radius closures let a composition find the free passage without restating the constants. Its docstring records the two silhouettes that were tried first and read wrong. |
+| `surfboard(width=0.28, tail=0.36, tip=0.012, nose_p=0.70, x_n=0.12, n=240)` | Planing hull section — nose rocker, tail width and tip thickness all parameterised. | Paired with `board_texture` for the drawn deck. |
+| `board_texture(px=768, deck=..., rail=..., stringer=...)` | Generates a deck/rail/stringer texture bitmap for a drawn board. | Cosmetic only — carries no physics. |
+| `cow(scale_y=1.0)` | A cow silhouette, as a closed polygon. | Not a joke: it is the bluff-body extreme in a shape comparison, and it is the readability test for `image_body`. |
+| `metaball(blobs, n=192, iters=36)` | Smooth-union outline of a set of circles, found by radial bisection. | The merging-droplet shape. Pair with `bodies.droplet` for an area-conserving version. |
+| `image_body(path, cells=120.0, flip_x=False, close_cells=1.5, detail=3.0, alpha_thr=128)` | Traces a closed polygon from a PNG's alpha channel — any silhouette becomes a solid body. | The general escape hatch: if you can draw it, the solver can put flow round it. |
+| `place(pts, chord, cx, cy, aoa_deg=0.0, pivot=0.25)` | Scale, rotate about the pivot chord fraction, translate. | Size bodies against the SCREEN, never against a lattice axis — which axis is 'across the picture' flips with `--flow`. |
+| `rasterize(polys, nx, ny, supersample=2)` | Polygons to the boolean solid mask. | Supersampled by default so a rotating body does not jitter cell by cell. |
+
+
+## Free-body physics
+
+Objects the flow moves, rather than objects held in place. A composition may choose a body's position at time t, its material, or a prescribed spin — and then it must let go. Every trajectory below that is solved.
+
+| object | what it is | notes |
+|---|---|---|
+| `FreeBody(profile, size, x, y, *, name, ang, vx, vy, ...)` | One rigid body. Reads the momentum the fluid handed its surface, adds gravity and buoyancy, integrates Newton-Euler. | `smooth` low-passes the fluid load; without it the body chatters on lattice noise. |
+| `BodySystem(nx, ny, g=5e-4, floor=0.055, ceiling=0.985, wall_gap=7.0, ...)` | Owns every body: masks, the wall-velocity field, soft contacts, soft walls, containment, central and pairwise gravity, coalescence. | Modes are `dynamic` (bodies respond) and `tracer` (bodies follow the flow). |
+| `density_for_fall(profile_name, size, v_fall, u0, g, unit_area)` | Solves the terminal-velocity balance for the density that makes a body fall at a chosen speed. | This is how you choose what a body is MADE OF instead of scripting its path. |
+| `droplet(blobs, area, iters=3)` | Area-conserving metaball outline. | A shape that changes must change smoothly and at constant area, or the solver sees a mass source. |
+| `FreeBody.set_profile(profile)` | Re-derives mass, inertia and radius when a body's shape changes mid-clip. |  |
+| `FreeBody.spin` | Prescribed rotation — a motor turning a cylinder rather than the flow doing it. | Opts the body out of the surface-speed cap, so the composition then owns that budget itself. |
+
+
+## Fluid forcing
+
+The legitimate ways to push the fluid. All of them are things a real rig has.
+
+| object | what it is | notes |
+|---|---|---|
+| `LBM.set_inlet(profile)` | The inflow condition — uniform, or any spanwise profile. | Whenever this is far from uniform you must also call `set_farfield`, or the sponge pulls the flow back toward a freestream that no longer exists. |
+| `LBM.set_farfield(profile)` | Retargets the outlet sponge to a spanwise profile. | The partner to a non-uniform `set_inlet`. |
+| `LBM.set_drive(u_target_x, u_target_y, beta)` | Drives the fluid toward a target velocity. `beta` may be a scalar or a per-cell field. | A per-cell beta is what makes a localised stirrer possible. Velocity fields SUPERPOSE — sum the components and take max() of the masks; weight-averaging overlapping patches drives the fluid between them toward a target that is too slow. |
+| `LBM.set_wall_velocity(field)` | Moving-wall term for bounce-back. | Breaks above \|u_wall\| ~ 0.12. Keep body speeds small and buy apparent speed with `steps`. |
+| `LBM.set_inlet_turbulence(...)` | Continuous divergence-free freestream turbulence, convected as a frozen field. | This is what makes air noisy for a whole run rather than kicked once at t=0. |
+| `LBM.force_field()` | Per-cell wall force — the momentum the fluid gave the solid. | Lives on the fluid cells BESIDE the body, never on its own cells. Getting this wrong once measured Cd ~ 22 against a textbook 1.2. |
+| `LBM.init_velocity(...)` | Seeds the domain's initial field. | In a sealed box, seed at REST — the default fills the domain with a uniform freestream, which in a closed pool is a slab of water sliding sideways for the whole clip. |
+| `LBM.health()` | One scalar reporting solve stability. | A stable solve and a CORRECT one are different questions. This answers only the first. |
+
+
+## Colour maps
+
+| object | what it is | notes |
+|---|---|---|
+| **jet** | The default speed palette. |  |
+| **turbo** | Perceptually improved rainbow. |  |
+| **ice** | Cool monotone. |  |
+| **inferno** | Dark-to-hot monotone. |  |
+| **vort** | Diverging map for signed vorticity. | Use with `--field vort`; zero must sit at the midpoint. |
+| **blues** | Blue shades only, built for a near-zero field. | The still-water palette — a normal map puts a dead pool at one flat colour. |
+| **reds** | The same ramp, hue-rotated. | Stop luminances track `blues` entry for entry, so a composition swaps palette without re-tuning `vmax`/`gamma`. |
+
+
+## Compositions
+
+The compositions themselves are not in this repository — see the README. They are listed because the list is the useful part: each one is a different answer to what you can point this solver at, and each has frames beside it. `rocket_engine` is withheld at the author's request.
+
+| composition | what it does | status | frames |
+|---|---|---|---|
+| `aoa_sweep` | A NACA section swept both ways through stall: +stall, cross over, -stall, back to neutral. | shipped 15 s | [1](frames/aoa_sweep_t035.jpg) [2](frames/aoa_sweep_t075.jpg) |
+| `aoa_sweep_fast` | The same section and the same sweep schedule, in a tunnel run twice as fast. | shipped | [1](frames/aoa_sweep_fast_t035.jpg) [2](frames/aoa_sweep_fast_t075.jpg) |
+| `stall` | Held deep in stall — a continuous shed of leading-edge vortices down the wake. | shipped (film pass) | [1](frames/stall_film_t035.jpg) [2](frames/stall_film_t075.jpg) |
+| `vortex_street` | A circular cylinder at a Reynolds number where the wake goes unsteady: a von Karman street. The textbook validation case. | shipped | — |
+| `tandem` | Three staggered cylinders — the downstream pair sit in the upstream wake and lock on. | shipped | — |
+| `flutter` | A flat plate pitching sinusoidally: dynamic stall, with the wake reversing every cycle. | shipped | — |
+| `shape_tour` | Swap the body every few seconds, streamlined to bluff, so the wake tells you the drag. | shipped | — |
+| `tri_foil` | Three symmetric sections stacked across a left-to-right tunnel, sweeping as a wave. | shipped | [1](frames/tri_foil_t035.jpg) [2](frames/tri_foil_t075.jpg) |
+| `tri_foil_fast` | The same choreography with the tunnel run twice as fast. | shipped | [1](frames/tri_foil_fast_t035.jpg) [2](frames/tri_foil_fast_t075.jpg) |
+| `tri_foil_rates` | Three identical sections in one tunnel, each sitting in a stream of a different speed, with a colour-bar legend. | shipped 15 s | [1](frames/tri_foil_rates_t015.jpg) [2](frames/tri_foil_rates_t045.jpg) [3](frames/tri_foil_rates_t080.jpg) |
+| `tri_foil_rates_fast` | The same clip at double the flow rate, 10 s. Colours are bit-identical; legend labels doubled. | shipped | [1](frames/tri_foil_rates_fast_t035.jpg) [2](frames/tri_foil_rates_fast_t075.jpg) |
+| `tri_foil_rates_loop` | Rebuilt as a seamless loop — frame 600 is frame 0, measurably. | shipped 10 s | [1](frames/tri_foil_rates_loop_t035.jpg) [2](frames/tri_foil_rates_loop_t075.jpg) |
+| `tri_foil_air` | The same clip with the fluid changed from a viscous liquid to air: chord Reynolds number up 10x, Mach DOWN not up, a finer lattice, and continuous freestream turbulence. | shipped 10 s | [1](frames/tri_foil_air_t035.jpg) [2](frames/tri_foil_air_t075.jpg) |
+| `tri_foil_air_fast` | Double the wind, bought with steps rather than Mach. Apparent wind exactly 2.000x. | shipped — the author's pick of the set | [1](frames/tri_foil_air_fast_t015.jpg) [2](frames/tri_foil_air_fast_t045.jpg) [3](frames/tri_foil_air_fast_t080.jpg) |
+| `tri_shapes` | The variable moved from the air to the BODY: one speed, three shapes. | shipped | [1](frames/tri_shapes_t035.jpg) [2](frames/tri_shapes_t075.jpg) |
+| `tri_shapes_live` | The same, with the cow alive: ears twitching, head lowered to graze. | shipped | [1](frames/tri_shapes_live_t035.jpg) [2](frames/tri_shapes_live_t075.jpg) |
+| `tri_foil_gas` | The air clip on the compressible solver at double the flow speed. | built and solver-validated, never rendered | — |
+| `mach_sweep` | One symmetric section in a tunnel throttled from fast subsonic to sonic. | shipped | [1](frames/mach_sweep_t035.jpg) [2](frames/mach_sweep_t075.jpg) |
+| `mach_rates` | Three flow rates, one section, throttled to sonic. | shipped | [1](frames/mach_rates_t035.jpg) [2](frames/mach_rates_t075.jpg) |
+| `mach_foils` | One flow rate, three sections, throttled to sonic. | shipped | [1](frames/mach_foils_t035.jpg) [2](frames/mach_foils_t075.jpg) |
+| `mach_shapes` | Foil / cow / foil taken to Mach 1. | shipped | [1](frames/mach_shapes_t035.jpg) [2](frames/mach_shapes_t075.jpg) |
+| `jet_engine` | A ducted engine in a DOWNWARD tunnel: idle, spool up over 6 s, cut, then run on. | shipped 10 s | [1](frames/jet_engine_t015.jpg) [2](frames/jet_engine_t045.jpg) [3](frames/jet_engine_t080.jpg) |
+| `falling_discs` | Discs dropped into a rising stream: they sink slowly, wobble, and shove each other's wakes. | shipped | [1](frames/falling_discs_t035.jpg) [2](frames/falling_discs_t075.jpg) |
+| `falling_squares` | The same drop with square plates — which, unlike discs, feel a torque and tumble. | shipped | [1](frames/falling_squares_t035.jpg) [2](frames/falling_squares_t075.jpg) |
+| `projectiles` | Dense pellets fired down into a fast rising stream, at angles. | shipped | [1](frames/projectiles_t035.jpg) [2](frames/projectiles_t075.jpg) |
+| `eddies` | Currents instead of a uniform stream, with light shapes set adrift in them. | shipped | [1](frames/eddies_t035.jpg) [2](frames/eddies_t075.jpg) |
+| `currents` | Complex curling non-straight currents in blue, with small spheres sinking through them. | shipped | [1](frames/currents_t035.jpg) [2](frames/currents_t075.jpg) |
+| `still_water` | Five spheres adrift on water that is nearly still — until something disturbs it. The blue-pool format. | shipped | [1](frames/still_water_t015.jpg) [2](frames/still_water_t045.jpg) [3](frames/still_water_t080.jpg) |
+| `black_holes` | Three spinning holes, each dragging a disc of water round itself, falling together over twenty seconds and fusing like droplets when they meet. | shipped | [1](frames/black_holes_t015.jpg) [2](frames/black_holes_t045.jpg) [3](frames/black_holes_t080.jpg) |
+| `black_holes_red` | The same clip in the red palette. | shipped | [1](frames/black_holes_red_t035.jpg) [2](frames/black_holes_red_t075.jpg) |
+| `object_test` | The blue-pool TEMPLATE and test bed: drop objects in and see what the flow does to them before committing them to a real clip. | template | — |
+| `orbit` | A vertically-stretched oval current turning about a central mass, with pellets injected into it. | CUT — the gravity fix was tested and does not work | — |
+| `surf_rates` | The three-rates clip with the fluid changed to water and the foils to surfboards. | shipped | [1](frames/surf_rates_t035.jpg) [2](frames/surf_rates_t075.jpg) |
+| `surf_sweep` | A surfboard planing on a steady wave face. | render interrupted | — |
+| `surf_wave` | The same board when the face starts curling — a wave peeling past, with a free-body diagram. | shipped | [1](frames/surf_wave_t035.jpg) [2](frames/surf_wave_t075.jpg) |
+
+
+## Parameters that matter
+
+The handful of numbers that decide whether a solve is stable, and the one relationship that breaks more solves than anything else.
+
+| parameter | lives in | what it controls | usable range |
+|---|---|---|---|
+| `u0` | RenderConfig | Under `lbm` this is a LATTICE VELOCITY. Under `cns` the identical field is a MACH NUMBER, because the solver is built with c_inf = 1. This is the single most dangerous trap in the project. | lbm: 0.02–0.10 · cns: 0.3–1.0 |
+| `steps` | RenderConfig | Solver steps per output frame at 60 fps, scaled by 60/fps with a fractional accumulator. Apparent speed = lattice speed x steps/frame. | 40–120. ALWAYS buy apparent speed here, never by raising u0. |
+| `re` | RenderConfig | Chord Reynolds number. Sets the relaxation time; low Re is thick and syrupy, high Re sheds finer structure and needs a finer lattice. | 450–900 for free-body scenes; 6000–20000 for air |
+| `scale` | RenderConfig | Lattice cells per screen pixel. `--preview` halves the frame size AND this, so the lattice — and therefore the physics — is identical to the final. | 0.25–1.0 |
+| `overscan` | RenderConfig | Pads the simulated domain beyond the visible frame on every side. Bodies enter and leave off-camera, an appearing body's pressure transient decays before it reaches the picture, and a sealed box's walls sit outside the shot. | 0.0–0.15; cost ~(1+2*overscan)^2 cells |
+| `flow` | RenderConfig / --flow | Which lattice axis becomes the screen's long one: `up` (wake gets the full height), `down` (subject at top, effect below), `right` (classic landscape tunnel). | All three are orientation-preserving on purpose — a naive 'x down, y right' would be a reflection and every vortex would spin the wrong way. |
+| `settle` | --settle | Seconds of flow run before frame 0, so the clip opens on an established field rather than a transient. | 0–4 s |
+| `wall_gap` | BodySystem | Stand-off distance for soft walls and contacts. | Never let any gap go sub-cell. A hard clamp steps a body's wall velocity in one tick and the boundary broadcasts it as a visible ripple across the frame. |
+| `speed_gain` | Streaks | Keys streakline brightness to local speed. | ~1.0 for still water — it is what makes the dashes appear only where the water actually moves |
+
+
+---
+
+*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this file.*

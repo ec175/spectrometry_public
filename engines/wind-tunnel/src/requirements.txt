@@ -1,0 +1,9 @@
+# Wind_Tunnel — manim-free 2D CFD (lattice-Boltzmann) video engine.
+# ffmpeg is an external binary (on PATH, or set WT_FFMPEG / OSC_FFMPEG, or drop bin\ffmpeg.exe).
+# Install into .venv (see setup.ps1) — NEVER global pip (root CLAUDE.md / global-python-numpy-pin).
+numpy>=2.0
+Pillow>=10.0
+scipy>=1.11
+# GPU is the DEFAULT for render work here (root CLAUDE.md). cupy-cuda12x[ctk] ships its own
+# CUDA 12 pieces so we never touch the system CUDA_PATH (pinned to v11.3 by the ML stack).
+cupy-cuda12x[ctk]>=13.0
