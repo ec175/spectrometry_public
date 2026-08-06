@@ -154,8 +154,11 @@ This shares its CRT core with the [oscilloscope engine](../oscilloscope/) — th
 buffer, the film filter, the config and the GPU backend are the same code. It carries its own copy
 so each engine stands alone; if you change one, change both.
 
-The format itself is a remake: the molecule geometries were transcribed one-to-one from the manim
-vertical-profile scenes in the [academia engine's manim subproject](../academia/manim/).
+The format itself is a remake. The original is [`drug_profiles/`](../../drug_profiles/) at the
+repository root — the manim `VerticalProfile` scene, which spins the molecule over its NMR
+spectra, cross-fades to FTIR, and then plays each vibration mode. These molecule geometries were
+transcribed one-to-one from that scene family. Render the manim original to see where the format
+came from; this engine is what it became once manim was dropped.
 
 ## What is not here
 

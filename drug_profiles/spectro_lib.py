@@ -3,9 +3,13 @@ spectro_lib.py — reusable object library + CANONICAL FORMAT for the spectrosco
 manim explainers. Import everything with `from spectro_lib import *`.
 
 This module is the single source of truth for the house style; the scene file
-(`spectro_scenes.py`) is just choreography on top of these objects. Importing this
+(`drug_profile.py`) is just choreography on top of these objects. Importing this
 module ALSO applies the canonical camera/background config (side effects below), so
 the same scene composes in both 16:9 and 9:16 just by changing `-r`.
+
+NB this library backs a wider set of spectroscopy scenes than the drug profiles
+published here, so it carries helpers the profiles never call (the STFT/heatmap
+machinery, the optics primitives). They are harmless; leave them or strip them.
 
 ================================ CANONICAL FORMAT ================================
 THEME / PALETTE (dark; shared with the finance + piano renders so they sit together)
@@ -29,8 +33,9 @@ AXES & MARKS (the look)
   No title/subtitle — explanation is carried by equations (MathTex) + compact inline
   labels (Text). Thick axis lines AXIS_W=9, deliberately small arrowheads
   TIP_LEN=TIP_W=0.11, tick thickness TICK_W=4, heatmap box frame FRAME_W=7, 3D axes
-  AXIS_W3D=4. All in GRID color. Axis numbers/labels use Text (Pango, no LaTeX);
-  only formulae use MathTex (needs MiKTeX — render_spectro.ps1 puts it on PATH).
+  AXIS_W3D=4. All in GRID color. Axis numbers/labels use Text (Pango, no LaTeX).
+  Some scenes elsewhere use MathTex for formulae, which needs a LaTeX install — the
+  drug profiles do NOT, so you can render them with no LaTeX on the machine.
 
 HEATMAPS
   Color via the inferno-like `_colormap` (6 anchor stops) with nearest-neighbor
@@ -47,9 +52,9 @@ DRAFT / QUALITY
   A single DRAFT flag gates sample counts (N_ENV/N_COMP/N_SPEC) and STFT window
   size; finals render at 30fps.
 
-RENDER / NAMING
-  ClassName -> ClassName_youtube.mp4 (16:9) / ClassName_short.mp4 (9:16), copied up
-  into Chemistry/<ClassName>/ (see render_spectro.ps1).
+RENDER
+  manim.cfg sets media_dir = ./renders, so output lands in
+  renders/videos/<file>/<height>p<fps>/<ClassName>.mp4. See GUIDE.md.
 =================================================================================
 """
 import numpy as np

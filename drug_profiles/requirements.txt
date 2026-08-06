@@ -1,0 +1,22 @@
+# Drug-profile renders — the whole dependency list.
+#
+# These are the versions the profiles in this repo were rendered with. manim moves
+# fast and its API does break between minor versions, so the pin is deliberate; if
+# you want a newer manim, expect to fix a few call sites.
+#
+#   python -m venv .venv
+#   .venv\Scripts\activate          # Windows
+#   source .venv/bin/activate       # macOS / Linux
+#   pip install -r requirements.txt
+
+manim==0.19.1
+
+# manim pulls numpy in itself, but the pin matters: this code is numpy 2.x. If you
+# install it into an environment already holding a numpy<2 scientific stack, that
+# stack breaks. Use a fresh virtual environment -- see GUIDE.md.
+numpy>=2.0,<3
+
+# Used by two helpers in spectro_lib.py (the STFT and the curve interpolator). The
+# drug-profile scenes themselves do not call them, so you can drop scipy if you are
+# only rendering profiles and never touch the spectrogram helpers.
+scipy>=1.11

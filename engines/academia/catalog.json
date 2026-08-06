@@ -80,9 +80,9 @@
       "what": "The only place that knows where measured data lives. Sample and measurement indices, queries by technique, and URL resolution."
     },
     {
-      "path": "manim/spectro_lib.py",
+      "path": "../../drug_profiles/spectro_lib.py",
       "kind": "subproject",
-      "what": "The manim spectroscopy library — the animated counterpart to all of the above. Axes, traces, molecule builders, peak callouts and the transitions between techniques. Its scene choreography is withheld like every other scenes module here."
+      "what": "The manim spectroscopy library — the animated counterpart to all of the above. Axes, traces, molecule builders, peak callouts and the transitions between techniques. Lives at the repository root beside a worked scene and its guide, not under this engine."
     }
   ],
   "objects": [
@@ -280,13 +280,13 @@
     },
     {
       "group": "manim subproject",
-      "intro": "An older, unrelated body of work kept here because it is the animated counterpart to the same chemistry — and because the CRT drug-profile format in the [drug-scope engine](../drug-scope/) was transcribed from its vertical-profile scenes. It needs manim and a LaTeX installation, neither of which anything else here does.",
+      "intro": "An older, unrelated body of work kept here because it is the animated counterpart to the same chemistry — and because the CRT drug-profile format in the [drug-scope engine](../drug-scope/) was transcribed from its vertical-profile scenes. The library itself ships at the repository root as `drug_profiles/`, with a worked scene and a guide; this directory holds the supporting data modules and build tools it does not carry. Needs manim, which nothing else here does.",
       "items": [
         {
           "name": "spectro_lib.py",
-          "signature": "from spectro_lib import *",
+          "signature": "drug_profiles/spectro_lib.py",
           "what": "The library: axes and trace builders, molecule construction, peak callouts, and the transitions between techniques. About 2,000 lines, and the part worth reading.",
-          "notes": "The scene choreography that sits on top of it is withheld, as everywhere else in this repository."
+          "notes": "Ships at the repository root with a worked scene, a guide, pinned requirements and a verified no-LaTeX render path — read that copy. The rest of the choreography is withheld, as everywhere else here."
         },
         {
           "name": "crystal_structures.py",

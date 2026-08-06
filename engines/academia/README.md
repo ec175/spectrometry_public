@@ -129,13 +129,28 @@ It is kept here because it is chemistry-adjacent and because it is the **origin 
 drug-profile format** in the [drug-scope engine](../drug-scope/) — those molecule geometries were
 transcribed one-to-one from its vertical-profile scenes.
 
-It shares no code with the figure pipeline above and has entirely different requirements:
-**manim** itself, plus a **LaTeX installation** for mathematical typesetting. Nothing else in this
-repository needs either.
+**The library itself lives at [`drug_profiles/spectro_lib.py`](../../drug_profiles/), not here** —
+about 2,000 lines of axes, trace builders, molecule construction, peak callouts and the
+transitions between techniques. That copy is the one to read: it ships with a worked scene, a
+guide, pinned requirements, and a verified no-LaTeX render path. This directory holds only what
+that one does not — the supporting data modules and build tools:
 
-`spectro_lib.py` is the part worth reading — about 2,000 lines of axes, trace builders, molecule
-construction, peak callouts and the transitions between techniques. The scene choreography that
-sits on top of it is withheld, as everywhere else here.
+| file | what |
+|---|---|
+| `crystal_structures.py` | crystal lattice geometry for the structure animations |
+| `morph_sequences.py` | which structure becomes which, and in what order |
+| `isoxazole_video_data.py` | geometry and line lists for the arylidene-isoxazolone series |
+| `build_montage.py`, `make_audio_bars.py`, `pick_color.py`, `calib.py` | build tools |
+| `render_scenes.py`, `render_mp4.py` | the render drivers |
+| `HORIZONTAL_FORMAT.md`, `ISOXAZOLE_MORPH_FORMAT.md` | the two format notes |
+
+This subproject shares no code with the figure pipeline above and has entirely different
+requirements — **manim** itself, and for some scenes a **LaTeX installation**. Nothing else in
+this repository needs either. (The drug profiles specifically do *not* need LaTeX; they use Pango
+text throughout.)
+
+The scene choreography is withheld, as everywhere else here — except for the one worked example in
+`drug_profiles/`.
 
 ⚠️ **Never run two manim renders that share a media directory concurrently.** They clobber each
 other's partial-movie and text-SVG caches and produce crashes and truncated output. Render

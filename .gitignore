@@ -1,3 +1,21 @@
+# --- manim output ---
+# manim.cfg sets media_dir = ./renders, so everything rendered lands there.
+renders/
+renders_*/
+media/
+*.mp4
+*.mov
+*.mkv
+
+# --- python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
 # --- secrets: never commit ---
 .env
 *.env
@@ -7,40 +25,23 @@
 *.pem
 *.key
 
-# --- generated workflow (may embed credential ids / tokens) ---
-**/batch-shorts.json
-**/_import.json
-
-# --- media / bulk ---
-# Rendered output never lands here. The reference frames under engines/*/frames/ do, and they
-# are the only images in the repository — hence the narrow allow below.
-*.mp4
-*.mov
-*.mkv
+# --- engine output ---
+# Nothing rendered is committed. The reference stills under engines/*/frames/ and
+# engines/academia/figures/ are the only images here, hence the narrow allows.
 *.wav
 *.mp3
 *.pdf
-incoming/
-local-files/
-renders/
 out/
-media/
 scratch/
 !engines/*/frames/*.jpg
+!engines/academia/figures/*.jpg
 
-# --- engine working dirs ---
 engines/*/src/out/
 engines/*/src/songs/
 engines/*/src/bin/
-
-# --- python / node ---
-.venv/
-venv/
-__pycache__/
-*.pyc
-node_modules/
 
 # --- os / editor ---
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/
