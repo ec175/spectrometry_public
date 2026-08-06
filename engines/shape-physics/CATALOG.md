@@ -1,0 +1,119 @@
+# Shape Physics — object catalogue
+
+> Rigid-body-lite simulation for 'satisfying shapes' clips — and audio the simulation triggers, rather than the other way round.
+
+Discs against analytic surfaces. Three primitives — a hollow ring with gaps, a thick capsule, and a peg — reduce to the same two resolvers, which is why they interact correctly with each other for free and why adding a shape is cheap. Everything runs in float scalars at a fixed physics rate independent of fps, in a world that is always the 1080x1920 reference frame whatever the output resolution is. The audio relationship is INVERTED against the rest of this repository: the simulation fires events and the events decide when the song plays.
+
+**Output.** 1080x1920 @60. World units are reference px and `RenderConfig.scale` maps them to output px, so any output resolution is a scale factor away. Landscape needs a different `cx`/`cy` and geometry, not different code.
+
+
+## Modules
+
+What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+
+| module | kind | what it gives you |
+|---|---|---|
+| `sim/world.py` | physics | The simulation. Primitives `Ring` / `Capsule` / `Peg`, plus `Ball` and `World.step`. Float math, no numpy in the inner loop — a 20 s clip is about a million substep-body iterations and a numpy scalar op costs roughly ten times a float multiply. |
+| `sim/build.py` | geometry | Structure builders — the assemblies you make out of the three primitives. A new STRUCTURE goes here; a new PRIMITIVE goes in world.py. |
+| `sim/audio.py` | audio | `Score` — the extend-not-retrigger scheduler — plus `decode_stereo`, `build_track` and `mux_track`. |
+| `sim/draw.py` | render | `Frame` (supersampled Pillow canvas, box downsample, two-scale additive bloom), `Style`, `draw_world`. Bloom runs on the DOWNSAMPLED frame: the glow is low-frequency, so it is visually identical and about four times cheaper. |
+| `sim/render.py` | render | `simulate()` (physics only, no drawing) and `render_scene()` (frames to ffmpeg, then build the track and mux it). |
+| `sim/config.py` | config | `RenderConfig` (resolution, fps, supersample, substeps, bloom), ffmpeg resolution, the NVENC probe with libx264 fallback. |
+
+
+## Primitives
+
+Everything in the format is built from these three. They all reduce to the same disc test and the same impulse resolver. Every obstacle carries `hp`/`hp0`/`alive`/`kind` even where it is meaningless — the resolver touches those fields on every contact, so a primitive that omits one raises on first touch rather than at import.
+
+| object | what it is | notes |
+|---|---|---|
+| `Ring(cx, cy, radius, h, gaps, omega=0.0)` | A hollow shell of thickness h with N gaps, optionally spinning. The escape-shell family. | Every gap edge is a real object: each carries a cap circle of radius h, collided against on every substep. Without it a ball clipping the edge slides through the shell wall, and a solid arc sweeping onto a half-escaped ball has nothing to shove it back with. |
+| `Capsule(x0, y0, x1, y1, h, *, pivot=None, omega=0.0, swing_amp=0.0, swing_freq=0.0, phase0=0.0, hp=0)` | A segment swept by a disc. Becomes polygons, funnels, chutes, spirals, paddles and gear teeth (with pivot+omega), pendulums (with swing), and destructible bricks (with hp). | A SLIDING capsule can pinch a ball and fire it out of frame — keep sway peak speed (amp*2pi*freq) modest, around 60 px/s, and contain the play area with side walls. |
+| `Peg(x, y, r, *, e=0.92, pivot=None, omega=0.0, ghost=False)` | A disc. Plinko pins, bumpers, hubs, attractors. With pivot+omega it orbits. | `e > 1` is a real energising solenoid — a ball leaves with more energy than it arrived with, which is what stops a decaying swarm going flat. `ghost=True` is drawn but collides with nothing: a gravity point, not an obstacle. |
+| `Ball(x, y, r, gen=0)` | A body. `gen` IS the tier index, and the renderer colours by it. | Holds x/y/vx/vy as floats, not a numpy array. Rewriting it 'cleanly' with arrays makes a 0.3 s simulation take about 15 s. |
+
+
+## Structure builders
+
+Assemblies. Each returns a list of primitives ready to hand to `World`.
+
+| object | what it is | notes |
+|---|---|---|
+| `polygon_shell(cx, cy, radius, n_sides, thickness=14.0, missing=(), rot=0.0, omega=0.0)` | A spinning polygon cage with chosen sides missing. | Read spin rates against the CLIP LENGTH, not against taste. A hexagon at omega=-0.55 sweeps its one missing side past the bottom of frame once every 11 s, so in a 15 s clip the ball simply sits and waits. |
+| `arc_bricks(cx, cy, radius, n, thickness=16.0, gap_deg=2.0, hp=1, span=TAU, aniso=1.0)` | A destructible brick ring. | A static brick ring is defeated instantly — the ball settles in one spot and chews a single hole. Rotate it and fresh bricks present to the same impact point: destroyed count went 11 to 33 in the same 15 s. |
+| `spokes(cx, cy, r_in, r_out, n, thickness=13.0, omega=0.0, rot=0.0)` | A radial paddle wheel or gear. |  |
+| `peg_grid(x0, x1, y0, dy, rows, cols, radius=11.0, stagger=True, e=0.92)` | The plinko pin field. | The busiest structure in the set at ~26 bounces/s. If the blips read as a buzz, raise `World.bounce_gap` rather than dropping the gain. |
+| `funnel(cx, y, half_gap, half_width, drop, thickness=13.0)` | A converging chute. |  |
+| `spiral(cx, cy, r_start, r_end, turns, n_seg, thickness=12.0, rot=0.0, omega=0.0)` | An Archimedes screw as a chute. | Only ONE sign conveys outward. Measured over 15 s: omega=-1.25 gave 16 escapes, omega=+1.25 gave ZERO — balls just stirred round the hub. A spiral that does not rotate at all is worse than either: every coil has a local low point and a ball parks in it. |
+| `walls(x0, x1, y0, y1, thickness=16.0, sides='lr')` | Containment. | Not optional for any scene with sliding geometry — see the Capsule note. |
+| `pendulum_row(y, n, x0, x1, length, thickness=13.0, amp=50*DEG, freq=0.35)` | A row of out-of-phase swinging bars. | Staggers each bar's swing FREQUENCY by ~8% rather than its phase, because `Capsule.phase0` biases the swing centre instead of delaying it — phase-offsetting would tilt the whole row. Incommensurate rates never re-align into a rigid comb. |
+
+
+## The tier ladder
+
+One size and colour ladder shared by every mechanic that makes a ball smaller: white -> blue -> red -> purple -> green -> yellow, each `tier_shrink` times the last. A composition names its tiers just by ordering the palette. Three mechanics walk it and they compose.
+
+| object | what it is | notes |
+|---|---|---|
+| `zones=[{x, y, r, mult}]` | A ball entering an Nx zone is consumed and returns as N balls one tier down. | N children at `tier_shrink` radius carry N*shrink^2 of the parent's area — 3 x 0.72^2 = 1.56, so it grows slowly per generation. |
+| `scatter_chance, scatter_into` | A ball-ball impact may fragment the PAIR into `scatter_into` balls one tier down. | Read the chance against the PAIR-HIT count, not intuition: pair hits are far rarer than bounces (62 of 179 in one 15 s clip), so 0.10 produced literally zero scatters where 0.35 gives about nine. |
+| `recombine_chance` | Two of the SMALLEST tier may fuse into one of the tier above. | Restricted to the smallest tier on purpose — that is what makes the ladder a CYCLE rather than a one-way slide to dust. Radius on a fuse goes as sqrt(ra^2 + rb^2), so area is conserved. |
+| `decay_after, decay_rate, decay_tier` | A ball that has lived long enough climbs back UP a tier, in place — it visibly grows and recolours instead of teleporting. | Closes the ladder. With scatter going down and recombine going up only at the smallest tier, decay is what lets a clip run long without settling into one colour. |
+| `split_min_r` | A ball splits in two only while its children would still be big enough to matter; below that an exit is replaced one-for-one. | This, not `max_balls`, is what bounds the population. Splitting 1->2 on every exit is exponential in escape cycles, and shrinking the children makes it WORSE — a smaller ball clears a gap more easily, so it escapes sooner. Raising the cap silently drops most of the spawns instead of fixing anything. |
+
+
+## Simulation-triggered audio
+
+The inverted relationship, and the whole point of the project.
+
+| object | what it is | notes |
+|---|---|---|
+| `Score(slice_len=0.5)` | Each event plays the NEXT `slice` seconds of the song. An event arriving while a segment is already sounding EXTENDS that segment by another slice — it does not retrigger it. | Retriggering is what videos of this kind normally do, and two events a few frames apart then stack two copies of the sample or hard-cut back to its start. Extending means an extended segment is ONE continuous read of the song: no overlap, and no abrupt stop while events keep arriving. `Score` is causal, so one object serves both the on-screen pulse and the final track. |
+| `build_track(score, ...)` | Pastes the resolved segments onto a silent bed with an 8 ms fade at each edge. | The fade is INSIDE the segment, so an extended segment stays continuous. Without it the cut lands mid-waveform and clicks. |
+| `sensor_r / zones / bottom_triggers / hp` | What counts as the headline event is a per-composition choice: clearing a radius, entering a zone, destroying a capsule, or reaching the floor. | `sensor_r` is a RADIAL test, so a polygon or brick shell gets the same event a Ring does. A ball is re-armed for a zone once it has left every zone, so a second visit sounds again. |
+
+
+## Compositions
+
+Twelve compositions, and the interesting axis across them is what counts as the headline EVENT — a different design decision in each, not a reskin. Measured counts are for 15 s at the shipped settings.
+
+| composition | what it does | status | frames |
+|---|---|---|---|
+| `escape_rings` | Two counter-rotating shells with gaps; a ball works its way out through both, fires the trigger, falls out of frame, and is replaced by two smaller ones. Counter-rotation is a choice, not decoration — same-direction shells phase-lock and the escaping ball meets the outer gap at nearly the same place every lap. | 45 s preview shipped; awaiting a full-res final | [1](frames/escape_rings_t006.jpg) [2](frames/escape_rings_t030.jpg) [3](frames/escape_rings_t060.jpg) [4](frames/escape_rings_t088.jpg) |
+| `orbit_swarm` | The most developed composition — eleven revisions. A central pull, a destructible shell, and spheres on three rotationally staggered elliptical tracks that separate into distinct orbital PLANES once the shell is gone. Whether two spheres interact depends on their HEADINGS, not on contact. | shipped 30 s at full res | [1](frames/orbit_swarm_t010.jpg) [2](frames/orbit_swarm_t035.jpg) [3](frames/orbit_swarm_t060.jpg) [4](frames/orbit_swarm_t085.jpg) |
+| `orbit_swarm (v9)` | The previous cut, kept for comparison — before per-tier counter-rotation was added. | archived | [1](frames/orbit_swarm_v9_anglerule_t055.jpg) |
+| `plinko` | Pin field plus 1x/2x/3x/2x/1x multiplier pits. The jackpot sits dead centre, exactly where the Galton distribution piles up, so the cascade builds by design rather than by luck. 32 events / 595 bounces. | shipped preview | [1](frames/plinko_t035.jpg) [2](frames/plinko_t075.jpg) |
+| `bumper_pit` | Energising bumpers at e = 1.12 over 1x/3x/1x pits. The busiest in the set: 70 events / 381 bounces. | shipped preview | [1](frames/bumper_pit_t035.jpg) [2](frames/bumper_pit_t075.jpg) |
+| `funnel_cascade` | Three sliding funnels over multiplier pits. A pit row meant to catch everything must TILE — with radii below half the pit spacing it caught 3 of 34 balls. 28 events / 329 bounces. | shipped preview | [1](frames/funnel_cascade_t035.jpg) [2](frames/funnel_cascade_t075.jpg) |
+| `breakout_shell` | Two counter-rotating destructible brick shells. The fewest bounces per second in the set, because the ball spends its time in free fall between bricks — and the most earned event. 38 events / 70 bounces / 33 bricks destroyed. | shipped preview | [1](frames/breakout_shell_t035.jpg) [2](frames/breakout_shell_t075.jpg) |
+| `hex_nest` | Three nested spinning polygon cages with sides missing; the event is clearing the outermost. 7 events / 149 bounces. | shipped preview | [1](frames/hex_nest_t035.jpg) [2](frames/hex_nest_t075.jpg) |
+| `gear_cage` | An octagon cage with a counter-rotating six-tooth gear; the ball is squeezed out along a gap. 17 events / 174 bounces. | shipped preview | [1](frames/gear_cage_t035.jpg) [2](frames/gear_cage_t075.jpg) |
+| `spiral_drop` | One rotating spiral chute; the event is clearing the last coil. 24 events / 182 bounces. | shipped preview | [1](frames/spiral_drop_t035.jpg) [2](frames/spiral_drop_t075.jpg) |
+| `paddle_wheel` | A bowl with a four-blade wheel; the event is being thrown out through a rim gap. The quietest in the set at 5 events / 55 bounces — the wheel throwing balls is the appeal rather than the escape rate. | shipped preview | [1](frames/paddle_wheel_t035.jpg) [2](frames/paddle_wheel_t075.jpg) |
+| `pendulum_rows` | Three rows of out-of-phase swinging bars; the event is reaching the floor. 33 events / 185 bounces. | shipped preview | [1](frames/pendulum_rows_t035.jpg) [2](frames/pendulum_rows_t075.jpg) |
+| `drum_tower` | Five gapped cages stacked rather than nested. | CUT — cages small enough that balls bypass them | — |
+
+
+## Parameters that matter
+
+The knobs that decide whether a clip is eventful, and the geometry rules that are not negotiable.
+
+| parameter | lives in | what it controls | usable range |
+|---|---|---|---|
+| `substeps_per_sec` | RenderConfig | Physics rate, independent of fps. This is why a 540x960 @30 preview and a 1080x1920 @60 final are the same simulation, sampled differently. | 900 default |
+| `mu` | World | Surface friction — the engine's liveliness knob. Bounces resolve in the WALL's frame, so a spinning shell FLINGS a ball rather than merely stopping it. | With mu = 0, or with the reflection done in the world frame, balls rattle to the bottom and sit there waiting for a gap. |
+| `gap width` | Ring / polygon_shell | Angular opening. | A gap must clear the BALL, not a point: a ball of radius r at shell radius R needs 2*asin(r/R) of arc just to fit through. 32 deg at R=210 against the 14 deg a 26 px ball needs is comfortable without being a doorway. |
+| `omega` | any spinning primitive | Rotation rate. | Set it so an opening passes the low point SEVERAL times per clip, not once. This alone rescued two compositions from near-zero event counts. |
+| `split_min_r` | World | The population bound. | Measured sweep at 45 s: 16.0 gave 15 triggers and 17% music; 12.0 gave 46 and 51%; 9.5 gave 71 and 79%. |
+| `max_balls` | World | Hard cap on live bodies. | NOT a population fix — raising it makes the runaway worse, and either way it silently drops most of the spawns. Use it as a ceiling, not a control. |
+| `g_size_exp` | World | Scales the central pull by (r/r0)^exp, so a smaller ball is held less tightly and tears around while big ones sit in slow close orbits. | 0.85 typical. If you use it, the swirl drive must target the speed for the pull that ball ACTUALLY FEELS, or small bodies are massively over-driven. |
+| `swirl_a / drag` | World | A tangential drive toward the local circular speed, and the damping that balances it. | Both matter together. Un-damped, every sphere migrates out to ride the rim; over-damped, the shell never breaks. 500 against 0.25 spread radii 76–487. |
+| `aniso` | World | Stretches the whole radial FIELD — central pull, guide tracks, swirl drive — so orbits fill a 9:16 frame. | 1.78 (the frame's own aspect). Stretch the field, not just the tracks: the central pull is what actually shapes an orbit and would drag it back to round. |
+| `plane_z / plane_ramp` | World | Per-tier depth offsets. A pair collides only when d_2d^2 < (ra+rb)^2 - dz^2, so the effective contact radius shrinks as depth grows and reaches zero at dz = ra+rb. | Plane gaps must exceed each PAIR's radius sum. Nothing is faked — the pass-through emerges from the geometry, which is what makes it rampable. |
+| `align_exp` | World | The angle rule: p = ((cos(angle between velocities) + 1)/2)^align_exp. Head-on never interacts; rear-end always fragments. | The roll must happen ONCE PER CONTACT EPISODE, not per substep — re-rolling each step turns any per-step chance into a near-certainty (32,525 interactions in one clip before this was guarded). |
+| `slice_len` | Score | Seconds of song per event. | 0.5 s default |
+
+
+---
+
+*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this file.*
