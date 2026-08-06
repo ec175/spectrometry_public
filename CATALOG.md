@@ -1,0 +1,182 @@
+# Catalogue index
+
+Every object in this repository, grouped by the engine that makes it. Each engine's own `CATALOG.md` carries the parameters, ranges and the notes on what breaks if you change them.
+
+
+## Engines
+
+| engine | what it makes | catalogue |
+|---|---|---|
+| [Wind Tunnel](engines/wind-tunnel/) | A real 2-D fluid solver driving a colour-field animation — nothing on screen is keyframed. | 37 objects, 35 compositions, 59 frames |
+| [Field Lines](engines/field-lines/) | Field lines and streamlines of a closed-form vector field, integrated in arclength. | 17 objects, 5 compositions, 15 frames |
+| [Lattice Grid](engines/lattice-grid/) | A fixed lattice of nodes and connectors whose content re-rolls on the beat, lit by a moving field. | 18 objects, 8 compositions, 16 frames |
+| [Shape Physics](engines/shape-physics/) | Rigid-body-lite simulation for 'satisfying shapes' clips — and audio the simulation triggers, rather than the other way round. | 20 objects, 13 compositions, 27 frames |
+| [Attractors](engines/attractors/) | Tens of thousands of particles integrated through a strange-attractor flow at once — the picture is where they crowd. | 18 objects, 5 compositions, 14 frames |
+| [Oscilloscope](engines/oscilloscope/) | A simulated CRT screen — a phosphor persistence buffer, a film-off-a-real-screen filter, and a glitch layer. | 17 objects, 17 compositions, 57 frames |
+| [Drug Scope](engines/drug-scope/) | Twenty-nine molecules, each with an FTIR and a Raman spectrum, drawn as a CRT oscilloscope screen. | 39 objects, 58 frames |
+| [Academia](engines/academia/) | The figure code behind the PDF deliverables — stacked simulated spectra for whole compound classes, with structures drawn alongside. | 27 objects, 90 frames |
+
+
+## Wind Tunnel
+
+[README](engines/wind-tunnel/README.md) · [catalogue](engines/wind-tunnel/CATALOG.md) · [frames](engines/wind-tunnel/frames/) · [source](engines/wind-tunnel/src/)
+
+
+**Shape generators** — `naca4`, `circle`, `square`, `plate`, `wedge`, `wedge_rev`, `ellipse`, `teardrop`, `turbofan`, `surfboard`, `board_texture`, `cow`, `metaball`, `image_body`, `place`, `rasterize`
+
+
+**Free-body physics** — `FreeBody`, `BodySystem`, `density_for_fall`, `droplet`, `set_profile`, `spin`
+
+
+**Fluid forcing** — `set_inlet`, `set_farfield`, `set_drive`, `set_wall_velocity`, `set_inlet_turbulence`, `force_field`, `init_velocity`, `health`
+
+
+**Colour maps** — `jet`, `turbo`, `ice`, `inferno`, `vort`, `blues`, `reds`
+
+
+**Compositions** — `aoa_sweep`, `aoa_sweep_fast`, `stall`, `vortex_street`, `tandem`, `flutter`, `shape_tour`, `tri_foil`, `tri_foil_fast`, `tri_foil_rates`, `tri_foil_rates_fast`, `tri_foil_rates_loop`, `tri_foil_air`, `tri_foil_air_fast`, `tri_shapes`, `tri_shapes_live`, `tri_foil_gas`, `mach_sweep`, `mach_rates`, `mach_foils`, `mach_shapes`, `jet_engine`, `falling_discs`, `falling_squares`, `projectiles`, `eddies`, `currents`, `still_water`, `black_holes`, `black_holes_red`, `object_test`, `orbit`, `surf_rates`, `surf_sweep`, `surf_wave`
+
+
+## Field Lines
+
+[README](engines/field-lines/README.md) · [catalogue](engines/field-lines/CATALOG.md) · [frames](engines/field-lines/frames/) · [source](engines/field-lines/src/)
+
+
+**Field kernels** — `coulomb`, `ChargeSet`, `PotentialFlow`, `wires`
+
+
+**The integrator** — `trace`, `END codes`, `seed_ring`, `seed_rake`, `fade_order`
+
+
+**Animation** — `PulseTrain`, `WanderPath`, `NBody`, `keyframes`, `pulse_gate`
+
+
+**Palettes** — `palette_alternate`, `palette_angle`, `palette_fate`
+
+
+**Compositions** — `dipole_flower`, `rosette_waltz`, `pair_dance`, `charge_wave`, `stream_glass`
+
+
+## Lattice Grid
+
+[README](engines/lattice-grid/README.md) · [catalogue](engines/lattice-grid/CATALOG.md) · [frames](engines/lattice-grid/frames/) · [source](engines/lattice-grid/src/)
+
+
+**Lattice geometries** — `SquareLattice`, `HexLattice (honeycomb)`, `HexLattice (triangular)`
+
+
+**Glyphs and content** — `glyph stamps`, `walks`, `boxes`, `blend`, `network chains`
+
+
+**Fields** — `Illumination`, `Twinkle`, `Palette`, `envelope`, `ChannelDelay`
+
+
+**The eye composition** — `eye.lit / conn / layer`, `saccades`, `blinks`, `holofoil`, `panel transmission`
+
+
+**Compositions** — `circuit_square`, `circuit_hex`, `circuit_tri`, `eye_foil`, `eye_foil_deep`, `eye_foil_wide`, `eye_foil_dense`, `eye_foil_sparse`
+
+
+## Shape Physics
+
+[README](engines/shape-physics/README.md) · [catalogue](engines/shape-physics/CATALOG.md) · [frames](engines/shape-physics/frames/) · [source](engines/shape-physics/src/)
+
+
+**Primitives** — `Ring`, `Capsule`, `Peg`, `Ball`
+
+
+**Structure builders** — `polygon_shell`, `arc_bricks`, `spokes`, `peg_grid`, `funnel`, `spiral`, `walls`, `pendulum_row`
+
+
+**The tier ladder** — `multiplier pit`, `scatter`, `recombine`, `decay`, `split_min_r`
+
+
+**Simulation-triggered audio** — `Score`, `build_track`, `trigger schemes`
+
+
+**Compositions** — `escape_rings`, `orbit_swarm`, `orbit_swarm (v9)`, `plinko`, `bumper_pit`, `funnel_cascade`, `breakout_shell`, `hex_nest`, `gear_cage`, `spiral_drop`, `paddle_wheel`, `pendulum_rows`, `drum_tower`
+
+
+## Attractors
+
+[README](engines/attractors/README.md) · [catalogue](engines/attractors/CATALOG.md) · [frames](engines/attractors/frames/) · [source](engines/attractors/src/)
+
+
+**Flows** — `lorenz`, `rossler`, `aizawa`, `halvorsen`, `thomas`, `chen`
+
+
+**Swarm** — `Swarm`, `Swarm.step`, `Swarm.respawn`, `project`, `rk4`
+
+
+**Colour ramps** — `ember`, `ice`, `flare`, `aurora`, `spectrum`, `ramp`
+
+
+**Canvas** — `Canvas`
+
+
+**Compositions** — `lorenz_swarm`, `lorenz_ribbon`, `lorenz_divergence`, `lorenz_capture`, `attractor_tour`
+
+
+## Oscilloscope
+
+[README](engines/oscilloscope/README.md) · [catalogue](engines/oscilloscope/CATALOG.md) · [frames](engines/oscilloscope/frames/) · [source](engines/oscilloscope/src/)
+
+
+**The CRT core** — `Scope`, `beam`, `beam_transient`, `head`, `graticule states`
+
+
+**The film filter** — `FilmLook`, `film_config_for_phosphor`, `ambilight`, `bevel`, `barrel_k`, `GlitchFX`
+
+
+**The ASCII front end** — `AsciiVideo`, `subject_pan`, `neutral phosphor for ASCII`
+
+
+**Audio analysis** — `decode_mono / decode_stereo`, `band magnitudes`, `mux_audio`
+
+
+**Compositions** — `look/dimensional`, `look/dimensional2d`, `look/dimensional2d_67`, `look/loop_gears`, `look/loop_weave`, `look/loop_braid`, `stack/spectral_stack`, `circle_format`, `ascii/hers_ascii`, `test/filmtest`, `test/radial_sound`, `test/spectral_falls`, `test/wind_up`, `test/orbit_trace`, `test/lissajous_tour`, `test/pulse_to_shape`, `test/fourier_epicycles`
+
+
+## Drug Scope
+
+[README](engines/drug-scope/README.md) · [catalogue](engines/drug-scope/CATALOG.md) · [frames](engines/drug-scope/frames/) · [source](engines/drug-scope/src/)
+
+
+**Format machinery** — `DrugScope`, `power-on intro`, `method handover`, `line playhead`, `symbol knockout`, `text flare`, `billboard rock`, `multi-axis tumble`, `principal-plane orientation`, `IR-to-Raman reweighting`
+
+
+**Molecules — Original set** — `Proline`, `Ibuprofen`, `Baclofen`, `Indigo`, `MethyleneBlue`, `Sertraline`, `Morphine`, `Omeprazole`
+
+
+**Molecules — Neurotransmitters, hormones and opioids** — `Dopamine`, `Serotonin`, `Adrenaline`, `Estradiol`, `Testosterone`, `Oxycodone`, `Glutathione`, `Mitragynine`
+
+
+**Molecules — Eicosanoids (arachidonic-acid cascade)** — `ProstaglandinE2`, `ThromboxaneA2`, `LeukotrieneB4`, `ThromboxaneB2`
+
+
+**Molecules — Cannabinoids and alkaloids** — `THC`, `CBD`, `THCA`, `Cocaine`, `Nicotine`
+
+
+**Molecules — Controlled substances** — `MDMA`, `Fentanyl`, `Methamphetamine`, `Alprazolam`
+
+
+## Academia
+
+[README](engines/academia/README.md) · [catalogue](engines/academia/CATALOG.md) · [frames](engines/academia/figures/) · [source](engines/academia/src/)
+
+
+**Figure scripts — the deliverables** — `amino_acid_sim_test.py`, `amino_acid_crystal_vs_amorphous_test.py`, `cannabinoid_sim_test.py`, `extra_classes_sim_test.py`, `bcs_sim_test.py`, `examples.py`, `example_overlay.py`
+
+
+**The figure engine** — `stack_plot`, `stack_overlay`, `broaden`, `simulate`, `overlay`, `predict.ir / raman / uv / c13`
+
+
+**Compound classes** — `AMINO_SMILES`, `CANNABINOID_SMILES`, `LIPID_SMILES`, `NEUROTRANSMITTER_SMILES`, `PEPTIDE_SMILES`, `STEROID_SMILES`, `DRUGS`
+
+
+**manim subproject** — `spectro_lib.py`, `crystal_structures.py`, `morph_sequences.py`, `isoxazole_video_data.py`, `build_montage.py`, `make_audio_bars.py`, `render_scenes.py / render_mp4.py`
+
+
+---
+
+*Generated by `tools/build_catalogs.py`.*
