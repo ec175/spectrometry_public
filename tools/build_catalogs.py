@@ -1,0 +1,172 @@
+"""Generate every CATALOG.md from the catalog.json files.
+
+`engines/<name>/catalog.json` is the source of truth; the Markdown beside it and the root
+CATALOG.md index are both derived. Edit the JSON and re-run:
+
+    python tools/build_catalogs.py
+
+Same arrangement the upstream library uses for its skill index, and for the same reason: two
+hand-maintained copies of a list drift apart within about a week.
+"""
+from __future__ import annotations
+
+import json
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+ENG = os.path.join(ROOT, "engines")
+
+ORDER = ["wind-tunnel", "field-lines", "lattice-grid", "shape-physics",
+         "attractors", "oscilloscope", "drug-scope", "academia"]
+
+
+def md_escape(s):
+    return str(s).replace("|", "\\|")
+
+
+def table(headers, rows):
+    if not rows:
+        return ""
+    out = ["| " + " | ".join(headers) + " |",
+           "|" + "|".join(["---"] * len(headers)) + "|"]
+    for r in rows:
+        out.append("| " + " | ".join(md_escape(c) for c in r) + " |")
+    return "\n".join(out) + "\n"
+
+
+def frames_dir(cat):
+    """Most engines call their stills `frames/`; academia's are figure previews."""
+    return cat.get("frames_dir", "frames")
+
+
+def build_engine(cat, engine_dir):
+    fdir = frames_dir(cat)
+    L = []
+    a = L.append
+    a(f"# {cat['title']} — object catalogue\n")
+    a(f"> {cat['tagline']}\n")
+    a(f"{cat['method']}\n")
+
+    if cat.get("output"):
+        o = cat["output"]
+        a("**Output.** " + o["native"] + ". " + o.get("note", "") + "\n")
+
+    # ---- modules
+    a("\n## Modules\n")
+    a("What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not "
+      "part of this repository — see the engine README.\n")
+    a(table(["module", "kind", "what it gives you"],
+            [(f"`{m['path']}`", m["kind"], m["what"]) for m in cat.get("modules", [])]))
+
+    # ---- objects
+    for group in cat.get("objects", []):
+        a(f"\n## {group['group']}\n")
+        if group.get("intro"):
+            a(group["intro"] + "\n")
+        has_frames = any(it.get("frames") for it in group["items"])
+        rows = []
+        for it in group["items"]:
+            # some entries describe a behaviour rather than a callable and carry no signature
+            s = it.get("signature")
+            sig = f"`{s}`" if s and s != "—" else f"**{it['name']}**"
+            row = [sig, it["what"], it.get("notes", "")]
+            if has_frames:
+                imgs = " ".join(f"[{i+1}]({fdir}/{f})"
+                                for i, f in enumerate(it.get("frames", [])))
+                row.append(imgs or "—")
+            rows.append(tuple(row))
+        headers = ["object", "what it is", "notes"] + (["frames"] if has_frames else [])
+        a(table(headers, rows))
+
+    # ---- scenes
+    if cat.get("scenes"):
+        a("\n## Compositions\n")
+        a(cat.get("scenes_intro", "") + "\n")
+        rows = []
+        for s in cat["scenes"]:
+            imgs = " ".join(f"[{i+1}]({fdir}/{f})" for i, f in enumerate(s.get("frames", [])))
+            rows.append((f"`{s['name']}`", s["what"], s.get("status", ""), imgs or "—"))
+        a(table(["composition", "what it does", "status", "frames"], rows))
+
+    # ---- parameters
+    if cat.get("parameters"):
+        a("\n## Parameters that matter\n")
+        a(cat.get("parameters_intro", "") + "\n")
+        rows = [(f"`{p['name']}`", p.get("where", ""), p["meaning"], p.get("range", ""))
+                for p in cat["parameters"]]
+        a(table(["parameter", "lives in", "what it controls", "usable range"], rows))
+
+    a("\n---\n")
+    a("*Generated from `catalog.json` by `tools/build_catalogs.py` — edit the JSON, not this "
+      "file.*\n")
+
+    with open(os.path.join(engine_dir, "CATALOG.md"), "w", encoding="utf-8",
+              newline="\n") as fh:
+        fh.write("\n".join(L))
+
+
+def build_root(cats):
+    L = []
+    a = L.append
+    a("# Catalogue index\n")
+    a("Every object in this repository, grouped by the engine that makes it. Each engine's own "
+      "`CATALOG.md` carries the parameters, ranges and the notes on what breaks if you change "
+      "them.\n")
+
+    a("\n## Engines\n")
+    rows = []
+    for c in cats:
+        counts = []
+        n_obj = sum(len(g["items"]) for g in c.get("objects", []))
+        if n_obj:
+            counts.append(f"{n_obj} objects")
+        if c.get("scenes"):
+            counts.append(f"{len(c['scenes'])} compositions")
+        fd = os.path.join(ENG, c["engine"], frames_dir(c))
+        n_frames = len(os.listdir(fd)) if os.path.isdir(fd) else 0
+        if n_frames:
+            counts.append(f"{n_frames} frames")
+        rows.append((f"[{c['title']}](engines/{c['engine']}/)", c["tagline"], ", ".join(counts)))
+    a(table(["engine", "what it makes", "catalogue"], rows))
+
+    for c in cats:
+        a(f"\n## {c['title']}\n")
+        a(f"[README](engines/{c['engine']}/README.md) · "
+          f"[catalogue](engines/{c['engine']}/CATALOG.md) · "
+          f"[frames](engines/{c['engine']}/{frames_dir(c)}/) · "
+          f"[source](engines/{c['engine']}/src/)\n")
+        for group in c.get("objects", []):
+            names = ", ".join(f"`{i['name']}`" for i in group["items"])
+            a(f"\n**{group['group']}** — {names}\n")
+        if c.get("scenes"):
+            names = ", ".join(f"`{s['name']}`" for s in c["scenes"])
+            a(f"\n**Compositions** — {names}\n")
+
+    a("\n---\n")
+    a("*Generated by `tools/build_catalogs.py`.*\n")
+
+    with open(os.path.join(ROOT, "CATALOG.md"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(L))
+
+
+def main():
+    cats = []
+    for name in ORDER:
+        d = os.path.join(ENG, name)
+        p = os.path.join(d, "catalog.json")
+        if not os.path.isfile(p):
+            print(f"  !! no catalog.json for {name}")
+            continue
+        with open(p, encoding="utf-8") as fh:
+            cat = json.load(fh)
+        build_engine(cat, d)
+        cats.append(cat)
+        n_obj = sum(len(g["items"]) for g in cat.get("objects", []))
+        print(f"  {name:14s} {n_obj:3d} objects  {len(cat.get('scenes', [])):3d} compositions")
+    build_root(cats)
+    print(f"\nwrote {len(cats)} engine catalogues + root index")
+
+
+if __name__ == "__main__":
+    main()

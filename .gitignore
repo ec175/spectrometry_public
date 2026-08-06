@@ -12,12 +12,26 @@
 **/_import.json
 
 # --- media / bulk ---
+# Rendered output never lands here. The reference frames under engines/*/frames/ do, and they
+# are the only images in the repository — hence the narrow allow below.
 *.mp4
 *.mov
 *.mkv
+*.wav
+*.mp3
+*.pdf
 incoming/
 local-files/
 renders/
+out/
+media/
+scratch/
+!engines/*/frames/*.jpg
+
+# --- engine working dirs ---
+engines/*/src/out/
+engines/*/src/songs/
+engines/*/src/bin/
 
 # --- python / node ---
 .venv/
