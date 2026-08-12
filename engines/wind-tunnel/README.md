@@ -42,7 +42,34 @@ value of the project, and it is what makes the output trustworthy as well as goo
 
 That last row is the single most dangerous thing in the project. The same field name means two
 different physical quantities depending on which solver is selected, and a value that is a
-comfortable lattice speed is a catastrophic Mach number.
+comfortable lattice speed is a catastrophic Mach number. The lattice sound speed is
+$c_s = 1/\sqrt{3}$, so the two readings differ by exactly that factor:
+
+$$
+\texttt{lbm.py:}\quad \mathrm{Ma}=\frac{u_0}{c_s}=u_0\sqrt{3}
+\qquad\qquad
+\texttt{cns.py:}\quad u_0 \equiv \mathrm{Ma}
+$$
+
+### The lattice-Boltzmann step
+
+One collision-and-streaming update, over the nine discrete velocities $\mathbf{c}_i$:
+
+$$
+f_i\!\left(\mathbf{x}+\mathbf{c}_i\,\Delta t,\; t+\Delta t\right)\;=\;f_i(\mathbf{x},t)\;-\;\frac{\Delta t}{\tau}\Big[\,f_i(\mathbf{x},t)-f_i^{\mathrm{eq}}(\rho,\mathbf{u})\,\Big]
+$$
+
+The relaxation time carries the viscosity, $\tau=\tfrac{1}{2}+3\nu$ with $\nu=u_0L/\mathrm{Re}$,
+and the Smagorinsky closure raises $\tau$ locally where the strain rate is high. **$\tau=\tfrac12$
+is a hard floor**, and that is what ties Reynolds number to resolution: ask for a higher
+$\mathrm{Re}$ on the same lattice and $\tau$ walks toward the wall until there is no margin left.
+Raise `re` and `scale` together, or not at all.
+
+Apparent on-screen speed is a product of two dials,
+
+$$v_{\text{apparent}} \;=\; u_0 \times \texttt{steps per frame}$$
+
+and only the first one is bounded. Buy speed with `steps`.
 
 Neither solver meshes anything. A body is a boolean mask re-rasterised from polygons every step,
 which is why a body can move, rotate or change shape with nothing downstream noticing.

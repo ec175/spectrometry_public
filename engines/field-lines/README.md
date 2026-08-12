@@ -28,10 +28,22 @@ material, a declared forcing, and how many lines are lit — all things a real r
 
 ### The step is in ARCLENGTH, and it is constant
 
-`dp/ds = E/|E|`. Normalising costs one divide and buys two things:
+Every seed advances by dividing out the field's own magnitude, so the integrator walks the
+direction field at unit speed:
+
+$$
+\frac{d\mathbf{p}}{ds}\;=\;\frac{\mathbf{E}(\mathbf{p})}{\lVert\mathbf{E}(\mathbf{p})\rVert}
+\qquad\Longrightarrow\qquad
+\left\lVert \frac{d\mathbf{p}}{ds} \right\rVert = 1
+$$
+
+Normalising costs one divide and buys two things:
 
 - drawn line density is uniform instead of piling up wherever the field is weak;
-- **a packet advected at speed *v* is the array index `round(v·t/ds)`.**
+- **every vertex is exactly $\Delta s$ from the last**, so a packet advected at speed $v$ stops
+  being an integration at all and becomes an array index,
+
+$$k \;=\; \operatorname{round}\!\left(\frac{v\,t}{\Delta s}\right)$$
 
 That second point is why `pulses.py` is a hundred lines with no integration in it. Do not
 "improve" it by integrating markers separately — they desynchronise from the line under them

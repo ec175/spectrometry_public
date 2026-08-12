@@ -3,56 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spectrometry Shorts</title>
+<title>Spectrometry Shorts — chemical profiles and the engines behind them</title>
+<meta name="description" content="Chemical profile videos built in manim, and eight standalone
+      rendering engines: two fluid solvers, field-line integrators, rigid-body physics, particle
+      swarms, a simulated CRT, and publication figure code.">
+<link rel="canonical" href="https://ec175.github.io/spectrometry_public/">
+
+<!-- Open Graph / Twitter: this is what renders when the link is pasted into a chat, a DM or a
+     job application. Without it a shared link shows a bare URL. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spectrometry Shorts">
+<meta property="og:description" content="Chemical profiles in manim, plus eight standalone
+      rendering engines — fluid dynamics, field lines, rigid bodies, attractors, a simulated CRT
+      and publication figures.">
+<meta property="og:url" content="https://ec175.github.io/spectrometry_public/">
+<meta name="twitter:card" content="summary">
+
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:740px;
-       margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a;background:#fafafa}
-  h1{font-size:1.6rem;margin-bottom:.2rem} a{color:#0a58ca}
-  h2{font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:#666;
-     margin:32px 0 8px}
-  .card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;
-        padding:20px 24px;margin:16px 0}
-  .card p{margin:.4rem 0 0;color:#555;font-size:.95rem}
-  code{background:#eef0f2;padding:2px 6px;border-radius:4px;font-size:.9em}
+  :root{
+    --bg:#fafafa; --fg:#1a1a1a; --muted:#5a5f66; --line:#e5e5e5;
+    --card:#fff; --link:#0a58ca; --chip:#eef0f2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1115; --fg:#e8eaed; --muted:#9aa3ad; --line:#242832;
+      --card:#161a21; --link:#7aa7ff; --chip:#1e232c;
+    }
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:820px;
+       margin:0 auto;padding:48px 20px 64px;line-height:1.6;color:var(--fg);background:var(--bg)}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:8px}
+  h1{font-size:1.75rem;margin:0 0 .35rem;letter-spacing:-.01em}
+  .lede{color:var(--muted);margin:0;font-size:1.02rem;max-width:62ch}
+  h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+     margin:36px 0 10px;font-weight:600}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:18px 20px;margin:12px 0}
+  .card p{margin:.35rem 0 0;color:var(--muted);font-size:.94rem}
+  .card a{font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
+  .grid .card{margin:0}
+  .grid strong{display:block;font-size:.95rem}
+  .grid span{color:var(--muted);font-size:.88rem}
+  code{background:var(--chip);padding:2px 6px;border-radius:4px;font-size:.88em;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .row a{background:var(--chip);border:1px solid var(--line);border-radius:999px;
+         padding:6px 14px;font-size:.88rem;color:var(--fg)}
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.86rem}
+  footer a{color:var(--muted);text-decoration:underline}
 </style>
 </head>
 <body>
+
+<header>
   <h1>Spectrometry Shorts</h1>
-  <p>Chemical profiles built in manim — a molecule spinning over the NMR and infrared
-     spectra that identify it, with the peaks numbered to match the atoms.</p>
-
-  <h2>Watch</h2>
-  <div class="card">
-    <a href="https://www.youtube.com/channel/UChtdNI2BC1SmkmHEERA4dzg">YouTube — spectrometry.mp4</a>
-    <p>Also on Instagram, <a href="https://instagram.com/spectrometry.mp4">@spectrometry.mp4</a>,
-       and X, <a href="https://x.com/spectrometrymp4">@spectrometrymp4</a>.</p>
+  <p class="lede">Chemical profiles built in manim — a molecule spinning over the NMR and infrared
+     spectra that identify it, with the peaks numbered to match the atoms. Plus the eight
+     rendering engines behind the rest of the work, published as parts.</p>
+  <div class="row">
+    <a href="https://www.youtube.com/channel/UChtdNI2BC1SmkmHEERA4dzg">YouTube</a>
+    <a href="https://instagram.com/spectrometry.mp4">Instagram</a>
+    <a href="https://x.com/spectrometrymp4">X</a>
+    <a href="https://github.com/ec175/spectrometry_public">GitHub</a>
   </div>
+</header>
 
-  <h2>Render one yourself</h2>
-  <div class="card">
-    <a href="https://github.com/ec175/spectrometry_public">Source on GitHub</a>
-    <p>Clone it, <code>pip install -r requirements.txt</code>, and render.
-       Python 3.10+ and ffmpeg; no LaTeX needed.</p>
-  </div>
-  <div class="card">
-    <a href="https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/GUIDE.md">Full guide</a>
-    <p>Install, every render flag, how to author a new molecule, and the complete
-       data contract.</p>
-  </div>
+<h2>Render one yourself</h2>
+<div class="card">
+  <a href="https://github.com/ec175/spectrometry_public">Source on GitHub</a>
+  <p>Clone it, <code>pip install -r requirements.txt</code>, and render. Python 3.10+ and ffmpeg.
+     No LaTeX install needed — the scenes use Pango text rather than <code>MathTex</code>.</p>
+</div>
+<div class="card">
+  <a href="https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/GUIDE.md">Full guide</a>
+  <p>Installing from scratch, what every quality flag does, authoring a new molecule attribute by
+     attribute, and what to do when something breaks.</p>
+</div>
 
-  <h2>The engines</h2>
-  <div class="card">
-    <a href="https://github.com/ec175/spectrometry_public/blob/main/CATALOG.md">Catalogue — 193 objects</a>
-    <p>Eight rendering and figure engines behind the rest of the work: a lattice-Boltzmann
-       and a compressible fluid solver, field-line integrators, a shape-physics world, a
-       particle-swarm attractor renderer, a simulated CRT, and the publication-figure code.
-       Published as parts, with reference stills.</p>
-  </div>
+<h2>The engines</h2>
+<p class="lede">Seven compute something real in numpy and pipe raw frames straight to ffmpeg — no
+   scene graph, no timeline. The eighth makes the publication figures the whole thing grew out of.
+   Each is standalone, catalogued, and shipped with reference stills.</p>
 
-  <h2>Legal</h2>
-  <p>For the publishing automation — a personal tool that posts the operator's own
-     videos to their own social accounts.</p>
-  <div class="card"><a href="/privacy.html">Privacy Policy</a></div>
-  <div class="card"><a href="/terms.html">Terms of Service</a></div>
+<div class="grid">
+  <div class="card"><strong>Wind Tunnel</strong><span>D2Q9 lattice-Boltzmann and a compressible
+    Navier–Stokes solver with HLLC. Nothing on screen is keyframed.</span></div>
+  <div class="card"><strong>Field Lines</strong><span>Any closed-form vector field, integrated in
+    constant arclength. Electrostatics, potential flow, magnetostatics.</span></div>
+  <div class="card"><strong>Lattice Grid</strong><span>Illuminated circuit lattices whose content
+    re-rolls on the beat.</span></div>
+  <div class="card"><strong>Shape Physics</strong><span>Discs, shells and destructible structures —
+    with audio the simulation triggers.</span></div>
+  <div class="card"><strong>Attractors</strong><span>Forty thousand particles through a chaotic
+    flow. The picture is where they crowd.</span></div>
+  <div class="card"><strong>Oscilloscope</strong><span>A simulated CRT: phosphor persistence, a
+    film-off-a-screen filter, and a glitch layer.</span></div>
+  <div class="card"><strong>Chemical Scope</strong><span>Twenty-nine molecules with FTIR and Raman,
+    drawn on that CRT.</span></div>
+  <div class="card"><strong>Academia</strong><span>Stacked simulated spectra for whole compound
+    classes, structures drawn alongside.</span></div>
+</div>
+
+<div class="card">
+  <a href="https://github.com/ec175/spectrometry_public/blob/main/CATALOG.md">Full catalogue — 193 objects, 83 compositions</a>
+  <p>Every object each engine makes, with parameters, ranges, and notes on what breaks if you
+     change them.</p>
+</div>
+
+<footer>
+  <p>Legal pages for the publishing automation — a personal tool that posts the operator's own
+     videos to their own accounts: <a href="privacy.html">Privacy Policy</a> ·
+     <a href="terms.html">Terms of Service</a></p>
+</footer>
+
 </body>
 </html>

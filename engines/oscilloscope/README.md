@@ -11,13 +11,21 @@ filter.
 ## The core is one idea
 
 The electron beam is stroked each frame into an intensity layer, which is added to a float buffer
-that **decays a little every frame** — real P31 green afterglow. That decay is what produces the
-orbiting ghost trails as a figure morphs or precesses, and it is why the shape can emerge from
-persistence rather than being drawn.
+that **decays a little every frame** — real P31 green afterglow:
 
-Faster beam travel means a dimmer trace (intensity goes as `1/segment-length`), so Lissajous
-corners glow the way they do on real hardware. The buffer is colourised and given an additive
-gaussian bloom halo over a static graticule.
+$$P_{n+1} \;=\; \underbrace{\alpha\,P_{n}}_{\text{phosphor decay}} \;+\; I_{n+1},\qquad 0<\alpha<1$$
+
+That one decay factor is what produces the orbiting ghost trails as a figure morphs or precesses,
+and it is why the shape can emerge from persistence rather than being drawn. The screen remembers,
+and how long it remembers is a single number.
+
+Faster beam travel means a dimmer trace — intensity goes as the reciprocal of the segment length,
+
+$$I \;\propto\; \left\lVert \frac{d\mathbf{r}}{dt} \right\rVert^{-1}$$
+
+so the beam dwells at the turning points and Lissajous corners glow the way they do on real
+hardware. Neither of those is a drawing trick; they are the two things a phosphor screen does. The
+buffer is then colourised and given an additive gaussian bloom halo over a static graticule.
 
 Two kinds of composition sit on that:
 

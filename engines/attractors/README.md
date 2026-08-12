@@ -10,8 +10,15 @@ traced — the picture is built entirely by where particles crowd.
 ## Why a swarm and not an orbit
 
 A single trajectory shows you the **shape** of an attractor. A swarm shows you its **invariant
-measure** — which parts of that shape the system actually spends its time in. The bright regions
-in these clips are not artistic emphasis; they are where the dynamics dwell.
+measure** — which parts of that shape the system actually spends its time in,
+
+$$
+\mu(A)\;=\;\lim_{T\to\infty}\frac{1}{T}\int_{0}^{T}\mathbf{1}_{A}\big(\mathbf{x}(t)\big)\,dt
+$$
+
+which the renderer approximates by histogramming the swarm onto the raster. So the bright regions
+in these clips are not artistic emphasis — brightness *is* occupancy, and it is where the dynamics
+dwell. (For the Lorenz flow, $\dot{x}=\sigma(y-x)$, $\dot{y}=x(\rho-z)-y$, $\dot{z}=xy-\beta z$.)
 
 That is a different measurement, not a restyling, and it is cheap: RK4 on an `(N,3)` array costs
 the same four function evaluations as RK4 on one point, so 40,000 particles are essentially free

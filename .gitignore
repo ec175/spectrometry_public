@@ -6,6 +6,7 @@ media/
 *.mp4
 *.mov
 *.mkv
+*.webm
 
 # --- python ---
 .venv/
@@ -15,6 +16,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # --- secrets: never commit ---
 .env

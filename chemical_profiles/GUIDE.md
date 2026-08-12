@@ -36,6 +36,38 @@ Two files do all of it:
 | **`spectro_lib.py`** | the object library — palette, axes, molecule builders, line-broadening maths, gradient fills. Nothing here is scene-specific. |
 | **`chemical_profile.py`** | the `VerticalProfile` scene class (the choreography) and `VerticalProfile_Aspirin` (the worked example). |
 
+### How a trace is built
+
+You supply a **line list** — peak positions and intensities — and the library broadens each line
+into a band. Which shape depends on the technique, and both are peak-normalised so the value at
+the centre is exactly the intensity you asked for.
+
+Vibrational spectra (FTIR, Raman) use a **Lorentzian**, the natural line shape for a damped
+oscillator:
+
+$$
+L(x)\;=\;I\,\frac{\gamma^{2}}{(x-x_{0})^{2}+\gamma^{2}},\qquad \gamma=\tfrac{1}{2}\,\mathrm{FWHM}
+$$
+
+UV-Vis uses a **Gaussian**, because an electronic band is broadened by vibronic structure and
+solvent interaction rather than by a single lifetime:
+
+$$
+G(x)\;=\;I\,\exp\!\left[-\frac{(x-x_{0})^{2}}{2\sigma^{2}}\right],\qquad
+\sigma=\frac{\mathrm{FWHM}}{2\sqrt{2\ln 2}}
+$$
+
+A whole trace is then just the sum over the line list, $y(x)=\sum_i L(x;x_{0,i},I_i)$, which is
+what `broaden()` does. The practical consequence when you author a molecule: **`fwhm` is the only
+dial that controls how crowded the spectrum looks.** Neighbouring bands closer together than about
+one FWHM merge into a single visible feature no matter what intensities you give them.
+
+⚠️ These are **representative spectra, not measured ones.** Peak positions come from literature
+values and group-contribution estimates, hand-corrected so the diagnostic bands land where they
+should — good enough to teach with, not a substitute for running the instrument. Nothing in the
+code validates an assignment, so check every shift and every band against a reference before you
+render. A wrong assignment is a factual error sitting on screen in front of whoever watches it.
+
 ---
 
 ## 2. Install
