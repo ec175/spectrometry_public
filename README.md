@@ -36,16 +36,33 @@ folder next to whichever engine you are running and it will be found there.
 There are two halves to this repo and they are independent.
 
 **Want to render something right now?** Go to [`chemical_profiles/`](chemical_profiles/). It is a
-complete, working manim scene with a worked example molecule, and it will produce a finished video
-in about ten minutes from a cold clone. Instructions are a few paragraphs down.
+finished manim scene with one molecule already set up, and it makes a video in about ten minutes
+starting from a fresh clone. Instructions are a few paragraphs down.
 
 **Want the pieces to build your own thing?** Go to [`engines/`](engines/). Eight libraries covering
-fluid dynamics, field lines, particle swarms, rigid-body physics, a simulated CRT, and publication
-figure generation. Each one is standalone, each has a catalogue of everything it can make, and each
-comes with reference stills so you can see what you are getting before you install anything.
+fluid flow, field lines, particle swarms, bouncing rigid bodies, a simulated CRT screen, and
+publication figures. Each one works on its own, each lists everything it can make, and each comes
+with sample images so you can see what you are getting before you install anything.
 
 The [full catalogue](CATALOG.md) lists all 193 objects and 83 compositions in one place if you want
 to browse.
+
+```mermaid
+flowchart LR
+    A["<b>chemical_profiles/</b><br/>manim scene"] --> R["<b>vertical video</b><br/>1080 × 1920"]
+    subgraph E ["engines/ — seven render libraries"]
+        direction TB
+        W["wind-tunnel<br/><i>two fluid solvers</i>"]
+        F["field-lines<br/><i>vector fields</i>"]
+        L["lattice-grid<br/><i>circuit lattices</i>"]
+        S["shape-physics<br/><i>rigid bodies</i>"]
+        T["attractors<br/><i>chaotic flows</i>"]
+        O["oscilloscope<br/><i>CRT + film filter</i>"]
+        C["chemical-scope<br/><i>29 molecules</i>"]
+    end
+    E -->|"numpy frames → ffmpeg"| R
+    D["<b>engines/academia</b><br/>figure generation"] --> P["<b>PDF / PNG</b><br/>publication figures"]
+```
 
 ### Repo layout
 
@@ -115,14 +132,14 @@ front of whoever watches it.
 Seven of these compute something real, in numpy, and pipe raw frames straight to ffmpeg. No scene
 graph, no timeline, no manim. The eighth makes the publication figures the whole thing grew out of.
 
-They are published as **parts** rather than as finished videos. You get the solvers, the shape
-generators, the field kernels, the physics primitives, the colour maps, the post filters, and the
-render pipeline that drives all of it. What you do not get is my `scenes.py` files, which is where
-the actual compositions live. That is on purpose: I would rather hand over a toolbox than a way to
-re-emit my back catalogue.
+They are published as **parts**, not as finished videos. You get the solvers, the shape generators,
+the field maths, the physics, the colour maps, the post filters, and the render pipeline that runs
+all of it. What you do not get is my `scenes.py` files, which is where the finished compositions
+live. That is deliberate — I would rather hand over the toolbox than a button that re-makes my own
+videos.
 
-Every composition is still catalogued, with a description of what it demonstrates and stills from
-it, because the ideas transfer even when the code does not.
+Every composition is still listed, with a note on what it shows and a still from it, because the
+idea is usually the useful part even when the code is not.
 
 | engine | in one line |
 |---|---|
@@ -147,12 +164,21 @@ interface:
 
 `lbm.py` is a D2Q9 lattice-Boltzmann scheme with a Smagorinsky turbulence model. It gives you free
 bodies the flow genuinely pushes around, sealed containers, and coloured dye transport, and it is
-fast.
+fast. One collision-and-streaming step, over nine discrete velocities $\mathbf{c}_i$:
+
+$$
+f_i\!\left(\mathbf{x}+\mathbf{c}_i\,\Delta t,\; t+\Delta t\right)\;=\;f_i(\mathbf{x},t)\;-\;\frac{\Delta t}{\tau}\Big[\,f_i(\mathbf{x},t)-f_i^{\mathrm{eq}}(\rho,\mathbf{u})\,\Big]
+$$
+
+The relaxation time $\tau$ carries whatever viscosity you asked for, $\tau=\tfrac{1}{2}+3\nu$ with
+$\nu=u_0 L/\mathrm{Re}$, and the Smagorinsky term raises it locally wherever the strain rate is
+high. Note that $\tau=\tfrac{1}{2}$ is a hard floor, so Reynolds number and resolution are not
+independent dials: raise $\mathrm{Re}$ without adding cells and you run out of margin.
 
 `cns.py` is a compressible Navier-Stokes solver with MUSCL reconstruction and an HLLC Riemann
-solver. Real ideal gas at γ = 1.4, so you get temperature, internal energy, and honest shock
-capture. It is validated against the exact Sod shock-tube solution and against oblique-shock
-theory, and both of those checks ship with it.
+solver. Real ideal gas at $\gamma = 1.4$, so you get temperature, internal energy, and honest shock
+capture. It is validated against the exact Sod shock-tube solution and against the
+$\theta$–$\beta$–$M$ oblique-shock relation, and both of those checks ship with it.
 
 Nothing on screen is keyframed. A scene can put a shape somewhere, choose what a free body is made
 of, or push the fluid, and then it has to let go. Every vortex, every separation bubble, every
@@ -189,13 +215,24 @@ channel, so anything you can draw becomes a solid the fluid flows around.
 ### Watch out for
 
 **`u0` means two different things.** Under the lattice-Boltzmann solver it is a lattice velocity
-and lives around 0.02 to 0.10. Under the compressible solver it is a Mach number. A comfortable
-value in one is catastrophic in the other, and this is the single easiest way to waste an hour
-here.
+and lives around 0.02 to 0.10. Under the compressible solver it is a Mach number. The lattice
+sound speed is $c_s=1/\sqrt{3}$, so the same symbol differs by a factor of $\sqrt{3}$ between them:
 
-**Buy speed with `steps`, never with `u0`.** Apparent speed is lattice speed multiplied by steps
-per frame. Raising the lattice velocity is what breaks solves; running more steps costs wall clock
-and nothing else.
+$$
+\text{LBM:}\quad \mathrm{Ma}=\frac{u_0}{c_s}=u_0\sqrt{3}
+\qquad\qquad
+\text{CNS:}\quad u_0 \equiv \mathrm{Ma}
+$$
+
+A comfortable value in one is catastrophic in the other, and this is the single easiest way to
+waste an hour here.
+
+**Buy speed with `steps`, never with `u0`.** Apparent speed is the product
+
+$$v_{\text{apparent}} \;=\; u_0 \times \texttt{steps per frame}$$
+
+so both dials look identical on screen — but only one of them is bounded. Raising $u_0$ is what
+breaks solves; running more steps costs wall clock and nothing else.
 
 **Size bodies against the screen, not against a lattice axis.** Which axis is "across the picture"
 flips with the flow direction, and a chord quoted in the wrong one comes out about three times too
@@ -218,10 +255,22 @@ integrator, because a field here is just a callable.
 Nothing solves a PDE. Every field is a closed form evaluated at an array of points, so there is no
 lattice, no timestep, no CFL condition, and nothing can blow up.
 
-The step is in **arclength**, not time, and it is constant. That normalisation costs one divide and
-buys two things. Line density comes out uniform instead of piling up wherever the field is weak.
-And a packet moving at speed *v* becomes the array index `round(v*t/ds)`, which is why the entire
-pulse module is a hundred lines with no integration in it at all.
+The step is in **arclength**, not time, and it is constant. Every seed advances by dividing out the
+field's magnitude, so the integrator walks the direction field at unit speed:
+
+$$
+\frac{d\mathbf{p}}{ds}\;=\;\frac{\mathbf{E}(\mathbf{p})}{\lVert\mathbf{E}(\mathbf{p})\rVert}
+\qquad\Longrightarrow\qquad
+\left\lVert \frac{d\mathbf{p}}{ds} \right\rVert = 1
+$$
+
+That one divide buys two things. Line density comes out uniform instead of piling up wherever the
+field is weak. And because every vertex is now exactly $\Delta s$ from the last, a packet moving at
+speed $v$ is no longer an integration at all — it is an array index,
+
+$$k \;=\; \operatorname{round}\!\left(\frac{v\,t}{\Delta s}\right)$$
+
+which is why the entire pulse module is a hundred lines with no integration in it at all.
 
 ### Getting started
 
@@ -413,11 +462,24 @@ seconds: one direction gave 16 escapes, the other gave zero.
 [Source](engines/attractors/src/) · [Full notes](engines/attractors/README.md)
 
 Forty thousand particles integrated through a chaotic flow at once. Nothing is traced. The picture
-is built entirely by where particles crowd.
+is built entirely by where particles crowd. Lorenz, Rössler, Thomas, Halvorsen, Chen and Aizawa all
+ship; the Lorenz system is the familiar one,
 
-A single orbit shows you the *shape* of an attractor. A swarm shows you its **invariant measure**,
-meaning which parts of that shape the system actually spends its time in. The bright regions are
-not artistic emphasis, they are where the dynamics dwell.
+$$
+\dot{x}=\sigma\,(y-x),\qquad
+\dot{y}=x\,(\rho-z)-y,\qquad
+\dot{z}=xy-\beta z
+$$
+
+A single orbit shows you the *shape* of an attractor. A swarm shows you its **invariant measure** —
+how much of its time the system actually spends in each part of that shape,
+
+$$
+\mu(A)\;=\;\lim_{T\to\infty}\frac{1}{T}\int_{0}^{T}\mathbf{1}_{A}\big(\mathbf{x}(t)\big)\,dt
+$$
+
+which the renderer approximates by histogramming the swarm. So the bright regions are not artistic
+emphasis — brightness *is* occupancy, and it is where the dynamics dwell.
 
 It is also cheap. RK4 on an (N,3) array costs the same four function calls as RK4 on one point, so
 the particles are essentially free next to the rasteriser.
@@ -471,10 +533,19 @@ sequence of attractors nobody has ever named.
 [Catalogue](engines/oscilloscope/CATALOG.md) · [Stills](engines/oscilloscope/frames/) ·
 [Source](engines/oscilloscope/src/) · [Full notes](engines/oscilloscope/README.md)
 
-A simulated CRT screen. The electron beam is stroked into an intensity layer each frame, added to a
-float buffer that decays a little every frame, exactly like real P31 green phosphor. That decay is
-what produces the orbiting ghost trails. Faster beam travel means a dimmer trace, so Lissajous
-corners glow the way they do on actual hardware.
+A simulated CRT screen. The electron beam is stroked into an intensity layer each frame and added
+to a float buffer that decays a little every frame, exactly like real P31 green phosphor:
+
+$$P_{n+1} \;=\; \underbrace{\alpha\,P_{n}}_{\text{phosphor decay}} \;+\; I_{n+1},\qquad 0<\alpha<1$$
+
+That single decay factor is what produces the orbiting ghost trails — the screen remembers, and how
+long it remembers is one number. Beam intensity also goes as the reciprocal of how fast the spot is
+travelling,
+
+$$I \;\propto\; \left\lVert \frac{d\mathbf{r}}{dt} \right\rVert^{-1}$$
+
+so the beam dwells at the turning points and Lissajous corners glow the way they do on real
+hardware. Neither of those is a drawing trick; they are the two things a phosphor screen does.
 
 Three layers you can use independently.
 
