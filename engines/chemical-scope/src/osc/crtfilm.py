@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """crtfilm.py — the "filmed off a real bright CRT" post-filter.
 
 Not a video-filter preset: a three-stage physical model, applied per frame in the correct

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """eye.py - the IMAGE the lattice is asked to draw.
 
 A detailed, deliberately NON-SPHERICAL eye: the outline is an almond built from two different

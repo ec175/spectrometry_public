@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py — render/solver config, ffmpeg resolution, encoder args.
 
 Vertical 1080x1920 by default (these are shorts, same target as ``Oscilloscope``). The SOLVER

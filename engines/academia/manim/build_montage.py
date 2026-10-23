@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """
 build_montage.py — prepare all assets for the MusicProfile montage (music-visualizer
 template). Run with the manim .venv python (needs numpy + scipy; uses bundled ffmpeg

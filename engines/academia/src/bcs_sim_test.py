@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """bcs_sim_test.py — crystalline-vs-amorphous simulated spectra for BCS Class 1-4
 oral drugs, one stacked figure per (class, technique), with a structure thumbnail
 beside each row.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """glitch.py - the glitch is a LAYER OVER the picture, not a property of the nodes.
 
 My note: "the glitch is not associated with the nodes... it seems to be placed over the video,

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """dsc.py — DSC parsing, smoothing, stacked plotting, and Tg/melt annotations.
 
 Ported from the cannabinoid ASD Colab (the more capable of the lab's two DSC

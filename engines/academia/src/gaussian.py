@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """gaussian.py — turn Gaussian 16 output into line lists for spectra.simulate().
 
 Written against Gaussian 16 output (`DFT/*.log`, plus GaussView ASCII exports

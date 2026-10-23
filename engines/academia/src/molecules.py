@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """molecules.py — render molecule thumbnails (transparent RGBA) from SMILES.
 
 Used to put a structure image next to each trace in the stacked sim figures.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """content.py - WHAT sits on the lattice, and when it changes.
 
 The mechanism this whole project turns on, and the thing that took measuring to find:

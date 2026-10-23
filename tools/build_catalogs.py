@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """Generate every CATALOG.md from the catalog.json files.
 
 `engines/<name>/catalog.json` is the source of truth. Everything below is derived from it:

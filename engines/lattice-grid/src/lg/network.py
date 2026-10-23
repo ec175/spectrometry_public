@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """network.py - the lattice as a set of CIRCUITS rather than a field of loose dots.
 
 My note: "There should be distinct connected nodes (no more than 10 connected nodes,

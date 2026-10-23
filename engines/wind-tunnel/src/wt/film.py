@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """film.py — the optional "filmed off a screen" post-pass, borrowed from the Oscilloscope project.
 
 We do NOT re-implement it. `Oscilloscope\\osc\\crtfilm.py` is a heavily tuned three-stage physical

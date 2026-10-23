@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """nmr.py — solid- and liquid-state NMR loading, plotting, and simulation.
 
 NMR probes local bonding/H-bonding directly. The lab has Varian ssNMR (MAS) and

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """draw.py - additive point accumulation with a persistence buffer.
 
 Forty thousand particles per frame is far past what PIL vector calls can draw, so nothing here is

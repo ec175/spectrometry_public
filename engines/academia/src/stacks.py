@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """stacks.py — reusable stacked-trace plots for simulated-spectra libraries.
 
 Two plotters, both normalize each trace 0-1 and lift it by index*offset so many

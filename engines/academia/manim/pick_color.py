@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """pick_color.py — pull a vibrant, non-dark accent colour out of an album cover.
 
 Downsamples the image, drops dark + washed-out pixels, then takes the dominant hue

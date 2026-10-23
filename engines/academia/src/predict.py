@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """predict.py — crude SMILES -> spectroscopic line lists via functional-group rules.
 
 A *qualitative* group-contribution estimator so structurally diverse molecules

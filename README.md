@@ -101,7 +101,7 @@ It's [MIT licensed](LICENSE). The only thing I ask is that you **leave a trail b
 1. **Keep the two-line header** at the top of any file you copy. The license needs it anyway.
 2. **Credit it** in your project's README or your video's description:
    ```
-   Made with spectrometry.mp4 engines by Ethan Earl - github.com/ec175/spectrometry_public
+   Made with spectrometry.mp4 engines by Clancy Earl - github.com/ec175/spectrometry_public
    ```
 3. **Or add the badge:**
    [![made with spectrometry.mp4 engines](https://img.shields.io/badge/made%20with-spectrometry.mp4%20engines-ffc440?labelColor=0b0f14)](https://github.com/ec175/spectrometry_public)
@@ -202,5 +202,5 @@ AGENTS.md            instructions for AI coding agents
 
 <div align="center">
 <br>
-<sub>Made by Ethan Earl · <a href="https://instagram.com/spectrometry.mp4">@spectrometry.mp4</a> · <a href="LICENSE">MIT</a></sub>
+<sub>Made by Clancy Earl · <a href="https://instagram.com/spectrometry.mp4">@spectrometry.mp4</a> · <a href="LICENSE">MIT</a></sub>
 </div>

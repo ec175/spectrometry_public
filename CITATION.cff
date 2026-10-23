@@ -11,7 +11,7 @@ abstract: >-
   simulation-triggered audio, a simulated CRT oscilloscope with a film filter, and
   simulated FTIR, Raman, UV-Vis and NMR spectra for molecules.
 authors:
-  - given-names: Ethan
+  - given-names: Clancy
     family-names: Earl
     alias: spectrometry.mp4
 repository-code: "https://github.com/ec175/spectrometry_public"

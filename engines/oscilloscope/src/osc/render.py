@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """render.py — drive the frame clock, stroke each scene's beams onto the Scope, pipe to ffmpeg.
 
 manim-free equivalent of `manim render`: owns the clock + the rawvideo pipe. Frames are driven

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """holo.py - holofoil / iridescent colour.
 
 Holofoil is NOT "a rainbow". Three properties separate it from a hue ramp, and all three are

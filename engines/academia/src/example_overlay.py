@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """example_overlay.py — template: overlay a simulated spectrum on an experimental scan.
 
 Run:  .\.venv\Scripts\python.exe example_overlay.py

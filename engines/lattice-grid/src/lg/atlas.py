@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """atlas.py - the glyph stamps, baked once.
 
 The whole format is a few thousand copies of about eight small shapes. So bake each shape ONCE

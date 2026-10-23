@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """raman.py — Raman experimental loading, plotting, and DFT overlay.
 
 Raman is FTIR's vibrational sibling: same line lists, same broadening, but the

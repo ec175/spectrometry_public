@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """gpu.py — CuPy backend for the hot per-frame math (bloom, film filter). GPU BY DEFAULT.
 
 The GPU (RTX 2060) is the default backend for all rendering — my standing policy

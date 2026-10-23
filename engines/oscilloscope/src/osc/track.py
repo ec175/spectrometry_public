@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """track.py - where is the subject, per frame?
 
 `AsciiVideo` takes a slice of the source WIDTH to fit a 16:9 clip into a 9:16 screen. A fixed

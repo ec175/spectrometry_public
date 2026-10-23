@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """panel.py - the hexagon faces as a SURFACE, with the light source underneath.
 
 The read I asked for: the holofoil is not painted on the hexagons, it is a glowing sheet

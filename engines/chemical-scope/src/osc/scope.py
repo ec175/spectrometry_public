@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """scope.py — the CRT phosphor screen: a persistence buffer + beam stroking + glow compose.
 
 Beams are stroked into a *colour* persistence buffer (RGB float) which decays a little every

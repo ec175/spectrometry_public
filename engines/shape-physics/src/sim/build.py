@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """build.py - structure builders. Turn a few numbers into a list of obstacles.
 
 Everything here returns plain `Capsule`/`Peg`/`Ring` lists, so a scene is mostly a handful of

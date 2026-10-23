@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """filter_cli.py — apply the crtfilm "filmed off a real CRT" look to a rendered mp4.
 
   .\.venv\Scripts\python.exe filter_cli.py out\loop_braid_final.mp4 out\filmtest_after.mp4 --start 6 --dur 3

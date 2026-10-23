@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py - render config + ffmpeg/NVENC resolution.
 
 Ported from Field_Lines\\fl\\config.py (itself from Oscilloscope\\osc\\config.py): same

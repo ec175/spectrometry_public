@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """core.py - vectorised strange-attractor flows and a particle swarm that lives on them.
 
 The difference from `..\\Oscilloscope\\osc\\attractors.py` is the whole point of this project.

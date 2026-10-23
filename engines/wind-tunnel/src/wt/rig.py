@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """rig.py - articulated deformation of a body, for the outline AND its texture.
 
 Every body in this project has been RIGID: a scene may put a polygon somewhere at time t, and

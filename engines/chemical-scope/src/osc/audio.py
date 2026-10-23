@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """audio.py — decode a song to mono, precompute per-band magnitudes, and mux audio onto a
 silent render. Pure numpy + ffmpeg (no manim). Ported from Ascii_Studio\\asciivid\\audio.py.
 

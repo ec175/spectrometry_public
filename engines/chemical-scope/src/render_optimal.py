@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """render_optimal.py — render the whole chemical-scope set with maximally-utilised GPU lanes.
 
 Strategy: decompose EVERY molecule into contiguous frame CHUNKS, put all chunks in one pool,

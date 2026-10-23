@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """amino_acid_sim_test.py — simulate FTIR/Raman/UV/1H-NMR for the 20 canonical
 amino acids and render one large stacked PDF per technique.
 

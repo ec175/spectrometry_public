@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """bodies.py — FREE bodies: objects the flow actually pushes around.
 
 Everything in `shapes.py` is placed by the scene at a position the scene chose. A `FreeBody` is

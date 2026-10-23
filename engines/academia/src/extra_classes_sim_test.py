@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """extra_classes_sim_test.py — simulate FTIR / Raman / UV / 13C for four new
 compound classes (neurotransmitters, steroids, small peptides, fats/lipids) from
 SMILES via predict.py, and render stacked PDFs per technique.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py - render config, song paths and ffmpeg/NVENC resolution.
 
 Ported from Oscilloscope\\osc\\config.py (same find_ffmpeg chain, same one-time NVENC probe

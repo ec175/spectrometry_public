@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """BCS Class 1-4 drugs (name, SMILES, MW). Workflow-verified, RDKit-validated.
 Re-binned by each drug's verified BCS class; >45 heavy atoms excluded.
 BCS classes are literature-consensus; borderline drugs exist. Auto-generated."""

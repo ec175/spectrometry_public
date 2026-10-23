@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """render.py - frame clock, compositor and the ffmpeg pipe.
 
 Frames are driven by REAL SECONDS (t = i/fps), never by frame index. That is what makes a

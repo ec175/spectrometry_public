@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """chemical_profile.py — render a CRT-scope "chemical profile" short (molecule above, spectrum below).
 
 manim-free remake of the vertical chemical profiles, drawn as an oscilloscope screen and finished

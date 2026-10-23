@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """lbm.py — the physics: D2Q9 lattice-Boltzmann incompressible flow with an LES closure.
 
 This is the engine that reproduces the source video's behaviour: a real, unsteady, separating

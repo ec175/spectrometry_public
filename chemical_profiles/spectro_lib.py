@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """
 spectro_lib.py — reusable object library + CANONICAL FORMAT for the spectroscopy
 manim explainers. Import everything with `from spectro_lib import *`.

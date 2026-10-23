@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """lattice.py - the SUBSTRATE. This is the swappable part of the format.
 
 Everything downstream (content.py, atlas.py, draw.py) is written against this interface and

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """Measure the EFFECTIVE drag coefficient of a body held in this tunnel, in the configuration
 the scene actually uses (blockage, slip walls, LES). Prints Cd_eff so CD_HINT can be set from a
 measurement rather than a textbook value."""

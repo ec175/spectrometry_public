@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """glitchfx.py — the "error-prone acquisition" layer for crtfilm: makes the trace look like
 the SIGNAL CHAIN misbehaves, not just the camera. Two passes around FilmLook:
 

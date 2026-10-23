@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """FTIR parsing, averaging, peak-finding and plotting for the research library.
 
 Scans are pulled through the registry (reg.urls_for(sample_id, "FTIR")), averaged,

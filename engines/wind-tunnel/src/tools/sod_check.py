@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """Does `wt\\cns.py` actually capture a shock, at the RIGHT place and the RIGHT strength?
 
 THE GATE FOR THE COMPRESSIBLE SOLVER. Everything the rewrite was for rests on the claim that this

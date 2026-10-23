@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """xrd.py — powder XRD loading, Q-conversion, polymorph overlays, simulation.
 
 Powder XRD is the lab's amorphous-vs-crystalline arbiter: a broad halo means

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Ethan Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """spectra.py — technique-agnostic spectrum loading, simulation, and overlay.
 
 Generalizes the FTIR conventions in ftir.py to UV-Vis and Raman: every spectrum is
