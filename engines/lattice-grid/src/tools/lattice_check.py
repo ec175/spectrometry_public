@@ -82,16 +82,48 @@ def main():
             print(f"              boxes OK (closed rings, "
                   f"{len(lat.sample_box(np.random.default_rng(1)))} sides sampled)")
 
+    bad += _scale_invariance()
     print("\n  ALL OK" if not bad else f"\n  {bad} FAILURES")
     return 1 if bad else 0
 
 
-# NOTE: the upstream tool has a third section here, `_scale_invariance()`,
-# which renders one real scene at 1080 and at 540 and fails if the bulk
-# statistics disagree. It needs the scene definitions, which are not part of
-# this repository, so it is not shipped. It is worth reimplementing against
-# your own compositions -- see NOTES.md "the glyph atlas was baked in world
-# px", the bug it exists to catch.
+def _scale_invariance():
+    """Is a preview actually a preview?
+
+    The standing promise of this format is that a 540x960 preview and a 1080x1920 final are the
+    SAME picture sampled differently. It was silently false here for a whole tuning pass: the
+    glyph atlas is baked in pixels and was not scaled with the output, so a 540-wide frame drew
+    every glyph at twice its correct relative size. `look_check` read mean_luma 58 where the
+    final delivered 27, and every constant tuned against it was wrong.
+
+    So check it numerically: render the same scene at two resolutions, downsample the larger,
+    and compare bulk statistics. They cannot be identical (different sampling, and grain is
+    per-pixel) but they must be close.
+    """
+    import numpy as np
+    from lg.config import RenderConfig
+    from lg.draw import Frame
+    from lg.scenes import SCENES
+
+    print("\n  scale invariance (preview must match final):")
+    bad = 0
+    for name in ("circuit_square", "circuit_hex"):
+        sc = SCENES[name]()
+        out = {}
+        for w in (1080, 540):
+            cfg = RenderConfig(width=w, height=w * 1920 // 1080)
+            g0, cfg.grain = cfg.grain, 0.0        # grain is per-pixel; it cannot survive
+            fr = Frame(cfg, sc.atlas_for(cfg))
+            rgb = sc.render_frame(fr, 0.42 * sc.duration).astype(np.float32)
+            cfg.grain = g0
+            lum = rgb.mean(2)
+            out[w] = (float(lum.mean()), float((lum < 20).mean()), float((lum > 200).mean()))
+        (m1, d1, h1), (m2, d2, h2) = out[1080], out[540]
+        ok = abs(m1 - m2) < 6.0 and abs(d1 - d2) < 0.09 and abs(h1 - h2) < 0.035
+        bad += not ok
+        print(f"    {name:15s} 1080: luma {m1:5.1f} dark {d1:.3f} hot {h1:.4f}  |  "
+              f"540: luma {m2:5.1f} dark {d2:.3f} hot {h2:.4f}   {'OK' if ok else '<-- FAIL'}")
+    return bad
 
 
 if __name__ == "__main__":

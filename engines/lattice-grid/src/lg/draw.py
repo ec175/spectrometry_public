@@ -7,7 +7,7 @@ source clip, wherever the content gets dense the colour runs to white (k-means f
 bright pixels at saturation < 0.25, against a palette that is otherwise strongly saturated).
 That is what accumulation does for free and what alpha compositing cannot do at all - PIL's
 draw calls OVERWRITE, so a hot cluster would come out the colour of whichever glyph was drawn
-last. Same lesson as Field_Lines' density channel, reached from the other direction.
+last. Same lesson as the field-lines engine's density channel, reached from the other direction.
 
 The buffer is PADDED by the largest stamp on all four sides so a stamp can never fall partly
 outside it. That removes every clipping branch from the splat - which matters, because the

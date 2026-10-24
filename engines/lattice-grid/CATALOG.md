@@ -11,7 +11,7 @@ A lattice is generated once and never moves. Each site carries a glyph — empty
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
@@ -29,6 +29,12 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 | `lg/render.py` | render | `dry_report` / `render_stills` / `render_scene`, ffmpeg pipe, atomic output, and the RGB-delay pre-roll. |
 | `lg/config.py` | config | `RenderConfig`, `SOURCE_PITCH`, NVENC probe, ffmpeg resolution. Unlike the rest of this repository the rate defaults here are deliberately HIGH — see the parameters table. |
 | `tools/lattice_check.py` | validation | Substrate invariants: coordination number, link-stamp lengths against real edge lengths, and that a box is a closed ring. |
+| `cli.py` | entry point | `python cli.py list`, `<scene> --dry` (density report, ~2 s), `--still`, `--preview`. |
+| `lg/scenes.py` | compositions | The circuit family and the `SCENES` registry. |
+| `lg/eyescene.py` | compositions | The eye family, registered alongside the circuit scenes. |
+| `tools/look_check.py` | check | Does a render LOOK like the reference clip: luminance, palette and contrast, measured the way the source was. |
+| `tools/motion_check.py` | check | Does it MOVE like the reference: per-cell temporal swing and the high-frequency share, at full frame rate. |
+| `tools/texture_check.py` | check | Does it have the reference's TEXTURE: hue correlation from 1 to 8 pitches, local contrast, structure coherence. |
 
 
 ## Lattice geometries
@@ -79,18 +85,18 @@ A second subject on the same substrate. Where the circuit scenes recreate a refe
 
 ## Compositions
 
-Eight compositions in two families. The circuit set recreates a reference clip and is checkable against it; the eye set deliberately departs on blacks, palette and density and is not.
+Eight compositions in two families. The circuit set recreates a reference clip and is checkable against it; the eye set deliberately departs on blacks, palette and density and is not. All eight are in `src/lg/scenes.py` and `src/lg/eyescene.py` and render with `python cli.py <name>`; run `--dry` first.
 
-| composition | what it does | status | frames |
-|---|---|---|---|
-| `circuit_square` | Square cells — the reference geometry. 8-neighbour, links at 0/45/90/135. | shipped 15 s | [1](frames/circuit_square_t020.jpg) [2](frames/circuit_square_t045.jpg) [3](frames/circuit_square_t075.jpg) |
-| `circuit_hex` | The literal read of 'square cells to hexagons' — the cells you see are hexagons. 3-neighbour. | shipped 15 s | [1](frames/circuit_hex_t020.jpg) [2](frames/circuit_hex_t045.jpg) [3](frames/circuit_hex_t075.jpg) |
-| `circuit_tri` | The other reading — a denser fabric closer to the square version's connectivity, with hexagonal rings as its box glyph. | registered, no density pass | — |
-| `eye_foil` | Baseline: balanced foil, readable panels, mid density. | shipped 15 s | [1](frames/eye_foil_t030.jpg) [2](frames/eye_foil_t065.jpg) |
-| `eye_foil_deep` | How far can the SURFACE go? Faces near-opaque, seams tight and hot — maximum 'light from underneath' before the picture turns to lace. | shipped 15 s | [1](frames/eye_foil_deep_t030.jpg) [2](frames/eye_foil_deep_t065.jpg) |
-| `eye_foil_wide` | Can COLOUR carry the layering instead of brightness? Half as many, twice as broad foil bands, and a big depth shift so sclera, iris and pupil separate by hue. | shipped 15 s | [1](frames/eye_foil_wide_t030.jpg) [2](frames/eye_foil_wide_t065.jpg) |
-| `eye_foil_dense` | Connectivity at its limit — the iris becomes a solid mesh while the sclera stays scattered dots. | shipped 15 s | [1](frames/eye_foil_dense_t030.jpg) [2](frames/eye_foil_dense_t065.jpg) |
-| `eye_foil_sparse` | The opposite end — few elements, source-dominant: the picture is mostly the glowing seams, nodes as accents. | shipped 15 s | [1](frames/eye_foil_sparse_t030.jpg) [2](frames/eye_foil_sparse_t065.jpg) |
+| composition | what it does | code here? | status | frames |
+|---|---|---|---|---|
+| `circuit_square` | Square cells — the reference geometry. 8-neighbour, links at 0/45/90/135. | ✅ yes | shipped 15 s | [1](frames/circuit_square_t020.jpg) [2](frames/circuit_square_t045.jpg) [3](frames/circuit_square_t075.jpg) |
+| `circuit_hex` | The literal read of 'square cells to hexagons' — the cells you see are hexagons. 3-neighbour. | ✅ yes | shipped 15 s | [1](frames/circuit_hex_t020.jpg) [2](frames/circuit_hex_t045.jpg) [3](frames/circuit_hex_t075.jpg) |
+| `circuit_tri` | The other reading — a denser fabric closer to the square version's connectivity, with hexagonal rings as its box glyph. | ✅ yes | registered, no density pass | — |
+| `eye_foil` | Baseline: balanced foil, readable panels, mid density. | ✅ yes | shipped 15 s | [1](frames/eye_foil_t030.jpg) [2](frames/eye_foil_t065.jpg) |
+| `eye_foil_deep` | How far can the SURFACE go? Faces near-opaque, seams tight and hot — maximum 'light from underneath' before the picture turns to lace. | ✅ yes | shipped 15 s | [1](frames/eye_foil_deep_t030.jpg) [2](frames/eye_foil_deep_t065.jpg) |
+| `eye_foil_wide` | Can COLOUR carry the layering instead of brightness? Half as many, twice as broad foil bands, and a big depth shift so sclera, iris and pupil separate by hue. | ✅ yes | shipped 15 s | [1](frames/eye_foil_wide_t030.jpg) [2](frames/eye_foil_wide_t065.jpg) |
+| `eye_foil_dense` | Connectivity at its limit — the iris becomes a solid mesh while the sclera stays scattered dots. | ✅ yes | shipped 15 s | [1](frames/eye_foil_dense_t030.jpg) [2](frames/eye_foil_dense_t065.jpg) |
+| `eye_foil_sparse` | The opposite end — few elements, source-dominant: the picture is mostly the glowing seams, nodes as accents. | ✅ yes | shipped 15 s | [1](frames/eye_foil_sparse_t030.jpg) [2](frames/eye_foil_sparse_t065.jpg) |
 
 
 ## Parameters that matter

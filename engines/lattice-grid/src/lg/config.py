@@ -2,9 +2,8 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py - render config + ffmpeg/NVENC resolution.
 
-Ported from Field_Lines\\fl\\config.py (itself from Oscilloscope\\osc\\config.py): same
-find_ffmpeg chain, same one-time NVENC probe with automatic libx264 fallback. Env vars here
-are LG_-prefixed (LG_FFMPEG / LG_NVENC / LG_GPU).
+A shared find_ffmpeg chain and a one-time NVENC probe with automatic libx264 fallback. Env
+vars here are LG_-prefixed (LG_FFMPEG / LG_NVENC / LG_GPU).
 
 WORLD UNITS: every scene is quoted in the REFERENCE frame 1080x1920 px, y DOWN, whatever the
 output resolution is. `RenderConfig.scale` maps world -> output px, so a 540x960 preview and a
@@ -21,7 +20,6 @@ from dataclasses import dataclass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-LIB = os.path.normpath(os.path.join(ROOT, ".."))
 OUT = os.path.join(ROOT, "out")
 
 REF_W = 1080
@@ -38,8 +36,8 @@ class RenderConfig:
     fps: int = 60
 
     # --- the look ---------------------------------------------------------------------
-    # Two-scale additive bloom, same shape as Field_Lines: a tight core halo that turns a
-    # dense cluster white, plus a wide atmosphere that lifts the whole frame off pure black.
+    # Two-scale additive bloom: a tight core halo that turns a dense cluster white, plus a
+    # wide atmosphere that lifts the whole frame off pure black.
     # Sigmas are quoted in WORLD px and scaled with the output, so a preview blooms the same.
     # The tight halo is what produces WHITE. A single palette swatch cannot tonemap to white
     # (its weakest channel saturates far too late), so every near-white pixel in the source is
@@ -163,7 +161,7 @@ def encoder_args() -> list:
 
 
 def find_ffmpeg() -> str:
-    """LG_FFMPEG env -> local bin\\ffmpeg.exe -> the Chemistry bundled binary -> PATH."""
+    """LG_FFMPEG env -> local bin\\ffmpeg.exe -> PATH."""
     env = os.environ.get("LG_FFMPEG")
     if env and os.path.exists(env):
         return env

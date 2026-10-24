@@ -50,6 +50,23 @@ sites, edges, edge kinds and a box sampler, and nothing downstream changes.
 `src/tools/lattice_check.py` verifies the substrate: coordination numbers, link-stamp lengths
 against real edge lengths, and that a box really is a closed ring.
 
+## Render a video
+
+All eight compositions are in `src/lg/scenes.py` and `src/lg/eyescene.py`:
+
+```bash
+cd engines/lattice-grid/src
+python cli.py list
+python cli.py circuit_hex --dry              # density report, ~2 s, draws nothing
+python cli.py circuit_hex --still 0,4,7.5    # PNGs from the same clock
+python cli.py circuit_hex --preview          # 540x960 @30
+python cli.py circuit_hex                    # 1080x1920 @60 -> out/circuit_hex.mp4
+```
+
+**Run `--dry` first.** Both ways this format fails, an empty grid and a bloomed-out wash, show up in
+that density number long before they show up in a render. The content re-rolls on a fixed beat
+clock, so no audio is needed.
+
 ## The format in one paragraph
 
 Each site carries a glyph — empty, dot, ring or pad — and each adjacency may be lit as a
@@ -126,7 +143,7 @@ precisely because nothing is connected to anything.
 
 ## Every check is necessary and none is sufficient
 
-Four separate check suites exist upstream, and each was added *after* a render passed all the
+Four separate check suites exist, and each was added *after* a render passed all the
 existing ones and still looked wrong. Two scars:
 
 - One honeycomb composition lit 38% of edges — past percolation. Every cell joined up, the frame
@@ -144,9 +161,9 @@ had every element the same colour as its neighbour where the reference has an is
 beside an orange ring. **When a render passes everything and still reads wrong, the missing metric
 is the deliverable, not more tuning.**
 
-Only `lattice_check` ships, because the other three drive real compositions. Its own
-scale-invariance section is removed for the same reason — but that section existed to catch the
-worst bug in the project's history, so it is worth reimplementing:
+`lattice_check`, `look_check`, `motion_check` and `texture_check` all ship in `src/tools/`; only
+the encoded-file check stays with me. Run `lattice_check`'s scale-invariance section after
+touching the atlas — it exists to catch the worst bug in the project's history:
 
 > **The glyph atlas was baked in world pixels and never scaled to the output.** A half-width frame
 > drew glyphs at twice their correct relative size, so a preview read a mean luminance of 58 where
@@ -227,9 +244,8 @@ rather than an error.
 
 ## What is not here
 
-- **`lg/scenes.py` and `lg/eyescene.py`** — the compositions. `lg/eye.py`, the eye *geometry*, is
-  here: it returns three fields and is a reusable subject rather than a composition.
-- **Three of the four check suites**, for the reason above.
+- **`tools/encoded_check.py`**, the fourth check suite. It measures a finished mp4 against the
+  reference clip the look was measured from, and that clip isn't mine to share.
 - **Audio.** Content already re-rolls on a beat grid, so a real track's beat should drive it
   directly rather than a constant — but nothing is wired up.
 

@@ -29,7 +29,7 @@ def dry_report(scene, cfg, samples=31):
 
     For this format the intent is a DENSITY BAND. Too few lit elements and the frame is an
     empty grid; too many and the bloom integrates to a flat wash with no contrast anywhere
-    (Field_Lines mistake 3, and it is the same failure here). This counts what would actually
+    (the same failure the field-lines engine hit). This counts what would actually
     be drawn, per frame, without drawing it - about 0.3 s for a whole scene.
     """
     st = scene.content.stats()
