@@ -69,8 +69,11 @@ def build_engine(cat, engine_dir):
 
     # ---- modules
     a("\n## Modules\n")
-    a("What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not "
-      "part of this repository — see the engine README.\n")
+    if cat.get("scenes"):
+        a("What each file is. The Compositions table further down says which scenes ship as "
+          "code — see the engine README to render one.\n")
+    else:
+        a("What each file is, and what it gives you.\n")
     a(table(["module", "kind", "what it gives you"],
             [(f"`{m['path']}`", m["kind"], m["what"]) for m in cat.get("modules", [])]))
 
@@ -98,11 +101,19 @@ def build_engine(cat, engine_dir):
     if cat.get("scenes"):
         a("\n## Compositions\n")
         a(cat.get("scenes_intro", "") + "\n")
+        # `public`: true = the composition's code is in src/ and renders with cli.py; false = it
+        # is listed for the idea but held back. Omitted entirely = the column is not shown.
+        has_pub = any("public" in s for s in cat["scenes"])
         rows = []
         for s in cat["scenes"]:
             imgs = " ".join(f"[{i+1}]({fdir}/{f})" for i, f in enumerate(s.get("frames", [])))
-            rows.append((f"`{s['name']}`", s["what"], s.get("status", ""), imgs or "—"))
-        a(table(["composition", "what it does", "status", "frames"], rows))
+            row = [f"`{s['name']}`", s["what"]]
+            if has_pub:
+                row.append("✅ yes" if s.get("public") else "held back")
+            row += [s.get("status", ""), imgs or "—"]
+            rows.append(tuple(row))
+        headers = ["composition", "what it does"] + (["code here?"] if has_pub else [])
+        a(table(headers + ["status", "frames"], rows))
 
     # ---- parameters
     if cat.get("parameters"):

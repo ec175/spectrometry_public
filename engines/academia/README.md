@@ -167,8 +167,8 @@ requirements — **manim** itself, and for some scenes a **LaTeX installation**.
 this repository needs either. (The chemical profiles specifically do *not* need LaTeX; they use Pango
 text throughout.)
 
-The scene choreography is withheld, as everywhere else here — except for the one worked example in
-`chemical_profiles/`.
+This subproject's scene choreography stays with me; the complete worked example is
+[`chemical_profiles/`](../../chemical_profiles/).
 
 ⚠️ **Never run two manim renders that share a media directory concurrently.** They clobber each
 other's partial-movie and text-SVG caches and produce crashes and truncated output. Render
@@ -184,8 +184,9 @@ compile from an elevated one, and the failure message does not say so.
 - **The 63 MB of PDFs.** The code is what is being published; [`figures/`](figures/) holds JPEG
   previews of all 84 deliverables plus the example plots, so you can see what each script
   produces before running it.
-- **`spectro_scenes.py`** — about 9,900 lines of manim choreography, withheld like every other
-  scenes module in this repository, along with the three files that import it.
+- **`spectro_scenes.py`** — about 9,900 lines of manim choreography, along with the three files
+  that import it. The video engines ship their scenes; this one is a different project, and
+  `chemical_profiles/` is its worked example.
 - **Measured data.** It lives in a separate repository and is fetched by `registry.py`.
 - **The marimo UI and preset gallery**, the DFT job inputs, and the isoxazole deliverable
   sub-package — outside the figure pipeline this engine is scoped to.

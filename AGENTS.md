@@ -9,9 +9,10 @@ friendlier version.
 **spectrometry.mp4 engines** by Clancy Earl: <https://github.com/ec175/spectrometry_public>.
 
 These are Python libraries that run a real simulation and pipe the frames straight into ffmpeg,
-with no keyframes and no timeline editor. Each engine under `engines/` stands on its own. The
-compositions (`scenes.py`) that arrange them into the finished videos are not included, so the
-normal task is to **write a new composition on top of an engine's modules**.
+with no keyframes and no timeline editor. Each engine under `engines/` stands on its own, and
+most of them ship their compositions (the scene scripts behind the videos) plus a `cli.py` that
+renders them. Typical tasks: render an existing scene, write a new scene next to the shipped ones,
+or build something new on an engine's modules.
 
 ## For AI agents: there is an inbox
 
@@ -67,20 +68,20 @@ engines/<name>/
   CATALOG.md       every object and parameter (generated, do not edit)
   catalog.json     the source of truth for CATALOG.md
   frames/          stills from finished renders (academia: figures/)
-  src/             the importable code + requirements.txt
+  src/             the importable code, requirements.txt, and cli.py (the renderer)
 chemical_profiles/ a complete manim scene (the one thing here that renders a finished video as-is)
 docs/              the GitHub Pages site and the preview media used by the READMEs
 tools/             build_catalogs.py (regenerates CATALOG.md files and the stills pages)
 ```
 
-| engine | import | entry points |
-|---|---|---|
-| `wind-tunnel` | `wt` | `wt.lbm.LBM` (lattice-Boltzmann), `wt.cns` (compressible), `wt.shapes`, `wt.bodies`, `wt.render.Tunnel` |
-| `field-lines` | `fl` | `fl.field` (fields as callables), `fl.lines.trace`, `fl.pulses`, `fl.render` |
-| `lattice-grid` | `lg` | `lg.lattice.build`, `lg.content`, `lg.rgbdelay`, `lg.render` |
-| `shape-physics` | `sim` | `sim.build` (shapes), `sim.world.World`, `sim.audio.Score`, `sim.render` |
-| `attractors` | `at` | `at.core.Swarm`, `at.core.FLOWS`, `at.draw.Canvas`, `at.draw.PALETTES` |
-| `oscilloscope` | `osc` | `osc.scope.Scope`, `osc.crtfilm.FilmLook`, `filter_cli.py` (standalone CLI) |
+| engine | import | scenes (registry) | entry points |
+|---|---|---|---|
+| `wind-tunnel` | `wt` | `wt/scenes.py` (`SCENES`, 38) | `wt.lbm.LBM` (lattice-Boltzmann), `wt.cns` (compressible), `wt.shapes`, `wt.bodies`, `wt.render.Tunnel`; `tools/dbg.py <scene>` is the pre-render gate |
+| `field-lines` | `fl` | `fl/scenes.py` (5) | `fl.field` (fields as callables), `fl.lines.trace`, `fl.pulses`, `fl.render` |
+| `lattice-grid` | `lg` | `lg/scenes.py` + `lg/eyescene.py` (8) | `lg.lattice.build`, `lg.content`, `lg.rgbdelay`, `lg.render` |
+| `shape-physics` | `sim` | `sim/scenes.py` (11) | `sim.build` (shapes), `sim.world.World`, `sim.audio.Score`, `sim.render` |
+| `attractors` | `at` | `at/scenes.py` (5) | `at.core.Swarm`, `at.core.FLOWS`, `at.draw.Canvas`, `at.draw.PALETTES` |
+| `oscilloscope` | `osc` | `osc/signals.py` (12) | `osc.scope.Scope`, `osc.crtfilm.FilmLook`, `filter_cli.py` (standalone CLI) |
 | `chemical-scope` | `osc` + `chemical_data` | `chemical_profile.py <Molecule> --preview`, `render_optimal.py` |
 | `academia` | modules in `src/` | `amino_acid_sim_test.py` is the reference script |
 
@@ -90,6 +91,11 @@ tools/             build_catalogs.py (regenerates CATALOG.md files and the still
   `pip install -r engines/<name>/src/requirements.txt`.
 - **`academia` needs `numpy<2`** (RDKit), while the other engines use `numpy>=2`. Never install
   them into the same environment.
+- Render a shipped scene: `cd engines/<name>/src`, then `python cli.py list`, then
+  `python cli.py <scene> --preview`. Where a `--dry` mode exists (field-lines, lattice-grid,
+  shape-physics) or a gate tool (`wind-tunnel/src/tools/dbg.py`), run it before rendering.
+- Add a scene: copy the nearest shipped one in the engine's scenes file and add one line to its
+  `SCENES` registry. Keep the new file's two-line header.
 - Import pattern, from the repo root: `import sys; sys.path.insert(0, "engines/<name>/src")`.
 - Output goes to `engines/<name>/src/out/`, which is gitignored. Encodes write `<name>.part.mp4`
   and rename only on success, so a `.part.mp4` is an unfinished file.
@@ -109,5 +115,7 @@ tools/             build_catalogs.py (regenerates CATALOG.md files and the still
   present them as measured data.
 - In `wind-tunnel`, `u0` is a lattice velocity under `lbm.py` but a Mach number under `cns.py`.
   Read `engines/wind-tunnel/README.md` before changing speeds.
+- Photographed-subject scenes (`tri_shapes`, `mach_shapes`) need a user-supplied cut-out PNG in
+  `engines/wind-tunnel/src/assets/`. No music ships; shape-physics takes `--song PATH`.
 - Nothing in these engines is keyframed. If a result looks wrong, fix a solver or geometry
   parameter, not the renderer.

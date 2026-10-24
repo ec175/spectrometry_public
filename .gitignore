@@ -52,3 +52,10 @@ engines/*/src/bin/
 Thumbs.db
 .vscode/
 .idea/
+
+# --- your own photos for the photographed-subject wind-tunnel scenes ---
+engines/wind-tunnel/src/assets/*
+!engines/wind-tunnel/src/assets/README.md
+
+# --- optional fonts you drop in for the CRT engines ---
+engines/*/src/fonts/

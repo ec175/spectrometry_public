@@ -87,7 +87,7 @@ def encoder_args() -> list:
 
 
 def find_ffmpeg() -> str:
-    """OSC_FFMPEG env -> local bin\\ffmpeg.exe -> the Chemistry bundled binary -> PATH."""
+    """OSC_FFMPEG env -> local bin\\ffmpeg.exe -> a bundled binary from another project -> PATH."""
     env = os.environ.get("OSC_FFMPEG")
     if env and os.path.exists(env):
         return env

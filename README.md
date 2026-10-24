@@ -18,8 +18,8 @@ Written in Python, turned into video with ffmpeg. Free to use.
 
 Hey! If you got here from one of my videos, you're in the right place. Nothing on the channel is
 animated by hand: a real simulation runs, and every frame it produces goes straight into the video.
-This repo is where I share the engines that do that, so you can pull them apart and make your own
-things with them.
+This repo is where I share the engines that do that, along with the scene scripts behind most of
+my videos, so you can render them yourself, pull them apart, and make your own things with them.
 
 ## Find the engine behind a video
 
@@ -72,8 +72,22 @@ python -m venv .venv
 Turn the environment on. On Windows that's `.venv\Scripts\activate`; on macOS or Linux it's
 `source .venv/bin/activate`. Then pick one:
 
-**🎬 Make a full video right now.** [Chemical Profiles](chemical_profiles/README.md) is a finished
-scene: one molecule, its spectra, about ten minutes from a fresh clone.
+**🌪️ Render one of my scenes.** Every engine has a `cli.py`. This is the wind tunnel clip from
+the top of this page, at preview size:
+
+```bash
+pip install -r engines/wind-tunnel/src/requirements.txt
+cd engines/wind-tunnel/src
+python cli.py list
+python cli.py tri_foil_air_fast --preview
+```
+
+Your video lands in `engines/wind-tunnel/src/out/`. Drop `--preview` for the full 1080×1920
+version. Each [engine page](engines/README.md) has a **Render a video** section with its own
+commands.
+
+**🎬 Make a molecule video.** [Chemical Profiles](chemical_profiles/README.md) is a finished manim
+scene: one molecule and its spectra.
 
 ```bash
 pip install -r chemical_profiles/requirements.txt
@@ -139,13 +153,15 @@ everywhere, so you can skip the whole LaTeX install.
 </details>
 
 <details>
-<summary><b>Why can't I re-make your exact videos?</b></summary>
+<summary><b>Can I re-make your exact videos?</b></summary>
 <br>
 
-The engines are the toolbox. The `scenes.py` files that arrange them into my finished videos
-stay with me, because I'd rather hand you the parts than a button that copies my channel. Every
-composition I've made is still listed in each engine's catalogue, with stills, because the idea is
-usually the useful bit.
+Most of them, yes. The scene scripts for 79 of my compositions are in the engines' `src/` folders,
+and `python cli.py list` shows them. Some are held back: scenes built on photos or music I
+don't own, the missile and ammunition studies, sets that aren't finished, and the "not public
+yet" engines above. Each
+engine's catalogue marks which scenes ship. My finished videos also have music and edits that
+aren't part of the engines.
 
 </details>
 

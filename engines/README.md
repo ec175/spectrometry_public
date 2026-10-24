@@ -32,6 +32,29 @@ straight to ffmpeg; the eighth, Academia, makes the publication figures the whol
 | **[Chemical Scope](chemical-scope/README.md)** | 29 molecules with their FTIR and Raman spectra, drawn on that CRT |
 | **[Academia](academia/README.md)** | stacked spectra figures for whole classes of molecules, as vector PDFs |
 
+## Render any of them
+
+Every video engine has a `cli.py` in its `src/` folder, and they all work the same way. Install
+that engine's requirements into its own virtual environment, then from its `src/` folder:
+
+```bash
+python cli.py list                 # the scenes it ships
+python cli.py <scene> --dry        # field-lines, lattice-grid, shape-physics: a check, no drawing
+python cli.py <scene> --preview    # half size, same animation
+python cli.py <scene>              # full 1080x1920 -> out/<scene>.mp4
+```
+
+| engine | scenes | a good first one |
+|---|---|---|
+| [Wind Tunnel](wind-tunnel/README.md#render-a-video) | 38 | `tri_foil_air_fast` (run `tools/dbg.py` on it first) |
+| [Field Lines](field-lines/README.md#render-a-video) | 5 | `dipole_flower` |
+| [Lattice Grid](lattice-grid/README.md#render-a-video) | 8 | `circuit_hex` |
+| [Shape Physics](shape-physics/README.md#render-a-video) | 11 | `plinko` |
+| [Attractors](attractors/README.md#render-a-video) | 5 | `lorenz_swarm` |
+| [Oscilloscope](oscilloscope/README.md#render-a-video) | 12 | `wind_up` |
+| [Chemical Scope](chemical-scope/README.md#start-here) | 29 molecules | `python chemical_profile.py Morphine --preview` |
+| [Academia](academia/README.md#start-here) | figure scripts | `python amino_acid_sim_test.py` |
+
 ## What every engine has in common
 
 **Previews are trustworthy.** Every engine drives its frames from real seconds (`t = i/fps`), so a

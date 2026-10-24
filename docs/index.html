@@ -124,7 +124,8 @@
 <div class="intro">
   <h1>The code behind the spectrometry.mp4 videos</h1>
   <p>Nothing on the channel is animated by hand. A real simulation runs and every frame goes
-     straight into the video. These are the engines that do it, free for anyone to use.</p>
+     straight into the video. These are the engines that do it, plus the scene scripts behind most
+     of the videos, free for anyone to use.</p>
   <div class="buttons">
     <a class="btn primary" href="https://github.com/ec175/spectrometry_public">Get the code on GitHub</a>
     <a class="btn" href="https://instagram.com/spectrometry.mp4">Instagram</a>
@@ -179,8 +180,15 @@ python -m venv .venv</code></pre>
          <code>source .venv/bin/activate</code> on macOS and Linux.</p>
     </div>
     <div class="panel">
-      <h3>2. Make a full video</h3>
-      <p>A finished scene: one molecule and its spectra.</p>
+      <h3>2. Render one of my scenes</h3>
+      <p>Every engine has a <code>cli.py</code>. This is the wind tunnel clip above, at preview size.</p>
+      <pre><code>pip install -r engines/wind-tunnel/src/requirements.txt
+cd engines/wind-tunnel/src
+python cli.py list
+python cli.py tri_foil_air_fast --preview</code></pre>
+    </div>
+    <div class="panel">
+      <h3>…or make a molecule video</h3>
       <pre><code>pip install -r chemical_profiles/requirements.txt
 cd chemical_profiles
 manim -ql -r 540,960 chemical_profile.py VerticalProfile_Aspirin</code></pre>

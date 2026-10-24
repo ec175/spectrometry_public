@@ -11,7 +11,7 @@ Every object in this repository, grouped by the engine that makes it. Each engin
 
 | engine | what it makes | catalogue |
 |---|---|---|
-| [Wind Tunnel](wind-tunnel/) | A real 2-D fluid solver driving a colour-field animation — nothing on screen is keyframed. | 37 objects, 35 compositions, 60 frames |
+| [Wind Tunnel](wind-tunnel/) | A real 2-D fluid solver driving a colour-field animation — nothing on screen is keyframed. | 37 objects, 40 compositions, 60 frames |
 | [Field Lines](field-lines/) | Field lines and streamlines of a closed-form vector field, integrated in arclength. | 17 objects, 5 compositions, 16 frames |
 | [Lattice Grid](lattice-grid/) | A fixed lattice of nodes and connectors whose content re-rolls on the beat, lit by a moving field. | 18 objects, 8 compositions, 17 frames |
 | [Shape Physics](shape-physics/) | Rigid-body-lite simulation for 'satisfying shapes' clips — and audio the simulation triggers, rather than the other way round. | 20 objects, 13 compositions, 28 frames |
@@ -38,7 +38,7 @@ Every object in this repository, grouped by the engine that makes it. Each engin
 **Colour maps** — `jet`, `turbo`, `ice`, `inferno`, `vort`, `blues`, `reds`
 
 
-**Compositions** — `aoa_sweep`, `aoa_sweep_fast`, `stall`, `vortex_street`, `tandem`, `flutter`, `shape_tour`, `tri_foil`, `tri_foil_fast`, `tri_foil_rates`, `tri_foil_rates_fast`, `tri_foil_rates_loop`, `tri_foil_air`, `tri_foil_air_fast`, `tri_shapes`, `tri_shapes_live`, `tri_foil_gas`, `mach_sweep`, `mach_rates`, `mach_foils`, `mach_shapes`, `jet_engine`, `falling_discs`, `falling_squares`, `projectiles`, `eddies`, `currents`, `still_water`, `black_holes`, `black_holes_red`, `object_test`, `orbit`, `surf_rates`, `surf_sweep`, `surf_wave`
+**Compositions** — `aoa_sweep`, `aoa_sweep_fast`, `stall`, `vortex_street`, `tandem`, `flutter`, `shape_tour`, `tri_foil`, `tri_foil_fast`, `tri_foil_rates`, `tri_foil_rates_fast`, `tri_foil_rates_loop`, `tri_foil_air`, `tri_foil_air_fast`, `tri_shapes`, `tri_shapes_live`, `tri_foil_gas`, `mach_sweep`, `mach_rates`, `mach_foils`, `mach_shapes`, `jet_engine`, `falling_discs`, `falling_squares`, `projectiles`, `eddies`, `currents`, `still_water`, `black_holes`, `black_holes_red`, `object_test`, `orbit`, `surf_rates`, `surf_sweep`, `surf_wave`, `tri_foil_air_sweep2`, `tri_cylinders`, `duo_foil_air_fast`, `duo_foil_air_sweep2`, `duo_foil_air_shape`
 
 
 ## Field Lines

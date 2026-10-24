@@ -51,8 +51,8 @@ ROLE = {                      # functional-group symbol colours (per-group trace
 
 _WINFONTS = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts")
 _FONT_CANDIDATES = [
-    os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..",
-                                  "Ascii_Studio", "assets", "fonts", "CascadiaMono.ttf")),
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts",
+                 "CascadiaMono.ttf"),
     os.path.join(_WINFONTS, "CascadiaMono.ttf"),
     os.path.join(_WINFONTS, "CascadiaCode.ttf"),
     os.path.join(_WINFONTS, "consola.ttf"),

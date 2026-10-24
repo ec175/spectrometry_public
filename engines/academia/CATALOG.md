@@ -13,7 +13,7 @@ The same core also parses real instrument scans — the technique modules accept
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
