@@ -3,12 +3,11 @@
 """draw.py - the look. Pillow vector draws at SS x resolution, box-downsampled, plus an
 additive two-scale bloom (tight halo + wide atmosphere).
 
-Same immediate-mode idea as Ascii_Studio / Oscilloscope: no scene graph, no cache. Each frame
-is drawn from the world state at time t and handed to ffmpeg as raw RGB24.
+Immediate-mode: no scene graph, no cache. Each frame is drawn from the world state at time t
+and handed to ffmpeg as raw RGB24.
 
-Bloom is done on the DOWNSAMPLED frame (the glow is low-frequency, so blurring at output res
-is visually identical to blurring the supersampled buffer and ~4x cheaper - the same argument
-as Oscilloscope's half-res bloom).
+Bloom is done on the DOWNSAMPLED frame - the glow is low-frequency, so blurring at output res
+is visually identical to blurring the supersampled buffer, and about 4x cheaper.
 """
 from __future__ import annotations
 
@@ -20,8 +19,6 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 _FONT_PATHS = [
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
-                 "Ascii_Studio", "assets", "fonts", "CascadiaMono.ttf"),
     r"C:\Windows\Fonts\arialbd.ttf",
     r"C:\Windows\Fonts\consola.ttf",
 ]

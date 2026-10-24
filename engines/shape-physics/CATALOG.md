@@ -11,7 +11,7 @@ Discs against analytic surfaces. Three primitives — a hollow ring with gaps, a
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
@@ -21,6 +21,8 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 | `sim/draw.py` | render | `Frame` (supersampled Pillow canvas, box downsample, two-scale additive bloom), `Style`, `draw_world`. Bloom runs on the DOWNSAMPLED frame: the glow is low-frequency, so it is visually identical and about four times cheaper. |
 | `sim/render.py` | render | `simulate()` (physics only, no drawing) and `render_scene()` (frames to ffmpeg, then build the track and mux it). |
 | `sim/config.py` | config | `RenderConfig` (resolution, fps, supersample, substeps, bloom), ffmpeg resolution, the NVENC probe with libx264 fallback. |
+| `cli.py` | entry point | `python cli.py list`, `<scene> --dry` (physics only), `--preview`, `--song PATH`. |
+| `sim/scenes.py` | compositions | The compositions and the `SCENES` registry. |
 
 
 ## Primitives
@@ -77,23 +79,23 @@ The inverted relationship, and the whole point of the project.
 
 ## Compositions
 
-Twelve compositions, and the interesting axis across them is what counts as the headline EVENT — a different design decision in each, not a reskin. Measured counts are for 15 s at the shipped settings.
+Twelve compositions, and the interesting axis across them is what counts as the headline EVENT — a different design decision in each, not a reskin. Measured counts are for 15 s at the shipped settings. Eleven are in `src/sim/scenes.py` and render with `python cli.py <name>`; run `--dry` first. No music ships - pass `--song PATH` for your own, or render silent.
 
-| composition | what it does | status | frames |
-|---|---|---|---|
-| `escape_rings` | Two counter-rotating shells with gaps; a ball works its way out through both, fires the trigger, falls out of frame, and is replaced by two smaller ones. Counter-rotation is a choice, not decoration — same-direction shells phase-lock and the escaping ball meets the outer gap at nearly the same place every lap. | 45 s preview shipped; awaiting a full-res final | [1](frames/escape_rings_t006.jpg) [2](frames/escape_rings_t030.jpg) [3](frames/escape_rings_t060.jpg) [4](frames/escape_rings_t088.jpg) |
-| `orbit_swarm` | The most developed composition — eleven revisions. A central pull, a destructible shell, and spheres on three rotationally staggered elliptical tracks that separate into distinct orbital PLANES once the shell is gone. Whether two spheres interact depends on their HEADINGS, not on contact. | shipped 30 s at full res | [1](frames/orbit_swarm_t010.jpg) [2](frames/orbit_swarm_t035.jpg) [3](frames/orbit_swarm_t060.jpg) [4](frames/orbit_swarm_t085.jpg) |
-| `orbit_swarm (v9)` | The previous cut, kept for comparison — before per-tier counter-rotation was added. | archived | [1](frames/orbit_swarm_v9_anglerule_t055.jpg) |
-| `plinko` | Pin field plus 1x/2x/3x/2x/1x multiplier pits. The jackpot sits dead centre, exactly where the Galton distribution piles up, so the cascade builds by design rather than by luck. 32 events / 595 bounces. | shipped preview | [1](frames/plinko_t035.jpg) [2](frames/plinko_t075.jpg) |
-| `bumper_pit` | Energising bumpers at e = 1.12 over 1x/3x/1x pits. The busiest in the set: 70 events / 381 bounces. | shipped preview | [1](frames/bumper_pit_t035.jpg) [2](frames/bumper_pit_t075.jpg) |
-| `funnel_cascade` | Three sliding funnels over multiplier pits. A pit row meant to catch everything must TILE — with radii below half the pit spacing it caught 3 of 34 balls. 28 events / 329 bounces. | shipped preview | [1](frames/funnel_cascade_t035.jpg) [2](frames/funnel_cascade_t075.jpg) |
-| `breakout_shell` | Two counter-rotating destructible brick shells. The fewest bounces per second in the set, because the ball spends its time in free fall between bricks — and the most earned event. 38 events / 70 bounces / 33 bricks destroyed. | shipped preview | [1](frames/breakout_shell_t035.jpg) [2](frames/breakout_shell_t075.jpg) |
-| `hex_nest` | Three nested spinning polygon cages with sides missing; the event is clearing the outermost. 7 events / 149 bounces. | shipped preview | [1](frames/hex_nest_t035.jpg) [2](frames/hex_nest_t075.jpg) |
-| `gear_cage` | An octagon cage with a counter-rotating six-tooth gear; the ball is squeezed out along a gap. 17 events / 174 bounces. | shipped preview | [1](frames/gear_cage_t035.jpg) [2](frames/gear_cage_t075.jpg) |
-| `spiral_drop` | One rotating spiral chute; the event is clearing the last coil. 24 events / 182 bounces. | shipped preview | [1](frames/spiral_drop_t035.jpg) [2](frames/spiral_drop_t075.jpg) |
-| `paddle_wheel` | A bowl with a four-blade wheel; the event is being thrown out through a rim gap. The quietest in the set at 5 events / 55 bounces — the wheel throwing balls is the appeal rather than the escape rate. | shipped preview | [1](frames/paddle_wheel_t035.jpg) [2](frames/paddle_wheel_t075.jpg) |
-| `pendulum_rows` | Three rows of out-of-phase swinging bars; the event is reaching the floor. 33 events / 185 bounces. | shipped preview | [1](frames/pendulum_rows_t035.jpg) [2](frames/pendulum_rows_t075.jpg) |
-| `drum_tower` | Five gapped cages stacked rather than nested. | CUT — cages small enough that balls bypass them | — |
+| composition | what it does | code here? | status | frames |
+|---|---|---|---|---|
+| `escape_rings` | Two counter-rotating shells with gaps; a ball works its way out through both, fires the trigger, falls out of frame, and is replaced by two smaller ones. Counter-rotation is a choice, not decoration — same-direction shells phase-lock and the escaping ball meets the outer gap at nearly the same place every lap. | ✅ yes | 45 s preview shipped; awaiting a full-res final | [1](frames/escape_rings_t006.jpg) [2](frames/escape_rings_t030.jpg) [3](frames/escape_rings_t060.jpg) [4](frames/escape_rings_t088.jpg) |
+| `orbit_swarm` | The most developed composition — eleven revisions. A central pull, a destructible shell, and spheres on three rotationally staggered elliptical tracks that separate into distinct orbital PLANES once the shell is gone. Whether two spheres interact depends on their HEADINGS, not on contact. | ✅ yes | shipped 30 s at full res | [1](frames/orbit_swarm_t010.jpg) [2](frames/orbit_swarm_t035.jpg) [3](frames/orbit_swarm_t060.jpg) [4](frames/orbit_swarm_t085.jpg) |
+| `orbit_swarm (v9)` | The previous cut, kept for comparison — before per-tier counter-rotation was added. | held back | archived | [1](frames/orbit_swarm_v9_anglerule_t055.jpg) |
+| `plinko` | Pin field plus 1x/2x/3x/2x/1x multiplier pits. The jackpot sits dead centre, exactly where the Galton distribution piles up, so the cascade builds by design rather than by luck. 32 events / 595 bounces. | ✅ yes | shipped preview | [1](frames/plinko_t035.jpg) [2](frames/plinko_t075.jpg) |
+| `bumper_pit` | Energising bumpers at e = 1.12 over 1x/3x/1x pits. The busiest in the set: 70 events / 381 bounces. | ✅ yes | shipped preview | [1](frames/bumper_pit_t035.jpg) [2](frames/bumper_pit_t075.jpg) |
+| `funnel_cascade` | Three sliding funnels over multiplier pits. A pit row meant to catch everything must TILE — with radii below half the pit spacing it caught 3 of 34 balls. 28 events / 329 bounces. | ✅ yes | shipped preview | [1](frames/funnel_cascade_t035.jpg) [2](frames/funnel_cascade_t075.jpg) |
+| `breakout_shell` | Two counter-rotating destructible brick shells. The fewest bounces per second in the set, because the ball spends its time in free fall between bricks — and the most earned event. 38 events / 70 bounces / 33 bricks destroyed. | ✅ yes | shipped preview | [1](frames/breakout_shell_t035.jpg) [2](frames/breakout_shell_t075.jpg) |
+| `hex_nest` | Three nested spinning polygon cages with sides missing; the event is clearing the outermost. 7 events / 149 bounces. | ✅ yes | shipped preview | [1](frames/hex_nest_t035.jpg) [2](frames/hex_nest_t075.jpg) |
+| `gear_cage` | An octagon cage with a counter-rotating six-tooth gear; the ball is squeezed out along a gap. 17 events / 174 bounces. | ✅ yes | shipped preview | [1](frames/gear_cage_t035.jpg) [2](frames/gear_cage_t075.jpg) |
+| `spiral_drop` | One rotating spiral chute; the event is clearing the last coil. 24 events / 182 bounces. | ✅ yes | shipped preview | [1](frames/spiral_drop_t035.jpg) [2](frames/spiral_drop_t075.jpg) |
+| `paddle_wheel` | A bowl with a four-blade wheel; the event is being thrown out through a rim gap. The quietest in the set at 5 events / 55 bounces — the wheel throwing balls is the appeal rather than the escape rate. | ✅ yes | shipped preview | [1](frames/paddle_wheel_t035.jpg) [2](frames/paddle_wheel_t075.jpg) |
+| `pendulum_rows` | Three rows of out-of-phase swinging bars; the event is reaching the floor. 33 events / 185 bounces. | ✅ yes | shipped preview | [1](frames/pendulum_rows_t035.jpg) [2](frames/pendulum_rows_t075.jpg) |
+| `drum_tower` | Five gapped cages stacked rather than nested. | held back | CUT — cages small enough that balls bypass them | — |
 
 
 ## Parameters that matter

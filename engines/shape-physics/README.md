@@ -62,6 +62,23 @@ and a `Peg` (a disc, optionally orbiting, optionally with restitution above 1 so
 energising bumper). They all resolve through the same two functions, so they interact correctly
 with each other for free.
 
+## Render a video
+
+Eleven compositions are in `src/sim/scenes.py`:
+
+```bash
+cd engines/shape-physics/src
+python cli.py list
+python cli.py plinko --dry                     # physics only: escapes, triggers, audio segments
+python cli.py plinko --preview --seconds 15    # 540x960 @30
+python cli.py plinko --seconds 15              # 1080x1920 @60 -> out/
+python cli.py escape_rings --song your_song.mp3 --song-start 12
+```
+
+**No music ships**, so videos are silent unless you pass `--song PATH` with a file of your own.
+The collision sounds are generated, and `escape_rings` plays the next slice of your song every time
+a ball escapes.
+
 ## The audio rule
 
 Everywhere else in this repository, a song is analysed into a band track and the render *reads*
@@ -223,10 +240,9 @@ isotropic, or to your own aspect.
 
 ## What is not here
 
-- **`sim/scenes.py`** — the twelve compositions. See [CATALOG.md](CATALOG.md) for what each one's
-  headline event is, its measured event and bounce counts, and frames.
-- **Audio files.** `SONGS` is empty and `SONGS_DIR` points at a `songs/` directory beside the
-  source. Drop your own files there, or pass an absolute path.
+- **Music.** `SONGS` in `sim/config.py` is empty. Pass `--song PATH`, or add your own names to
+  `SONGS`.
+- **`drum_tower`**, a composition I cut: its cages were small enough that balls bypassed them.
 
 ---
 

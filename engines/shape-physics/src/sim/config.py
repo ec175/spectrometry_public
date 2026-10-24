@@ -2,8 +2,8 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py - render config, song paths and ffmpeg/NVENC resolution.
 
-Ported from Oscilloscope\\osc\\config.py (same find_ffmpeg chain, same one-time NVENC probe
-with automatic libx264 fallback, same env-var opt-out names but SP_-prefixed).
+Same find_ffmpeg chain and one-time NVENC probe (with automatic libx264 fallback) as the
+other engines in this repository, with SP_-prefixed env-var names.
 
 WORLD UNITS: the simulation always runs in the REFERENCE frame 1080x1920 px, whatever the
 output resolution is. `RenderConfig.scale` maps world -> output px. That is what makes a
@@ -17,7 +17,6 @@ from dataclasses import dataclass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-LIB = os.path.normpath(os.path.join(ROOT, ".."))
 OUT = os.path.join(ROOT, "out")
 
 # world/reference frame - all scene geometry is quoted in these px
@@ -97,7 +96,7 @@ def encoder_args() -> list:
 
 
 def find_ffmpeg() -> str:
-    """SP_FFMPEG env -> local bin\\ffmpeg.exe -> the Chemistry bundled binary -> PATH."""
+    """SP_FFMPEG env -> local bin\\ffmpeg.exe -> PATH."""
     env = os.environ.get("SP_FFMPEG")
     if env and os.path.exists(env):
         return env

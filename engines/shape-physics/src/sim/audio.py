@@ -2,14 +2,14 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """audio.py - EVENT-TRIGGERED progressive song playback, plus decode/mux.
 
-`decode_*` and `mux_track` are ported from Oscilloscope\\osc\\audio.py (which was itself
-ported from Ascii_Studio) - same ffmpeg invocation, same atomic <out>.part.mp4 -> rename.
+`decode_*` and `mux_track` use a plain ffmpeg invocation, with the same atomic
+<out>.part.mp4 -> rename pattern used by every other engine in this repository.
 
-The NEW piece is `Score`, and it inverts the library's usual relationship with audio. Every
-other audio-reactive project here precomputes a band track from the song and lets the RENDER
-read it (the "build start == mux -ss" sync rule). Here the SIMULATION decides when the song
-plays: each event plays the next half-second of the song, so the song is revealed in order
-across the clip.
+The NEW piece is `Score`, and it inverts the usual relationship with audio. The common
+pattern elsewhere is to precompute a band track from the song and let the render READ it
+(a "build start == mux -ss" sync rule). Here the SIMULATION decides when the song plays:
+each event plays the next half-second of the song, so the song is revealed in order across
+the clip.
 
 THE OVERLAP RULE (the mistake this class exists to avoid). Videos of this kind usually
 retrigger the sample on every event, so two events inside one interval stack two copies of

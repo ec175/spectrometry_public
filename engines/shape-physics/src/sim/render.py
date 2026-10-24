@@ -5,8 +5,8 @@
 Two entry points:
   simulate(scene, cfg)      - physics only, no drawing. Answers "does the scene DO its brief?"
                               (how many escapes, when, how the audio schedule falls out) in a
-                              second or two. Wind_Tunnel's lesson: a scene with an intent needs
-                              a check that measures THAT, not just one that survives a render.
+                              second or two - a scene with an intent needs a check that
+                              measures THAT, not just one that survives a render.
   render_scene(...)         - frames -> ffmpeg -> silent mp4 -> build track -> mux.
 
 The physics rate (cfg.substeps_per_sec) is independent of fps, so a 30 fps preview and a

@@ -16,7 +16,7 @@ Three obstacle primitives cover everything the scene library needs:
 All three reduce to the same two resolvers (`_disc` for anything round, `_resolve` for the
 impulse), which is why adding a shape is cheap and why they all interact correctly.
 
-WHAT A SCENE MAY DO (the Wind_Tunnel discipline): choose geometry, materials and forcing -
+WHAT A SCENE MAY DO: choose geometry, materials and forcing -
 positions, sizes, spin rates, restitution, friction, gravity, what spawns and when. It may NOT
 place a ball on a path. Every bounce, escape and fall is solved.
 
@@ -339,7 +339,7 @@ class World:
         # of half the balls running each way, `orbit_boost` scales the launch above the circular
         # speed, and `tan_kick` biases a scatter's fragments along the circulation instead of
         # purely radially. Together they give the system a net angular momentum it keeps.
-        # This is a declared FORCING (the same category as Wind_Tunnel's prescribed spin), not
+        # This is a declared FORCING, not
         # an emergent result - a random-direction swarm cancels its own circulation to zero.
         self.orbit_dir = int(orbit_dir)
         # PER-TIER circulation direction. A tier that runs the other way is head-on to every
@@ -353,7 +353,7 @@ class World:
         # 30 s only 6 of 13 spheres were still co-rotating (i.e. a coin flip - the swarm had
         # cancelled its own angular momentum). This is a tangential acceleration that drives
         # each sphere TOWARD the local circular speed in the shared direction - the same
-        # drive-toward-a-target device as Wind_Tunnel's `set_drive`, and a declared forcing
+        # drive-toward-a-target device, and a declared forcing
         # rather than a fudge: a stirrer, not a keyframe.
         self.swirl_a = float(swirl_a)
         # ---- DECAY: an age-gated climb back UP the ladder. Together with scatter (down) and
