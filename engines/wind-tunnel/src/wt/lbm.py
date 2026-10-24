@@ -125,6 +125,7 @@ class LBM:
         self._turb_amp = 0.0
         self._turb_n = 0
         self._turb_c = 0.0
+        self._turb_base = None        # (amp, c) as built; see set_turbulence_scale
         self.steps_done = 0
 
     # -- geometry ---------------------------------------------------------------------
@@ -258,6 +259,33 @@ class LBM:
         self._turb_amp = float(amp) if amp.ndim == 0 else xp.asarray(amp.reshape(-1))
         self._turb_c = float(self.u0 if u_conv is None else u_conv)
         self._turb_on = True
+
+    def set_turbulence_scale(self, scale):
+        """Scale the injected turbulence (and its convection speed) without rebuilding the patch.
+
+        Added 2026-08-11 for the road set, whose tunnel ACCELERATES FROM REST. `set_inlet_
+        turbulence` builds a frozen random field once and reads one column per step, which is what
+        makes it cheap - but it fixes the amplitude at that moment, and a clip that opens on still
+        air cannot have 2%-of-full-speed fluctuations wobbling its first second. Regenerating the
+        patch per frame is not the answer either: it is a gaussian filter over a (ny, span) array,
+        and a NEW random field every frame is white noise in time rather than turbulence.
+
+        So the patch stays frozen and only its amplitude moves. Turbulence intensity is defined as
+        a fraction of the FREESTREAM, so scaling both the amplitude and the convection speed with
+        the throttle keeps Tu constant at the value the scene asked for while the tunnel spins up
+        - which is what a real tunnel does. At scale 0 nothing is injected at all.
+
+        Cheap by construction: two attribute writes, no allocation. A scene calls it from
+        `forcing()`; nothing that does not call it is affected.
+        """
+        s = max(0.0, float(scale))
+        if not self._turb_on:
+            return
+        if self._turb_base is None:                  # first call: remember what was built
+            self._turb_base = (self._turb_amp, self._turb_c)
+        amp, c = self._turb_base
+        self._turb_amp = (amp * s) if np.isscalar(amp) else (amp * s)
+        self._turb_c = c * s
 
     # -- one collision-streaming step ------------------------------------------------
     def step(self):
@@ -514,7 +542,7 @@ class LBM:
         self.rho = xp.ones((self.ny, self.nx), dtype=xp.float32)
         self.f = equilibrium(self.rho, self.ux, self.uy, self.cx, self.cy, self.w)
 
-    def set_farfield(self, ux_profile=None):
+    def set_farfield(self, ux_profile=None, uy_profile=None):
         """Retarget the SPONGE's equilibrium to a spanwise profile instead of a uniform `u0`.
 
         The outlet sponge relaxes `f` toward the freestream so a vortex leaving the domain does
@@ -525,6 +553,14 @@ class LBM:
         bands the scene asked for quietly wash out over the clip. Feed the same profile here that
         went into `set_inlet` and the absorber becomes what it was meant to be - transparent to
         the flow the scene established, opaque to what reflects off the boundary.
+
+        `uy_profile` is the CROSS-STREAM half of the same argument, and it defaults to None,
+        which means zero - exactly what this did before it existed. A scene that YAWS its
+        freestream (`sperm_slalom` swings the current to lean the race) sets a cross-stream inlet
+        via `set_inlet`'s second argument, and without the matching term here the absorber would
+        go on targeting a purely axial stream: the identical failure this docstring already
+        describes for speed, arriving on the other component. A sponge that disagrees with the
+        inlet about DIRECTION is still a pump - it just pushes sideways.
 
         `None` restores the uniform-`u0` target. Note this does NOT touch the current `f`; a scene
         wanting the whole domain to START on the profile calls `init_velocity` as well.
@@ -537,9 +573,11 @@ class LBM:
             self._feq_free = equilibrium(rho1, ux1, uy1, self.cx, self.cy, self.w).reshape(9, 1, 1)
             return
         u = xp.asarray(ux_profile, dtype=f32).reshape(1, self.ny, 1)
+        v = (xp.zeros_like(u) if uy_profile is None
+             else xp.asarray(uy_profile, dtype=f32).reshape(1, self.ny, 1))
         rho = xp.ones((1, self.ny, 1), dtype=f32)
         # (9, ny, 1): broadcasts against the (1, ny, nx) sponge weight exactly as the scalar did
-        self._feq_free = equilibrium(rho, u, xp.zeros_like(u), self.cx, self.cy, self.w)
+        self._feq_free = equilibrium(rho, u, v, self.cx, self.cy, self.w)
 
     def set_inlet(self, ux_profile=None, uy_profile=None):
         """Override the inlet velocity across the span — arrays of length ny (or None to reset).
@@ -568,8 +606,49 @@ class LBM:
         return fx / q, fy / q
 
     def health(self):
-        """Max |u| — a cheap divergence tripwire (lattice Mach must stay well under 1/sqrt(3))."""
-        return float(asnumpy(xp.sqrt(self.ux ** 2 + self.uy ** 2).max()))
+        """Divergence tripwire: max |u| over fluid at least ONE CELL CLEAR of any solid.
+
+        Two exclusions, and both were paid for.
+
+        **Solid cells**, because `ux`/`uy` are not zero inside a body - they hold bounce-back
+        leftovers, which are not a velocity. For a static body the
+        leftovers are small and an unmasked max happened to equal the fluid's; a body with a
+        MOVING wall has its own surface velocity written into those cells by `step()`, and the
+        unmasked number read 0.50-0.63 while the flow peaked at 0.097.
+
+        **The one-cell skin beside a body**, because a sharp-interface wall sweeping BROADSIDE
+        piles mass up in the cell it is moving into. Measured on `sperm_sweep`'s flagellar tip:
+        rho **1.68** against a fluid mean of 1.0008, so `momentum/rho` reads ~0.5 in ONE cell,
+        which then relaxes within a single frame. That is the standard staircase artefact of a
+        moving boundary (`bodies.py`'s load low-pass exists for the same reason); it is not a
+        lattice dying, and a lattice dying does not recover in one frame.
+
+        THE STATISTIC WAS CHOSEN BY MEASUREMENT, not by argument. Worst frame of each scene:
+
+            scene             max      skin    p99.99
+            tri_foil_air    0.0845    0.0845    0.0824
+            aoa_sweep       0.1231    0.1231    0.1218
+            jet_engine      0.1050    0.1050    0.1006
+            sperm_sweep_12  0.5808    0.0886    0.0490
+
+        `skin` is **bit-identical to the old number on every static scene** - the suction peak is
+        not in the first cell, so nothing that was being guarded stops being guarded - while
+        putting the driven body back in the same range as everything else. `p99.99` also works
+        but moves the static scenes and discriminates less. A synthetic runaway (1250 cells at
+        0.62) still trips all three, which is the property that matters: this narrows WHERE the
+        guard looks, never how hard it looks.
+
+        **Non-finite is checked everywhere, unmasked.** A NaN inside a body or in its skin is a
+        real divergence and reaches the rest of the lattice within a step or two.
+        """
+        u = xp.sqrt(self.ux * self.ux + self.uy * self.uy)
+        raw = float(asnumpy(u.max()))
+        if not np.isfinite(raw):
+            return raw
+        near = self.solid
+        for k in range(1, 9):
+            near = near | xp.roll(self.solid, (int(CY[k]), int(CX[k])), axis=(0, 1))
+        return float(asnumpy(xp.where(near, 0.0, u).max()))
 
     @property
     def health_limit(self):

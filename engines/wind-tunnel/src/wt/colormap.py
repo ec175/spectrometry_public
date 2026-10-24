@@ -24,6 +24,45 @@ _STOPS = {
     "turbo": [(0.00, (48, 18, 59)), (0.13, (28, 100, 220)), (0.28, (28, 200, 220)),
               (0.43, (70, 235, 135)), (0.58, (200, 240, 55)), (0.72, (255, 170, 40)),
               (0.86, (230, 70, 20)), (1.00, (122, 4, 3))],
+    # ------------------------------------------------------------------ the ORCHID family
+    # My note, 2026-08-17: the blue-to-red scale worked well, but I wanted the green and yellow
+    # swapped out for purple and pink.
+    #
+    # So these are `jet` WITH ITS BOTTOM HALF UNTOUCHED. The first three stops (navy, blue, cyan)
+    # and the last two (red, dark red) are jet's own values, byte for byte; only the 0.375-0.875
+    # stretch - which is where jet interpolates through green and lands on yellow - is rewritten.
+    # That is not tidiness for its own sake: on `tri_foil_air_fast` the three lane freestreams sit
+    # at s = 0.50 / 0.30 / 0.23 of the ramp, so the two slower lanes ARE those first three stops
+    # and keeping them identical is what makes this a recolour of the green rather than a new
+    # palette. The GREEN in that clip is the fast lane's freestream at 0.50 and the YELLOW is its
+    # suction peaks, which is exactly what the brief names.
+    #
+    # LUMINANCE IS THE CONSTRAINT, not hue. jet's green sits at luminance 202 against the mid
+    # lane's cyan-blue at 135, so "faster = brighter" reads for free there. A deep violet at 0.50
+    # would land near 97 and INVERT that - the fastest lane would read darker than the middle one.
+    # Hence the 0.50 stop is a luminous orchid (143) and 0.625 a hot pink (172): the ramp still
+    # climbs into the red peak, and it climbs more gently than jet did, which is the standing
+    # "the green is very bright" complaint answered on the way past.
+    "orchid": [(0.00, (0, 0, 131)), (0.125, (0, 0, 255)), (0.375, (0, 255, 255)),
+               (0.500, (185, 100, 255)), (0.625, (255, 120, 225)),
+               (0.875, (255, 0, 0)), (1.00, (128, 0, 0))],
+    # PLUM - the same swap with the two new stops in the OTHER order (pink first, then purple),
+    # because I wasn't sure which ordering would read best. It puts the
+    # brightest new colour on the fast freestream and darkens INTO the red peak, so the peaks
+    # read as deepening rather than as brightening.
+    "plum": [(0.00, (0, 0, 131)), (0.125, (0, 0, 255)), (0.375, (0, 255, 255)),
+             (0.500, (255, 120, 225)), (0.660, (150, 45, 235)),
+             (0.875, (255, 0, 0)), (1.00, (128, 0, 0))],
+    # IRIS - `orchid` with a deep saturated violet instead of the luminous one, i.e. the version
+    # that accepts the luminance inversion above in exchange for a much stronger purple.
+    "iris": [(0.00, (0, 0, 131)), (0.125, (0, 0, 255)), (0.375, (0, 255, 255)),
+             (0.500, (130, 10, 240)), (0.625, (255, 80, 210)),
+             (0.875, (255, 0, 0)), (1.00, (128, 0, 0))],
+    # VIOLET - the one member of the family that also gives up CYAN, so the whole ramp is a single
+    # monotone hue sweep 240 -> 300 -> 360 deg. The most coherent of the four as a colour ramp and
+    # the most different from what shipped: it moves the two SLOW lanes as well as the fast one.
+    "violet": [(0.00, (0, 0, 131)), (0.125, (0, 0, 255)), (0.375, (120, 0, 255)),
+               (0.625, (255, 105, 235)), (0.875, (255, 0, 0)), (1.00, (128, 0, 0))],
     # cool "wind tunnel schlieren" alternative
     "ice": [(0.00, (4, 6, 26)), (0.25, (12, 46, 110)), (0.50, (30, 140, 190)),
             (0.75, (150, 225, 230)), (1.00, (255, 255, 255))],
@@ -52,7 +91,7 @@ _STOPS = {
              (0.88, (242, 112, 56)), (1.00, (255, 178, 124))],
     "inferno": [(0.00, (0, 0, 4)), (0.25, (87, 16, 110)), (0.50, (188, 55, 84)),
                 (0.75, (249, 142, 9)), (1.00, (252, 255, 164))],
-    # EMBER: single-hue orange for the Cinematic TUNNEL skin (2026-07-31). Built like `reds`
+    # EMBER: single-hue orange built for another project's TUNNEL skin (2026-07-31). Built like `reds`
     # (true-black floor, colour spent on the top half) but the hue band is 20-35 deg the whole
     # way so a frame passes the "one accent family" bar - inferno's purple lows fail it.
     "ember": [(0.00, (0, 0, 0)), (0.12, (18, 7, 3)), (0.30, (64, 24, 9)),
@@ -93,7 +132,8 @@ def _tone(lut8, sat, val):
     are composited afterwards and keep their contrast, so taming the background makes the flow
     structure MORE legible rather than washing the picture out. That is also why this is done
     here and not as a post-pass over the finished frame: dimming the finished image would dim
-    the streaks with it (which is the one inexactness in `tools\\satpreview.py`).
+    the streaks with it (which is the one inexactness in a saturation-preview tool not included
+    here).
     """
     a = lut8.astype(np.float32)
     lum = (a * np.array([0.299, 0.587, 0.114], np.float32)).sum(1, keepdims=True)

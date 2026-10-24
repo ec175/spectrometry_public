@@ -70,7 +70,8 @@ LBM/solver steps per frame - apparent speed is (distance per step x steps per fr
 that wandered with the solution would make the on-screen wind speed a function of the flow, which
 is precisely the kind of unfalsifiable animation this library refuses to produce. `dt` is set
 from a conservative estimate of max(|u| + c) with a margin, and `cfl_now()` reports the achieved
-CFL so a run can be checked rather than assumed - `tools\\cns_check.py` does exactly that.
+CFL so a run can be checked rather than assumed - a CFL check tool (not included here) does
+exactly that.
 
 INTERFACE
 ---------
@@ -593,11 +594,29 @@ class CNS:
 
     @property
     def health_limit(self):
-        """Abort threshold. NOT the LBM's 0.45: here a velocity of 1 is Mach 1, and a local
-        supersonic pocket is the physics this solver was written for, not a failure. What is
-        genuinely wrong is a runaway, so the guard sits well above anything this tunnel can
-        legitimately produce."""
-        return 3.0
+        """Abort threshold, DERIVED from the design Mach rather than fixed.
+
+        NOT the LBM's 0.45: here a velocity of 1 is Mach 1 and a local supersonic pocket is the
+        physics this solver was written for, not a failure. What is genuinely wrong is a runaway.
+
+        It was a hardcoded 3.0 until 2026-08-06 - the same mistake behind the rule that a guard
+        which does not scale with what the scene is doing will abort a CORRECT render. At
+        `u0` = 1 it sits 3x above the freestream and every shipped Mach clip
+        peaked at ~1.76x; at `u0` = 2 the same constant is 1.5x the freestream, i.e. BELOW what
+        those clips measured, so `mach_cow` would have been killed by its own guard somewhere in
+        an 80 minute render.
+
+        The right ceiling is thermodynamic and needs no taste. Total enthalpy is conserved, so a
+        gas expanding from this freestream cannot exceed `u_max = sqrt(2/(gamma-1)) * c_total`,
+        i.e. **`sqrt(5 + u0^2)`** with gamma = 1.4 and `c_inf` = 1 - the speed it would reach
+        expanding to vacuum, which no real flow reaches. Anything past that is not fast, it is
+        non-physical. The 1.15 is discretisation headroom on top of a bound the flow cannot
+        legitimately approach.
+
+        Sanity: this gives 2.82 at u0 = 1 (against the old 3.0, and every shipped clip peaked at
+        1.76 or below, so nothing already rendered is affected) and 3.45 at u0 = 2.
+        """
+        return 1.15 * float(np.sqrt(5.0 + self.u0 ** 2))
 
     def cfl_now(self):
         """Achieved CFL this instant. The fixed dt is only safe while this stays under ~1."""

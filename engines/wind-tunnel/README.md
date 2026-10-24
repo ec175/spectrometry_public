@@ -56,6 +56,29 @@ channel, so anything you can draw becomes a solid the fluid flows around.
 the ffmpeg pipe and the divergence guard. An NVIDIA GPU makes everything much faster (see the note
 in `src/requirements.txt`), but it all runs on the CPU too.
 
+## Render a video
+
+38 of my compositions are in `src/wt/scenes.py`. Everything below runs from the engine's `src`
+folder:
+
+```bash
+cd engines/wind-tunnel/src
+python cli.py list                            # every scene and its length
+python tools/dbg.py tri_foil_air_fast         # the whole clip, nothing drawn: must print COMPLETED
+python cli.py tri_foil_air_fast --preview     # 540x960 @30 -> out/tri_foil_air_fast_preview.mp4
+python cli.py tri_foil_air_fast               # 1080x1920 @60 -> out/tri_foil_air_fast.mp4
+```
+
+`--preview` halves the picture but keeps the lattice, so it's the same flow at the same instants,
+just smaller. `--still 4,9 --preview` writes PNGs from one run instead of a video, which is the
+fast way to tune. A colour variant is a flag, not a new scene: `--cmap orchid`, `--no-legend`,
+`--seconds 5`. Every scene's own settings apply unless you pass the flag yourself.
+
+Full-size renders take a few minutes each on a GPU and a lot longer on a CPU, so start with
+`--preview`. Good first picks: `tri_foil_air_fast`, `vortex_street`, `falling_discs`,
+`black_holes`, `surf_wave`. `tri_shapes` and `mach_shapes` need a cut-out photo of your own in
+`src/assets/` ([how](src/assets/README.md)).
+
 ## The one thing to understand
 
 **Nothing here is animated by hand.** A composition may only put a shape somewhere at time *t*,
@@ -189,8 +212,8 @@ one composition printed COMPLETED with the project's best stability numbers whil
 its subjects apart for the whole clip. Anything with an *intent* needs a check that measures THAT
 intent, not just that the solver did not blow up.
 
-Several such checks exist upstream but import the withheld composition modules, so they are not
-shipped. What they measured is worth reimplementing against your own work: separation drift over
+I wrote several, each aimed at one composition, and they stay with me. What they measured is
+worth reimplementing against your own work: separation drift over
 the clip, apparent wind at a fixed probe against its nominal value, loop seam difference between
 first and last frame, and mask coverage against the intended silhouette.
 
@@ -209,12 +232,12 @@ off-camera and an appearing body's pressure transient has room to decay. It cost
 
 ## What is not here
 
-- **`wt/scenes.py`** — the compositions. See [CATALOG.md](CATALOG.md) for what each one
-  demonstrates and frames from most of them.
-- **`shapes.rocket()` and the `rocket_engine` composition** — held back on purpose.
-  `wt/dye.py`, the D2Q5 species transport it used, *is* here: it is general, and `render.py`
-  depends on it.
-- **The composition-dependent check tools.** See the section above.
+- **Some of my compositions.** The sets built on photographs I can't share (the farm and road
+  sets, the dart frog), the missile-canard and ammunition studies, `rocket_engine`, and a newer
+  set that isn't finished. [CATALOG.md](CATALOG.md) marks which scenes ship.
+- **The photos themselves.** `tri_shapes` and `mach_shapes` ship as code; bring your own cut-out.
+- **The scene-specific check tools.** `sod_check`, `shock_check`, `seam_check`, `calib` and `dbg`
+  are here; the rest were written against single compositions and stay with me.
 
 `wt/film.py` bridges to the CRT filter in the [oscilloscope engine](../oscilloscope/) rather than
 duplicating a 300-line filter that would drift out of sync. It resolves that path relative to this

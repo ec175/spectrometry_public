@@ -2,7 +2,7 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """gpu.py — CuPy backend for the hot per-frame math (LBM lattice, splats, blurs). GPU BY DEFAULT.
 
-Same contract as ``Oscilloscope\\osc\\gpu.py`` (my standing policy since 2026-07-18: the GPU is the
+Same contract as ``engines/oscilloscope/src/osc/gpu.py`` (my standing policy since 2026-07-18: the GPU is the
 DEFAULT for render work, opt-OUT not opt-in). Set ``WT_CUPY=0`` (or ``OSC_CUPY=0``) to force the
 CPU path. Everything degrades to numpy/scipy transparently with a loud warning, so a broken
 driver can only slow a render, never stop it.

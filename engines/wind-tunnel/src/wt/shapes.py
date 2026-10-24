@@ -149,6 +149,61 @@ def cow(scale_y=1.0):
     return a
 
 
+def cow_tail(root=(0.980, -0.133), length=0.40, stem=0.055, tuft=0.105, base=0.075,
+             flare=0.22, n=14):
+    """A cow's TAIL as its own polygon, hanging from `root`, in the photographic cow's unit space.
+
+    Why it is drawn rather than traced. The tail in `assets\\cow.png` is ~4.5% of the animal's
+    length, which at the ~125 cells these scenes give the cow is a **4-cell ribbon that the photo
+    also happens to overlap with the near hind leg** - so `image_parts` welds it to that leg and
+    the solver never sees a tail at all. Rebuilding it at a width the lattice can carry is the
+    same trade `shapes.cow`'s docstring makes for the legs ("legs are 0.055-0.065 of the length
+    wide (~7 cells) rather than a real cow's ~0.03. At 3 cells a leg is a jagged ribbon that
+    sheds numerical noise"). The photograph still supplies its colour, the same approach an
+    earlier farm scene took (not included here) - so it is the same animal, at a size the
+    physics can represent.
+
+    It hangs along +y from `root` (screen-DOWN in the horizontal format, i.e. the way a tail
+    hangs), so a scene rotates it about `root` by whatever angle the flow has earned. The stem
+    tapers into a switch and finishes in a tuft, which is the part a viewer reads as a tail and
+    also the part that gives the flow something to push on.
+
+    THE DEFAULT `root` IS A RULE-4 NUMBER, not styling, and it was measured rather than picked.
+    The scene clears the cow's rear with a rectangular cut whose left edge lands at u = 0.885,
+    and the rump behind it only runs to u = 0.979 - so the tail has 11.7 cells of room and needs
+    a >= 6 cell clearance on its left, which a 6.9 cell stem hung from the MIDDLE of that space
+    cannot have. Hanging it from the aft end instead gives 8.9 cells of clear passage between the
+    tail and the thigh, and 11.5 between the tail and the hind leg. The first attempt hung it at
+    u = 0.952 and left a 5 cell slot - a passage too narrow for the lattice to represent, i.e.
+    exactly the failure the cut existed to remove.
+
+    `base` then only has to weld the dock to the rump ABOVE the cut, which it does with 4.5
+    cells of overlap - and it is what a tail looks like anyway: thick at the dock, tapering over
+    the first fifth.
+    """
+    L, w0, w1 = float(length), 0.5 * float(stem), 0.5 * float(tuft)
+    s = np.linspace(0.0, 1.0, int(n))
+    # stem for the first 62%, then the switch flares into the tuft and rounds off
+    half = w0 + (w1 - w0) * _sstep(0.62, 0.97, s)
+    half = half + (0.5 * float(base) - w0) * (1.0 - _sstep(0.0, float(flare), s))
+    half = half * (1.0 - 0.92 * _sstep(0.965, 1.0, s))
+    right = np.stack([half, s * L], 1)
+    left = np.stack([-half[::-1], s[::-1] * L], 1)
+    p = np.concatenate([right, left])
+    p[:, 0] += float(root[0])
+    p[:, 1] += float(root[1])
+    return p
+
+
+def rotate_about(pts, pivot, deg):
+    """Rotate a polygon about a point, in the polygon's own space. The exact inverse is -deg."""
+    a = np.deg2rad(float(deg))
+    ca, sa = np.cos(a), np.sin(a)
+    d = np.asarray(pts, dtype=np.float64) - np.asarray(pivot, dtype=np.float64)
+    return np.asarray(pivot, dtype=np.float64) + np.stack(
+        [d[:, 0] * ca - d[:, 1] * sa, d[:, 0] * sa + d[:, 1] * ca], 1)
+
+
 def surfboard(width=0.28, tail=0.36, tip=0.012, nose_p=0.70, x_n=0.12, n=240):
     """TOP-DOWN surfboard PLANFORM, unit-LENGTH space: x = 0 nose -> 1 tail, +-y the two rails.
 
@@ -492,8 +547,157 @@ def _trace_boundary(mask):
     return np.asarray(out, dtype=np.float64)
 
 
-def image_body(path, cells=120.0, flip_x=False, close_cells=1.5, detail=3.0, alpha_thr=128,
-               tex_px=1024):
+def _image_solid(path, cells=120.0, flip_x=False, flip_y=False, close_cells=1.5, detail=3.0,
+                 alpha_thr=128, tex_px=1024):
+    """The front half of `image_body` / `image_parts`: a cut-out PNG -> (closed mask, RGB).
+
+    Shared rather than duplicated because the two entry points differ only in what they do with
+    the mask AFTERWARDS - one keeps the largest island, the other cuts it into declared pieces -
+    and every step before that (alpha threshold, hole fill, crop, colour extension, resample to
+    `detail` x the lattice, sub-cell closing) is a rule this project already paid for. Forking it
+    would let the two drift, and the traced cow would stop being the same animal in both.
+
+    Returns (mask, rgb) where `mask` is at `detail` x the lattice and `rgb` is the cropped source
+    bounding box (colour-extended, downsampled to `tex_px`), so u,v in [0,1] mean the same box in
+    both.
+    """
+    from scipy.ndimage import (binary_closing, binary_fill_holes, distance_transform_edt,
+                               label as _label)
+    im = Image.open(path).convert("RGBA")
+    if flip_x:
+        im = im.transpose(Image.FLIP_LEFT_RIGHT)
+    if flip_y:
+        # The VERTICAL counterpart of `flip_x`, and it exists for exactly one reason: the two
+        # horizontal formats are 180 degrees apart. `render._build_maps` maps lattice +y to
+        # screen-DOWN under flow="right" and to screen-UP under flow="left" (that is what keeps
+        # "left" a rotation rather than a reflection), so a photograph that stands the right way
+        # up in one lands upside down in the other. Setting BOTH flips is therefore the honest
+        # spelling of "pre-rotate this source through 180 degrees", which is precisely what a
+        # subject facing RIGHT into a leftward stream needs.
+        #
+        # It is applied to the SOURCE, before the alpha threshold - so the mask, the traced
+        # polygons, the `cuts` coordinates and the RGB texture are all in ONE frame and cannot
+        # disagree. Doing it to the polygons afterwards (`shapes.flip_y`) would leave the texture
+        # map behind, which is the bug this avoids rather than a style preference.
+        im = im.transpose(Image.FLIP_TOP_BOTTOM)
+    a = np.asarray(im)
+    solid = a[:, :, 3] >= int(alpha_thr)
+    solid = binary_fill_holes(solid)
+    lab, n = _label(solid)
+    if n > 1:                                  # drop stray specks from the cut-out
+        solid = lab == (1 + np.argmax([(lab == k + 1).sum() for k in range(n)]))
+    ys, xs = np.nonzero(solid)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    solid = solid[y0:y1, x0:x1]
+    rgb = a[y0:y1, x0:x1, :3]
+
+    # extend the colour outward so anything the closing welds shut is cow-coloured, not
+    # background-coloured
+    _, idx = distance_transform_edt(~solid, return_indices=True)
+    rgb = rgb[idx[0], idx[1]]
+
+    # work at `detail` x the lattice: fine enough for the 2x-screen body draw, coarse enough that
+    # the closing radius below is a small integer
+    w = max(8, int(round(float(cells) * float(detail))))
+    h = max(8, int(round(w * solid.shape[0] / solid.shape[1])))
+    small = np.asarray(Image.fromarray((solid * 255).astype(np.uint8)).resize(
+        (w, h), Image.BILINEAR)) >= 128
+    r = int(max(1, round(float(close_cells) * float(detail))))     # radius in LATTICE cells
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
+    small = binary_fill_holes(binary_closing(small, structure=(xx ** 2 + yy ** 2) <= r * r))
+
+    # The texture is sampled NEAREST at draw time, so hand back something close to the size it
+    # will be drawn at rather than a 21 MB original that would alias.
+    if rgb.shape[1] > int(tex_px):
+        th = max(1, int(round(int(tex_px) * rgb.shape[0] / rgb.shape[1])))
+        rgb = np.asarray(Image.fromarray(rgb).resize((int(tex_px), th), Image.LANCZOS))
+    return small, rgb
+
+
+def _normalise(c, w, h):
+    """Traced (row, col) boundary at `detail` resolution -> unit-chord space over the SOURCE box.
+
+    x = 0 at the source bounding box's left edge and 1 at its right, y centred on the box, both
+    divided by the same span - so a shape and a texture quoted against the same box line up, and
+    several parts cut out of one photograph share one coordinate system by construction.
+    """
+    return np.stack([c[:, 1] / float(w), (c[:, 0] - 0.5 * h) / float(w)], 1)
+
+
+def image_parts(path, cells=120.0, cuts=(), keep_frac=0.004, **kw):
+    """The same cut-out, split into SEVERAL polygons along declared cuts.
+
+    `image_body` hands the solver one welded island, which is right when the body is meant to be
+    one solid thing. It is wrong when the body is an ANIMAL and the flow is supposed to go
+    between its legs: a photographic silhouette at ~120 cells has leg gaps a few cells wide, the
+    sub-cell closing (correctly) welds the narrowest of them shut, and what is left reads as a
+    brick wall on legs. My note, 2026-08-06: the image gave the impression that the legs were a
+    brick wall.
+
+    So the passages become a DECLARED, MEASURED input instead of whatever the photograph happened
+    to leave. `cuts` is a list of shapes in the source bounding box's own fractional coordinates,
+    erased from the mask before it is split into connected components. Each entry is either a
+    BOX `(u0, u1, v0, v1)` or a CIRCLE `(u, v, r)` - the circle added 2026-08-11 because a
+    rectangle cannot isolate an open-wheeler's wheel from the nose it overlaps in side elevation
+    (see the note at the cut loop).
+    Two things follow that make this the right shape for the problem:
+
+      - **a cut is quoted as a fraction of the body, so it keeps its meaning in CELLS when the
+        body is resized.** `tools\\farm_check.py` converts each surviving passage back to cells
+        and gates it against the >= 6 cells this project's rule 4 asks for.
+      - **a cut must reach the outside of the silhouette**, or it carves a floating island out of
+        the middle of the animal. That is not enforced here - `keep_frac` drops the debris and the
+        check tool prints the part count, which is what catches it.
+
+    Every part is normalised against the SAME source box, so one `to_uv` paints all of them from
+    one photograph and the animal stays one animal across the pieces (`render._draw_texture`
+    already takes a per-body `to_uv`; this is what it was built for).
+
+    Returns dict(parts, rgb, box, aspect): `parts` is a list of unit-space polygons ordered
+    largest first, `box` is (xmin, xmax, ymin, ymax) of their union.
+    """
+    from scipy.ndimage import label as _label
+    small, rgb = _image_solid(path, cells=cells, **kw)
+    h, w = small.shape
+    yy, xx = np.mgrid[0:h, 0:w]
+    for cut in cuts:
+        if len(cut) == 3:
+            # A CIRCULAR cut - (u, v, r), with r in units of the source WIDTH, i.e. the same
+            # coordinates a scene already quotes a wheel hub and radius in.
+            #
+            # Added 2026-08-11 for the F1 car, and a box genuinely could not do it. The phantom
+            # treatment removes what a CENTRELINE SECTION does not pass through, and for an
+            # open-wheeler that is exactly two discs - but in side elevation the front wheel
+            # OVERLAPS the nose, which is on the centreline and must stay. A rectangle covering
+            # the wheel therefore cut the nose off as well: measured, it split the car into three
+            # islands, leaving the nose-and-front-wing and the rear wing floating free of the
+            # chassis. A disc takes the wheel and nothing else.
+            cu, cv, cr = cut
+            small[((xx - cu * w) ** 2 + (yy - cv * h) ** 2) <= (cr * w) ** 2] = False
+        else:
+            u0, u1, v0, v1 = cut
+            small[int(round(v0 * h)):int(round(v1 * h)),
+                  int(round(u0 * w)):int(round(u1 * w))] = False
+    lab, n = _label(small)
+    parts = []
+    for k in range(1, n + 1):
+        m = lab == k
+        if m.sum() < keep_frac * small.size:
+            continue
+        parts.append((int(m.sum()), _normalise(_trace_boundary(m), w, h)))
+    parts.sort(key=lambda kp: -kp[0])
+    pts = [p for _, p in parts]
+    if not pts:
+        raise SystemExit(f"image_parts: every part of {path!r} was cut away")
+    allp = np.concatenate(pts)
+    return dict(parts=pts, rgb=rgb,
+                box=(float(allp[:, 0].min()), float(allp[:, 0].max()),
+                     float(allp[:, 1].min()), float(allp[:, 1].max())),
+                aspect=h / float(w))
+
+
+def image_body(path, cells=120.0, flip_x=False, flip_y=False, close_cells=1.5, detail=3.0,
+               alpha_thr=128, tex_px=1024):
     """A cut-out PNG -> (closed unit-space polygon, RGB texture) that the solver and the
     renderer agree on by construction.
 
@@ -527,37 +731,14 @@ def image_body(path, cells=120.0, flip_x=False, close_cells=1.5, detail=3.0, alp
         polygon" (see this module's docstring); a body that arrived as pixels must join that
         contract rather than fork it, or every downstream stage - `place`, `rasterize`,
         `FreeBody`, the body draw - needs a second code path.
+
+    See `image_parts` for the multi-polygon form, which is what a body needs when the flow is
+    meant to go THROUGH it rather than round it.
     """
-    from scipy.ndimage import (binary_closing, binary_fill_holes, distance_transform_edt,
-                               label as _label)
-    im = Image.open(path).convert("RGBA")
-    if flip_x:
-        im = im.transpose(Image.FLIP_LEFT_RIGHT)
-    a = np.asarray(im)
-    solid = a[:, :, 3] >= int(alpha_thr)
-    solid = binary_fill_holes(solid)
-    lab, n = _label(solid)
-    if n > 1:                                  # drop stray specks from the cut-out
-        solid = lab == (1 + np.argmax([(lab == k + 1).sum() for k in range(n)]))
-    ys, xs = np.nonzero(solid)
-    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    solid = solid[y0:y1, x0:x1]
-    rgb = a[y0:y1, x0:x1, :3]
-
-    # extend the colour outward so anything the closing welds shut is cow-coloured, not
-    # background-coloured
-    _, idx = distance_transform_edt(~solid, return_indices=True)
-    rgb = rgb[idx[0], idx[1]]
-
-    # work at `detail` x the lattice: fine enough for the 2x-screen body draw, coarse enough that
-    # the closing radius below is a small integer
-    w = max(8, int(round(float(cells) * float(detail))))
-    h = max(8, int(round(w * solid.shape[0] / solid.shape[1])))
-    small = np.asarray(Image.fromarray((solid * 255).astype(np.uint8)).resize(
-        (w, h), Image.BILINEAR)) >= 128
-    r = int(max(1, round(float(close_cells) * float(detail))))     # radius in LATTICE cells
-    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
-    small = binary_fill_holes(binary_closing(small, structure=(xx ** 2 + yy ** 2) <= r * r))
+    from scipy.ndimage import label as _label
+    small, rgb = _image_solid(path, cells=cells, flip_x=flip_x, flip_y=flip_y,
+                              close_cells=close_cells,
+                              detail=detail, alpha_thr=alpha_thr, tex_px=tex_px)
     lab, n = _label(small)
     if n > 1:
         small = lab == (1 + np.argmax([(lab == k + 1).sum() for k in range(n)]))
@@ -567,12 +748,6 @@ def image_body(path, cells=120.0, flip_x=False, close_cells=1.5, detail=3.0, alp
     sx0, sx1 = px.min(), px.max()
     span = max(sx1 - sx0, 1.0)
     pts = np.stack([(px - sx0) / span, (py - 0.5 * (py.min() + py.max())) / span], 1)
-
-    # The texture is sampled NEAREST at draw time, so hand back something close to the size it
-    # will be drawn at rather than a 21 MB original that would alias.
-    if rgb.shape[1] > int(tex_px):
-        th = max(1, int(round(int(tex_px) * rgb.shape[0] / rgb.shape[1])))
-        rgb = np.asarray(Image.fromarray(rgb).resize((int(tex_px), th), Image.LANCZOS))
     return dict(points=pts, rgb=rgb,
                 ybox=(float(pts[:, 1].min()), float(pts[:, 1].max())))
 
@@ -656,3 +831,5 @@ def rasterize(polys, nx, ny, supersample=2):
     if s > 1:
         a = a.reshape(ny, s, nx, s).mean(axis=(1, 3))
     return a >= 128
+
+

@@ -11,7 +11,7 @@ Two solvers share one interface. `lbm.py` is a D2Q9 lattice-Boltzmann scheme wit
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
@@ -31,6 +31,10 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 | `tools/shock_check.py` | validation | Measured oblique-shock angle and post-shock state against the theta-beta-Mach relation. |
 | `tools/seam_check.py` | validation | Whether a clip built as a loop actually loops — compares first and last frame numerically. |
 | `tools/calib.py` | validation | Lattice-to-physical calibration: what a chosen `u0`, chord and Reynolds number actually mean in cells and steps. |
+| `cli.py` | entry point | `python cli.py list`, `python cli.py <scene> [--preview] [--still T,T] [--cmap ...] [--film]`. Scene OVERRIDES apply unless a flag is passed explicitly. |
+| `wt/scenes.py` | compositions | The `Scene` base, the published compositions and the `SCENES` registry. Add a scene = a class with `duration`, `bodies(t)` and `OVERRIDES`, plus one registry line. |
+| `tools/dbg.py` | gate | Runs a whole scene at preview size with no drawing and reports the first thing to break. Must print COMPLETED before you render anything that moves. |
+| `assets/` | your photos | Cut-out PNGs for the photographed-subject scenes. None ship; see its README. |
 
 
 ## Shape generators
@@ -102,45 +106,50 @@ The legitimate ways to push the fluid. All of them are things a real rig has.
 
 ## Compositions
 
-The compositions themselves are not in this repository — see the README. They are listed because the list is the useful part: each one is a different answer to what you can point this solver at, and each has frames beside it. `rocket_engine` is held back on purpose.
+Most of these are in `src/wt/scenes.py` and render with `python cli.py <name>` - the column says which. Each one is a different answer to what you can point this solver at, and most have frames beside them. `tri_shapes` and `mach_shapes` need a cut-out photo of your own (see `src/assets/README.md`). Held back: the sets built on photographs I can't share, the missile-canard and ammunition studies, `rocket_engine`, and newer work that isn't finished.
 
-| composition | what it does | status | frames |
-|---|---|---|---|
-| `aoa_sweep` | A NACA section swept both ways through stall: +stall, cross over, -stall, back to neutral. | shipped 15 s | [1](frames/aoa_sweep_t035.jpg) [2](frames/aoa_sweep_t075.jpg) |
-| `aoa_sweep_fast` | The same section and the same sweep schedule, in a tunnel run twice as fast. | shipped | [1](frames/aoa_sweep_fast_t035.jpg) [2](frames/aoa_sweep_fast_t075.jpg) |
-| `stall` | Held deep in stall — a continuous shed of leading-edge vortices down the wake. | shipped (film pass) | [1](frames/stall_film_t035.jpg) [2](frames/stall_film_t075.jpg) |
-| `vortex_street` | A circular cylinder at a Reynolds number where the wake goes unsteady: a von Karman street. The textbook validation case. | shipped | — |
-| `tandem` | Three staggered cylinders — the downstream pair sit in the upstream wake and lock on. | shipped | — |
-| `flutter` | A flat plate pitching sinusoidally: dynamic stall, with the wake reversing every cycle. | shipped | — |
-| `shape_tour` | Swap the body every few seconds, streamlined to bluff, so the wake tells you the drag. | shipped | — |
-| `tri_foil` | Three symmetric sections stacked across a left-to-right tunnel, sweeping as a wave. | shipped | [1](frames/tri_foil_t035.jpg) [2](frames/tri_foil_t075.jpg) |
-| `tri_foil_fast` | The same choreography with the tunnel run twice as fast. | shipped | [1](frames/tri_foil_fast_t035.jpg) [2](frames/tri_foil_fast_t075.jpg) |
-| `tri_foil_rates` | Three identical sections in one tunnel, each sitting in a stream of a different speed, with a colour-bar legend. | shipped 15 s | [1](frames/tri_foil_rates_t015.jpg) [2](frames/tri_foil_rates_t045.jpg) [3](frames/tri_foil_rates_t080.jpg) |
-| `tri_foil_rates_fast` | The same clip at double the flow rate, 10 s. Colours are bit-identical; legend labels doubled. | shipped | [1](frames/tri_foil_rates_fast_t035.jpg) [2](frames/tri_foil_rates_fast_t075.jpg) |
-| `tri_foil_rates_loop` | Rebuilt as a seamless loop — frame 600 is frame 0, measurably. | shipped 10 s | [1](frames/tri_foil_rates_loop_t035.jpg) [2](frames/tri_foil_rates_loop_t075.jpg) |
-| `tri_foil_air` | The same clip with the fluid changed from a viscous liquid to air: chord Reynolds number up 10x, Mach DOWN not up, a finer lattice, and continuous freestream turbulence. | shipped 10 s | [1](frames/tri_foil_air_t035.jpg) [2](frames/tri_foil_air_t075.jpg) |
-| `tri_foil_air_fast` | Double the wind, bought with steps rather than Mach. Apparent wind exactly 2.000x. | shipped — the author's pick of the set | [1](frames/tri_foil_air_fast_t015.jpg) [2](frames/tri_foil_air_fast_t045.jpg) [3](frames/tri_foil_air_fast_t080.jpg) |
-| `tri_shapes` | The variable moved from the air to the BODY: one speed, three shapes. | shipped | [1](frames/tri_shapes_t035.jpg) [2](frames/tri_shapes_t075.jpg) |
-| `tri_shapes_live` | The same, with the cow alive: ears twitching, head lowered to graze. | shipped | [1](frames/tri_shapes_live_t035.jpg) [2](frames/tri_shapes_live_t075.jpg) |
-| `tri_foil_gas` | The air clip on the compressible solver at double the flow speed. | built and solver-validated, never rendered | — |
-| `mach_sweep` | One symmetric section in a tunnel throttled from fast subsonic to sonic. | shipped | [1](frames/mach_sweep_t035.jpg) [2](frames/mach_sweep_t075.jpg) |
-| `mach_rates` | Three flow rates, one section, throttled to sonic. | shipped | [1](frames/mach_rates_t035.jpg) [2](frames/mach_rates_t075.jpg) |
-| `mach_foils` | One flow rate, three sections, throttled to sonic. | shipped | [1](frames/mach_foils_t035.jpg) [2](frames/mach_foils_t075.jpg) |
-| `mach_shapes` | Foil / cow / foil taken to Mach 1. | shipped | [1](frames/mach_shapes_t035.jpg) [2](frames/mach_shapes_t075.jpg) |
-| `jet_engine` | A ducted engine in a DOWNWARD tunnel: idle, spool up over 6 s, cut, then run on. | shipped 10 s | [1](frames/jet_engine_t015.jpg) [2](frames/jet_engine_t045.jpg) [3](frames/jet_engine_t080.jpg) |
-| `falling_discs` | Discs dropped into a rising stream: they sink slowly, wobble, and shove each other's wakes. | shipped | [1](frames/falling_discs_t035.jpg) [2](frames/falling_discs_t075.jpg) |
-| `falling_squares` | The same drop with square plates — which, unlike discs, feel a torque and tumble. | shipped | [1](frames/falling_squares_t035.jpg) [2](frames/falling_squares_t075.jpg) |
-| `projectiles` | Dense pellets fired down into a fast rising stream, at angles. | shipped | [1](frames/projectiles_t035.jpg) [2](frames/projectiles_t075.jpg) |
-| `eddies` | Currents instead of a uniform stream, with light shapes set adrift in them. | shipped | [1](frames/eddies_t035.jpg) [2](frames/eddies_t075.jpg) |
-| `currents` | Complex curling non-straight currents in blue, with small spheres sinking through them. | shipped | [1](frames/currents_t035.jpg) [2](frames/currents_t075.jpg) |
-| `still_water` | Five spheres adrift on water that is nearly still — until something disturbs it. The blue-pool format. | shipped | [1](frames/still_water_t015.jpg) [2](frames/still_water_t045.jpg) [3](frames/still_water_t080.jpg) |
-| `black_holes` | Three spinning holes, each dragging a disc of water round itself, falling together over twenty seconds and fusing like droplets when they meet. | shipped | [1](frames/black_holes_t015.jpg) [2](frames/black_holes_t045.jpg) [3](frames/black_holes_t080.jpg) |
-| `black_holes_red` | The same clip in the red palette. | shipped | [1](frames/black_holes_red_t035.jpg) [2](frames/black_holes_red_t075.jpg) |
-| `object_test` | The blue-pool TEMPLATE and test bed: drop objects in and see what the flow does to them before committing them to a real clip. | template | — |
-| `orbit` | A vertically-stretched oval current turning about a central mass, with pellets injected into it. | CUT — the gravity fix was tested and does not work | — |
-| `surf_rates` | The three-rates clip with the fluid changed to water and the foils to surfboards. | shipped | [1](frames/surf_rates_t035.jpg) [2](frames/surf_rates_t075.jpg) |
-| `surf_sweep` | A surfboard planing on a steady wave face. | render interrupted | — |
-| `surf_wave` | The same board when the face starts curling — a wave peeling past, with a free-body diagram. | shipped | [1](frames/surf_wave_t035.jpg) [2](frames/surf_wave_t075.jpg) |
+| composition | what it does | code here? | status | frames |
+|---|---|---|---|---|
+| `aoa_sweep` | A NACA section swept both ways through stall: +stall, cross over, -stall, back to neutral. | ✅ yes | shipped 15 s | [1](frames/aoa_sweep_t035.jpg) [2](frames/aoa_sweep_t075.jpg) |
+| `aoa_sweep_fast` | The same section and the same sweep schedule, in a tunnel run twice as fast. | ✅ yes | shipped | [1](frames/aoa_sweep_fast_t035.jpg) [2](frames/aoa_sweep_fast_t075.jpg) |
+| `stall` | Held deep in stall — a continuous shed of leading-edge vortices down the wake. | ✅ yes | shipped (film pass) | [1](frames/stall_film_t035.jpg) [2](frames/stall_film_t075.jpg) |
+| `vortex_street` | A circular cylinder at a Reynolds number where the wake goes unsteady: a von Karman street. The textbook validation case. | ✅ yes | shipped | — |
+| `tandem` | Three staggered cylinders — the downstream pair sit in the upstream wake and lock on. | ✅ yes | shipped | — |
+| `flutter` | A flat plate pitching sinusoidally: dynamic stall, with the wake reversing every cycle. | ✅ yes | shipped | — |
+| `shape_tour` | Swap the body every few seconds, streamlined to bluff, so the wake tells you the drag. | ✅ yes | shipped | — |
+| `tri_foil` | Three symmetric sections stacked across a left-to-right tunnel, sweeping as a wave. | ✅ yes | shipped | [1](frames/tri_foil_t035.jpg) [2](frames/tri_foil_t075.jpg) |
+| `tri_foil_fast` | The same choreography with the tunnel run twice as fast. | ✅ yes | shipped | [1](frames/tri_foil_fast_t035.jpg) [2](frames/tri_foil_fast_t075.jpg) |
+| `tri_foil_rates` | Three identical sections in one tunnel, each sitting in a stream of a different speed, with a colour-bar legend. | ✅ yes | shipped 15 s | [1](frames/tri_foil_rates_t015.jpg) [2](frames/tri_foil_rates_t045.jpg) [3](frames/tri_foil_rates_t080.jpg) |
+| `tri_foil_rates_fast` | The same clip at double the flow rate, 10 s. Colours are bit-identical; legend labels doubled. | ✅ yes | shipped | [1](frames/tri_foil_rates_fast_t035.jpg) [2](frames/tri_foil_rates_fast_t075.jpg) |
+| `tri_foil_rates_loop` | Rebuilt as a seamless loop — frame 600 is frame 0, measurably. | ✅ yes | shipped 10 s | [1](frames/tri_foil_rates_loop_t035.jpg) [2](frames/tri_foil_rates_loop_t075.jpg) |
+| `tri_foil_air` | The same clip with the fluid changed from a viscous liquid to air: chord Reynolds number up 10x, Mach DOWN not up, a finer lattice, and continuous freestream turbulence. | ✅ yes | shipped 10 s | [1](frames/tri_foil_air_t035.jpg) [2](frames/tri_foil_air_t075.jpg) |
+| `tri_foil_air_fast` | Double the wind, bought with steps rather than Mach. Apparent wind exactly 2.000x. | ✅ yes | shipped — the author's pick of the set | [1](frames/tri_foil_air_fast_t015.jpg) [2](frames/tri_foil_air_fast_t045.jpg) [3](frames/tri_foil_air_fast_t080.jpg) |
+| `tri_shapes` | The variable moved from the air to the BODY: one speed, three shapes. | ✅ yes | shipped | [1](frames/tri_shapes_t035.jpg) [2](frames/tri_shapes_t075.jpg) |
+| `tri_shapes_live` | The same, with the cow alive: ears twitching, head lowered to graze. | held back | shipped | [1](frames/tri_shapes_live_t035.jpg) [2](frames/tri_shapes_live_t075.jpg) |
+| `tri_foil_gas` | The air clip on the compressible solver at double the flow speed. | ✅ yes | built and solver-validated, never rendered | — |
+| `mach_sweep` | One symmetric section in a tunnel throttled from fast subsonic to sonic. | ✅ yes | shipped | [1](frames/mach_sweep_t035.jpg) [2](frames/mach_sweep_t075.jpg) |
+| `mach_rates` | Three flow rates, one section, throttled to sonic. | ✅ yes | shipped | [1](frames/mach_rates_t035.jpg) [2](frames/mach_rates_t075.jpg) |
+| `mach_foils` | One flow rate, three sections, throttled to sonic. | ✅ yes | shipped | [1](frames/mach_foils_t035.jpg) [2](frames/mach_foils_t075.jpg) |
+| `mach_shapes` | Foil / cow / foil taken to Mach 1. | ✅ yes | shipped | [1](frames/mach_shapes_t035.jpg) [2](frames/mach_shapes_t075.jpg) |
+| `jet_engine` | A ducted engine in a DOWNWARD tunnel: idle, spool up over 6 s, cut, then run on. | ✅ yes | shipped 10 s | [1](frames/jet_engine_t015.jpg) [2](frames/jet_engine_t045.jpg) [3](frames/jet_engine_t080.jpg) |
+| `falling_discs` | Discs dropped into a rising stream: they sink slowly, wobble, and shove each other's wakes. | ✅ yes | shipped | [1](frames/falling_discs_t035.jpg) [2](frames/falling_discs_t075.jpg) |
+| `falling_squares` | The same drop with square plates — which, unlike discs, feel a torque and tumble. | ✅ yes | shipped | [1](frames/falling_squares_t035.jpg) [2](frames/falling_squares_t075.jpg) |
+| `projectiles` | Dense pellets fired down into a fast rising stream, at angles. | ✅ yes | shipped | [1](frames/projectiles_t035.jpg) [2](frames/projectiles_t075.jpg) |
+| `eddies` | Currents instead of a uniform stream, with light shapes set adrift in them. | ✅ yes | shipped | [1](frames/eddies_t035.jpg) [2](frames/eddies_t075.jpg) |
+| `currents` | Complex curling non-straight currents in blue, with small spheres sinking through them. | ✅ yes | shipped | [1](frames/currents_t035.jpg) [2](frames/currents_t075.jpg) |
+| `still_water` | Five spheres adrift on water that is nearly still — until something disturbs it. The blue-pool format. | ✅ yes | shipped | [1](frames/still_water_t015.jpg) [2](frames/still_water_t045.jpg) [3](frames/still_water_t080.jpg) |
+| `black_holes` | Three spinning holes, each dragging a disc of water round itself, falling together over twenty seconds and fusing like droplets when they meet. | ✅ yes | shipped | [1](frames/black_holes_t015.jpg) [2](frames/black_holes_t045.jpg) [3](frames/black_holes_t080.jpg) |
+| `black_holes_red` | The same clip in the red palette. | ✅ yes | shipped | [1](frames/black_holes_red_t035.jpg) [2](frames/black_holes_red_t075.jpg) |
+| `object_test` | The blue-pool TEMPLATE and test bed: drop objects in and see what the flow does to them before committing them to a real clip. | held back | template | — |
+| `orbit` | A vertically-stretched oval current turning about a central mass, with pellets injected into it. | ✅ yes | CUT — the gravity fix was tested and does not work | — |
+| `surf_rates` | The three-rates clip with the fluid changed to water and the foils to surfboards. | ✅ yes | shipped | [1](frames/surf_rates_t035.jpg) [2](frames/surf_rates_t075.jpg) |
+| `surf_sweep` | A surfboard planing on a steady wave face. | ✅ yes | render interrupted | — |
+| `surf_wave` | The same board when the face starts curling — a wave peeling past, with a free-body diagram. | ✅ yes | shipped | [1](frames/surf_wave_t035.jpg) [2](frames/surf_wave_t075.jpg) |
+| `tri_foil_air_sweep2` | `tri_foil_air_fast` with the sweep run at double rate - two full loops instead of one. | ✅ yes | rendered | — |
+| `tri_cylinders` | Three cylinders at three flow rates - the canonical vortex-shedding experiment, one Strouhal number per lane. | ✅ yes | rendered | — |
+| `duo_foil_air_fast` | Two identical sections at two flow rates in one upward tunnel. The duel set's base clip. | ✅ yes | rendered 10 s | — |
+| `duo_foil_air_sweep2` | `duo_foil_air_fast` with the sweep run at double rate - two full loops in the same 10 s. | ✅ yes | rendered 10 s | — |
+| `duo_foil_air_shape` | Two sections in one airstream - the variable moved from the air to the body's shape. | ✅ yes | rendered 10 s | — |
 
 
 ## Parameters that matter

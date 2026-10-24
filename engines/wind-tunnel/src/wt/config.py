@@ -2,7 +2,7 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py — render/solver config, ffmpeg resolution, encoder args.
 
-Vertical 1080x1920 by default (these are shorts, same target as ``Oscilloscope``). The SOLVER
+Vertical 1080x1920 by default (these are shorts, same target as the oscilloscope engine). The SOLVER
 runs in its own "wind coordinates" lattice — x is ALWAYS the streamwise axis, y the cross-stream
 axis — and `flow` only decides how that lattice is mapped onto the screen:
 
@@ -23,7 +23,7 @@ from dataclasses import field as _dc_field      # `field` is taken: it's a confi
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 OUT = os.path.join(ROOT, "out")
-# the Oscilloscope project supplies the CRT "filmed off a screen" post-filter (see wt/film.py)
+# the oscilloscope engine supplies the CRT "filmed off a screen" post-filter (see wt/film.py)
 OSC_ROOT = os.path.normpath(os.path.join(ROOT, "..", "..", "oscilloscope", "src"))
 
 
@@ -33,13 +33,16 @@ class RenderConfig:
     width: int = 1080
     height: int = 1920
     fps: int = 60
-    flow: str = "up"                # "up" | "down" (streamwise = screen vertical) | "right"
-                                    # "down" is "up" with the stream running top-to-bottom: same
-                                    # lattice, same physics, only render.py's mapping differs.
-                                    # It also mirrors the cross-stream axis (lattice +y -> screen
-                                    # LEFT) so the mapping stays orientation-PRESERVING; without
-                                    # that the picture would be a reflection and the sign of
-                                    # `--field vort` would silently invert.
+    flow: str = "up"                # "up" | "down" (streamwise = screen vertical)
+                                    # | "right" | "left" (streamwise = screen horizontal)
+                                    # "down" is "up" with the stream running top-to-bottom, and
+                                    # "left" is "right" turned through 180 deg: same lattice, same
+                                    # physics, only render.py's mapping differs. Each also negates
+                                    # the cross-stream axis, so all four mappings stay
+                                    # orientation-PRESERVING; without that the picture would be a
+                                    # reflection and the sign of `--field vort` would silently
+                                    # invert. "left" is for a body that must FACE RIGHT into an
+                                    # oncoming stream - the bullet series.
 
     # --- solver ---
     solver: str = "lbm"             # "lbm" = D2Q9 lattice-Boltzmann (wt/lbm.py), the default and
@@ -133,8 +136,30 @@ class RenderConfig:
                                     # tri_foil_rates, three flow rates at once) needs the key.
                                     # Content comes from the scene's legend() method.
 
+    axes: bool = False              # burn in the INSTRUMENT BLOCK (bottom): a ground-pinned
+                                    # scrolling ruler + a solid progress bar, from the scene's
+                                    # `axes(t)`. The bullet series' alternative to `legend` - a
+                                    # colour key says what a colour means, these say where the
+                                    # projectile is and how long it has been flying, and the
+                                    # ruler's SCROLL RATE is the speed reading (see
+                                    # render._draw_axes). The two can coexist but no scene wants
+                                    # both: `mach_bullet` runs legend=False, axes=True.
+
+    panel: bool = False             # burn in the CAPTION PANEL (bottom band) + a corner TAG, from
+                                    # the scene's `panel(t)`. Added 2026-08-11 for the road set,
+                                    # and it is deliberately NOT `legend` or `axes` reworked:
+                                    # I asked for a bottom bar carrying a TITLE and a live
+                                    # SPEED for a social post, which is a caption, not a key to
+                                    # the colour ramp (`legend`) and not an instrument telling
+                                    # you where a projectile is (`axes`). Reusing either would
+                                    # have meant a colour bar or a ruler nobody wanted, dressed
+                                    # in new text. The panel owns a declared BAND of the frame
+                                    # so a scene can compose the flow into what is left of it -
+                                    # see `_RoadSet.LEGEND_FRAC` - which is the one thing the
+                                    # other two overlays cannot do, since they float on top.
+
     # --- post ---
-    film: bool = False              # CRT "filmed off a screen" pass (Oscilloscope crtfilm)
+    film: bool = False              # CRT "filmed off a screen" pass (the oscilloscope engine's crtfilm)
     glow: float = 0.55              # film halation boost (LOW: the field is bright edge to edge)
     exposure: float = 0.72          # film pre-exposure. FilmLook's 1.75 default exposes for a
                                     # thin trace on a black scope screen; a wind-tunnel frame is
@@ -233,7 +258,7 @@ def _nvenc_available() -> bool:
 
 
 def find_ffmpeg() -> str:
-    """WT_FFMPEG/OSC_FFMPEG env -> local bin\\ffmpeg.exe -> the Chemistry bundled binary -> PATH."""
+    """WT_FFMPEG/OSC_FFMPEG env -> local bin\\ffmpeg.exe -> another project's bundled binary -> PATH."""
     for key in ("WT_FFMPEG", "OSC_FFMPEG"):
         env = os.environ.get(key)
         if env and os.path.exists(env):

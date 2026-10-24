@@ -1,16 +1,17 @@
 # SPDX-License-Identifier: MIT
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
-"""film.py — the optional "filmed off a screen" post-pass, borrowed from the Oscilloscope project.
+"""film.py — the optional "filmed off a screen" post-pass, borrowed from the oscilloscope engine.
 
-We do NOT re-implement it. `Oscilloscope\\osc\\crtfilm.py` is a heavily tuned three-stage physical
-model (screen halation/grain/dust -> lens barrel+CA+defocus+vignette -> camera flicker/hum/
-highlight-blowout/noise) and a second copy would immediately drift out of sync with it. This
-module just puts that package on sys.path and hands it a NEUTRAL WHITE phosphor config —
-mandatory here, because the green-phosphor defaults are only correct for a single-hue trace and
-would wreck a full-colour jet field (this is the same reasoning as Oscilloscope's ascii_video.py).
+We do NOT re-implement it. `engines/oscilloscope/src/osc/crtfilm.py` is a heavily tuned
+three-stage physical model (screen halation/grain/dust -> lens barrel+CA+defocus+vignette ->
+camera flicker/hum/highlight-blowout/noise) and a second copy would immediately drift out of
+sync with it. This module just puts that package on sys.path and hands it a NEUTRAL WHITE
+phosphor config — mandatory here, because the green-phosphor defaults are only correct for a
+single-hue trace and would wreck a full-colour jet field (this is the same reasoning as the
+oscilloscope engine's ascii_video.py).
 
-If the Oscilloscope project is missing, `--film` fails with a clear message; everything else in
-Wind_Tunnel keeps working.
+If the oscilloscope engine is missing, `--film` fails with a clear message; everything else in
+this project keeps working.
 """
 from __future__ import annotations
 
@@ -29,7 +30,8 @@ def make_look(w, h, fps, n_frames, *, glow=0.55, ambient=0.16, bow=0.045, seed=7
     image back in range."""
     if not os.path.isdir(os.path.join(OSC_ROOT, "osc")):
         raise SystemExit(
-            f"--film needs the Oscilloscope project's CRT filter, not found at {OSC_ROOT}\\osc")
+            f"--film needs the oscilloscope engine's CRT filter, not found in {OSC_ROOT}. "
+            "Keep engines/oscilloscope next to engines/wind-tunnel.")
     if OSC_ROOT not in sys.path:
         sys.path.insert(0, OSC_ROOT)
     from osc.crtfilm import FilmLook, film_config_for_phosphor    # noqa: E402
