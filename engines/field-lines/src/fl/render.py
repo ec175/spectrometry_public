@@ -8,7 +8,7 @@ the same rule as every other engine in this library.
 
 Encoding is atomic: raw RGB24 goes to `<out>.mp4.part.mp4` and the file is renamed onto its real
 name only on success. A file bearing its final name is always finalized and playable, which is
-what makes the skip-if-exists logic in render_five.ps1 sound.
+what makes a skip-if-exists batch script sound.
 """
 from __future__ import annotations
 

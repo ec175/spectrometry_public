@@ -52,6 +52,23 @@ That traces the field lines of a +6 and a −2 charge and tells you how each lin
 design: a field is any callable `f(P) -> V` on an `(N, 2)` array, so adding one changes nothing
 downstream.
 
+## Render a video
+
+All five compositions are in `src/fl/scenes.py`:
+
+```bash
+cd engines/field-lines/src
+python cli.py list
+python cli.py dipole_flower --dry                     # flux report, ~2 s, draws nothing
+python cli.py dipole_flower --still 0,4,7.5 --preview # PNGs from the same clock
+python cli.py dipole_flower --preview                 # 540x960 @30
+python cli.py dipole_flower                           # 1080x1920 @60 -> out/dipole_flower.mp4
+```
+
+**Run `--dry` first, every time.** It answers the one question a render can't: are the lines
+ending where field lines have to end? Tune against it, not against renders. `tools/pf_check.py`
+and `tools/dance_check.py` are the two intent checks described below.
+
 ## Nothing here solves a PDE
 
 Every field is a closed form evaluated at an array of points. There is no lattice, no timestep, no
@@ -125,8 +142,8 @@ a 2,130 px straight run put 34% of lines out of budget.
 **But the fate report only answers "are the lines legal?"** Anything with an intent needs a check
 that measures THAT intent. The most valuable one written for this engine asked *is a cylinder
 actually a cylinder* by measuring surface-normal velocity directly — see the next section for why.
-Those checks import the withheld composition module and are not shipped; write the equivalent for
-any composition whose success is not simply "it did not crash".
+Two of them ship in `src/tools/` (`pf_check.py`, `dance_check.py`); write the equivalent for any
+composition of your own whose success is not simply "it did not crash".
 
 ## Two results worth knowing before you build a potential flow
 
@@ -183,10 +200,8 @@ The one thing to re-derive is the arclength budget, since it must clear a bounds
 
 ## What is not here
 
-- **`fl/scenes.py`** — the five compositions. See [CATALOG.md](CATALOG.md) for what each one
-  demonstrates and three frames from each.
-- **`tools/pf_check.py` and `tools/dance_check.py`** — both import the compositions. What they
-  measured is described above.
+- **The horizontal stock set.** The 16:9 versions I sell as stock footage stay with me; the five
+  vertical compositions are all here.
 - **Audio.** The format is built for it — the packet period is already one bar at 96 BPM, and line
   count and source magnitude are exactly the channels a track should drive — but nothing is wired
   up. The keep-them-equal rule if you add it: build `start` must equal mux `-ss`.

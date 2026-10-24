@@ -11,7 +11,7 @@ Nothing here solves a PDE. Every field is a closed form evaluated at an array of
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
@@ -22,6 +22,10 @@ What each shipped file is. Compositions (`scenes.py` and friends) are deliberate
 | `fl/draw.py` | render | `Frame` — supersampled Pillow strokes, box downsample, a bilinear density splat as a separate additive channel, then two-scale bloom. Palettes `palette_alternate`, `palette_angle`, `palette_fate`. |
 | `fl/render.py` | render | `solve` / `compose` / `flux_report` / `render_stills` / `render_scene`. ffmpeg pipe with atomic output. |
 | `fl/config.py` | config | `RenderConfig` (resolution, fps, supersample, bloom, density), the NVENC probe, ffmpeg resolution. |
+| `cli.py` | entry point | `python cli.py list`, `<scene> --dry` (flux report, ~2 s), `--still`, `--preview`. |
+| `fl/scenes.py` | compositions | The five compositions and the `SCENES` registry. |
+| `tools/pf_check.py` | check | Is a `PotentialFlow.cylinder` really a cylinder? Zero surface-normal velocity and a 2\|U\| equator speed, checked in a tenth of a second. |
+| `tools/dance_check.py` | check | Does `pair_dance` actually dance? The six charges must stay on camera, keep moving, and keep meeting. |
 
 
 ## Field kernels
@@ -69,15 +73,15 @@ A field is any callable `f(P) -> V` on an (N,2) array. That is the entire contra
 
 ## Compositions
 
-Five, and they are a deliberate spread over the properties the format can carry — one property each, no reskins. The compositions are not shipped; the list is here because what each one PROVES is reusable even when the code is not.
+Five, and they are a deliberate spread over the properties the format can carry — one property each, no reskins. All five are in `src/fl/scenes.py` and render with `python cli.py <name>`; run `--dry` first.
 
-| composition | what it does | status | frames |
-|---|---|---|---|
-| `dipole_flower` | Seed count as an animation channel, and capture as a topology EVENT. A mobile negative source toggles magnitude; above a threshold its capacity exceeds the centre's emission and it takes the entire flux — the picture snaps from a five-pole flower to a teardrop in about a second. | shipped 15 s | [1](frames/dipole_flower_t015.jpg) [2](frames/dipole_flower_t045.jpg) [3](frames/dipole_flower_t080.jpg) |
-| `rosette_waltz` | Continuous reconnection under MOVING sinks. Bundles are handed between sinks through null points; the rosette is never drawn, only the sinks move. | shipped 15 s | [1](frames/rosette_waltz_t015.jpg) [2](frames/rosette_waltz_t045.jpg) [3](frames/rosette_waltz_t080.jpg) |
-| `pair_dance` | Nothing keyframed — the SOURCES are solved. Six charges under mutual Coulomb in an anisotropic well, launched tangentially, with lines coloured by fate. | shipped 15 s | [1](frames/pair_dance_t015.jpg) [2](frames/pair_dance_t045.jpg) [3](frames/pair_dance_t080.jpg) |
-| `charge_wave` | MAGNITUDE and SIGN as animation channels. Seven sources in a swaying column with a travelling-wave charge; lines are born and die as sources cross zero, and marker radius reads the state out honestly. | shipped 15 s | [1](frames/charge_wave_t015.jpg) [2](frames/charge_wave_t045.jpg) [3](frames/charge_wave_t080.jpg) |
-| `stream_glass` | KERNEL GENERALITY — the reuse proof. Potential flow: a tilting stream, one exactly-imaged cylinder with swinging bound circulation, two free vortices orbiting it. Not one line of the integrator, the pulses or the drawing changes; only the callable. | shipped 15 s | [1](frames/stream_glass_t015.jpg) [2](frames/stream_glass_t045.jpg) [3](frames/stream_glass_t080.jpg) |
+| composition | what it does | code here? | status | frames |
+|---|---|---|---|---|
+| `dipole_flower` | Seed count as an animation channel, and capture as a topology EVENT. A mobile negative source toggles magnitude; above a threshold its capacity exceeds the centre's emission and it takes the entire flux — the picture snaps from a five-pole flower to a teardrop in about a second. | ✅ yes | shipped 15 s | [1](frames/dipole_flower_t015.jpg) [2](frames/dipole_flower_t045.jpg) [3](frames/dipole_flower_t080.jpg) |
+| `rosette_waltz` | Continuous reconnection under MOVING sinks. Bundles are handed between sinks through null points; the rosette is never drawn, only the sinks move. | ✅ yes | shipped 15 s | [1](frames/rosette_waltz_t015.jpg) [2](frames/rosette_waltz_t045.jpg) [3](frames/rosette_waltz_t080.jpg) |
+| `pair_dance` | Nothing keyframed — the SOURCES are solved. Six charges under mutual Coulomb in an anisotropic well, launched tangentially, with lines coloured by fate. | ✅ yes | shipped 15 s | [1](frames/pair_dance_t015.jpg) [2](frames/pair_dance_t045.jpg) [3](frames/pair_dance_t080.jpg) |
+| `charge_wave` | MAGNITUDE and SIGN as animation channels. Seven sources in a swaying column with a travelling-wave charge; lines are born and die as sources cross zero, and marker radius reads the state out honestly. | ✅ yes | shipped 15 s | [1](frames/charge_wave_t015.jpg) [2](frames/charge_wave_t045.jpg) [3](frames/charge_wave_t080.jpg) |
+| `stream_glass` | KERNEL GENERALITY — the reuse proof. Potential flow: a tilting stream, one exactly-imaged cylinder with swinging bound circulation, two free vortices orbiting it. Not one line of the integrator, the pulses or the drawing changes; only the callable. | ✅ yes | shipped 15 s | [1](frames/stream_glass_t015.jpg) [2](frames/stream_glass_t045.jpg) [3](frames/stream_glass_t080.jpg) |
 
 
 ## Parameters that matter

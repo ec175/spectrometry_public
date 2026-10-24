@@ -5,8 +5,9 @@
 Two motion backends, and the distinction between them is deliberate:
 
 * `WanderPath` is a DECLARED path. A scene using it is saying "this source is on a rig" - the
-  same class of input as Wind_Tunnel's "a body's POSITION at time t" or Shape_Physics' spin
-  rate. It is honest because it is declared, not because it is physical.
+  same class of input as the wind-tunnel engine's "a body's POSITION at time t" or the
+  shape-physics engine's spin rate. It is honest because it is declared, not because it is
+  physical.
 * `NBody` is SOLVED. Nothing about where those charges go is authored; only their masses,
   charges, the well they sit in, and how they were launched.
 
@@ -98,11 +99,11 @@ class NBody:
     anisotropic harmonic well.
 
     The well is the rig: without it a charge that gains energy in a close pass simply leaves and
-    the frame empties, and no amount of tuning the interactions fixes that (Shape_Physics rev 4
-    hit exactly this and solved it the same way). It is ANISOTROPIC - the restoring force is
-    computed in a metric where ry = (y-cy)/aniso - so orbits come out as vertical ellipses that
-    fill a 9:16 frame with nothing fighting anything. Bodies stay round; only the field is
-    stretched. That is the Shape_Physics rev-6 lesson carried over verbatim.
+    the frame empties, and no amount of tuning the interactions fixes that (an earlier revision
+    of the shape-physics engine hit exactly this and solved it the same way). It is ANISOTROPIC -
+    the restoring force is computed in a metric where ry = (y-cy)/aniso - so orbits come out as
+    vertical ellipses that fill a 9:16 frame with nothing fighting anything. Bodies stay round;
+    only the field is stretched. That is the same lesson carried over verbatim from that engine.
 
     `softening` is not cosmetic. An unsoftened opposite-sign pair reaches unbounded speed in
     finite time, and no fixed substep can follow it.
@@ -119,11 +120,11 @@ class NBody:
         self.well, self.aniso, self.C = well, aniso, coupling
         self.soft2 = softening * softening
         # A SOFT CORE: these sources are beads with a size, not mathematical points. That is a
-        # MATERIAL choice - the same class of input as picking a body's density in Wind_Tunnel -
-        # and it is what stops an opposite-sign pair from slamming together (measured 12 px on
-        # the first build, i.e. two 15 px markers fully overlapped). Falling as 1/r^3 against
-        # Coulomb's 1/r^2, it is negligible at working distances and dominant only on contact,
-        # so pairs settle into loose orbiting dipoles instead of colliding.
+        # MATERIAL choice - the same class of input as picking a body's density in the
+        # wind-tunnel engine - and it is what stops an opposite-sign pair from slamming together
+        # (measured 12 px on the first build, i.e. two 15 px markers fully overlapped). Falling
+        # as 1/r^3 against Coulomb's 1/r^2, it is negligible at working distances and dominant
+        # only on contact, so pairs settle into loose orbiting dipoles instead of colliding.
         self.core_k, self.core_soft2 = core_k, core_soft * core_soft
         self.drag, self.v_max = drag, v_max
         self.sps = substeps_per_sec
@@ -132,7 +133,7 @@ class NBody:
     def launch_tangential(self, gain=1.0):
         """Circular-orbit speed for THIS well, in the stretched metric. Launching in a random
         direction instead drops everything straight down the well and the swarm reads as a
-        clump, not as orbits (Shape_Physics learned this twice)."""
+        clump, not as orbits (the shape-physics engine learned this twice)."""
         d = self.p - self.c
         u = np.stack([d[:, 0], d[:, 1] / self.aniso], axis=1)
         r = np.hypot(u[:, 0], u[:, 1]) + 1e-9

@@ -3,16 +3,17 @@
 """draw.py - the look. PIL vector strokes at SS x resolution, box-downsampled, plus a
 two-scale additive bloom and an additive DENSITY term.
 
-Ported from Shape_Physics\\sim\\draw.py, with one addition that this project needs and that one
-does not. PIL line drawing OVERWRITES; the reference clip is clearly ADDITIVE - hundreds of
-lines converging on a charge blow the core to white, and a frame corner 500 px from any line
-still measures (3,5,12) rather than (0,0,0), which only a wide-sigma blur summed back in can
-produce. Rather than pay for a real additive rasteriser, the integrator's own samples are
+Ported from the shape-physics engine's sim/draw.py, with one addition that this project needs
+and that one does not. PIL line drawing OVERWRITES; the reference clip is clearly ADDITIVE -
+hundreds of lines converging on a charge blow the core to white, and a frame corner 500 px from
+any line still measures (3,5,12) rather than (0,0,0), which only a wide-sigma blur summed back
+in can produce. Rather than pay for a real additive rasteriser, the integrator's own samples are
 splatted into a scalar density histogram at OUTPUT resolution, blurred, and added. It is one
 bincount, it is the only genuinely additive channel, and it is what makes a dense fan glow.
 
 Bloom runs on the DOWNSAMPLED frame, never the supersampled buffer - the glow is low-frequency,
-so it is visually identical and ~4x cheaper (Oscilloscope's half-res-bloom argument).
+so it is visually identical and ~4x cheaper (the same half-res-bloom argument as the
+oscilloscope engine).
 """
 from __future__ import annotations
 

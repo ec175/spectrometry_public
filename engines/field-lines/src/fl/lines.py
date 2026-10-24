@@ -26,7 +26,8 @@ THREE decisions here are load-bearing. Each is a bug if it is "simplified" away:
 Termination, in priority order: captured by a sink, stalled at a null point, left the bounds,
 or ran out of arclength. A line ending on `s_max` (code 3) is a BUG, not a taste matter - it
 means capture_r is smaller than ds (the line stepped straight over its sink) or the bounds are
-wrong. `tools/flux_check.py` counts these; do not raise s_max to make the number go away.
+wrong. A check tool (not included here) counts these; do not raise s_max to make the number go
+away.
 """
 from __future__ import annotations
 

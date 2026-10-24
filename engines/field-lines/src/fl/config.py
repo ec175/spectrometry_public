@@ -2,14 +2,14 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """config.py - render config + ffmpeg/NVENC resolution.
 
-Ported from Shape_Physics\\sim\\config.py (itself ported from Oscilloscope\\osc\\config.py):
-same find_ffmpeg chain, same one-time NVENC probe with automatic libx264 fallback. Env vars
-here are FL_-prefixed (FL_FFMPEG / FL_NVENC).
+Same find_ffmpeg chain and one-time NVENC probe pattern used elsewhere in this project: probe
+h264_nvenc once per process and fall back to libx264 automatically rather than kill a render
+mid-pipe. Env vars here are FL_-prefixed (FL_FFMPEG / FL_NVENC).
 
 WORLD UNITS: every scene is quoted in the REFERENCE frame 1080x1920 px, y DOWN, whatever the
 output resolution is. `RenderConfig.scale` maps world -> output px. That is what makes a
 540x960 preview and a 1080x1920 final the SAME picture, sampled differently - and it is why a
-preview is trustworthy. Same discipline as the rest of the library.
+preview is trustworthy.
 """
 from __future__ import annotations
 
@@ -19,7 +19,6 @@ from dataclasses import dataclass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-LIB = os.path.normpath(os.path.join(ROOT, ".."))
 OUT = os.path.join(ROOT, "out")
 
 REF_W = 1080
@@ -32,6 +31,13 @@ class RenderConfig:
     height: int = REF_H
     fps: int = 60
     ss: int = 2                  # supersample factor for the vector draws (anti-aliasing)
+
+    # The REFERENCE frame this scene's world coordinates were authored in. Vertical scenes
+    # keep 1080x1920 and are unaffected. A scene that declares a 1920x1080 reference renders
+    # at scale 1.0 instead of 1.78 - without this a 16:9 layout would draw 9:16 geometry blown
+    # up nearly twice and hanging off the frame.
+    ref_w: int = REF_W
+    ref_h: int = REF_H
 
     # --- the look ------------------------------------------------------------------
     # Two-scale additive bloom, measured off the source clip: a tight core halo plus a wide
@@ -50,13 +56,30 @@ class RenderConfig:
     @property
     def scale(self) -> float:
         """world px -> output px."""
-        return self.width / float(REF_W)
+        return self.width / float(self.ref_w)
 
     @classmethod
     def preview(cls, **kw):
-        kw.setdefault("width", REF_W // 2)
-        kw.setdefault("height", REF_H // 2)
+        """Half the SCENE's reference frame, not a hardcoded 9:16 half."""
+        rw = kw.get("ref_w", REF_W)
+        rh = kw.get("ref_h", REF_H)
+        kw.setdefault("width", rw // 2)
+        kw.setdefault("height", rh // 2)
         kw.setdefault("fps", 30)
+        return cls(**kw)
+
+    @classmethod
+    def for_scene(cls, scene, **kw):
+        """Build a config in the reference frame the scene declares.
+
+        A scene opts into 16:9 with `REF = (1920, 1080)`; anything without the attribute keeps
+        the original 1080x1920, so every existing vertical scene is untouched.
+        """
+        rw, rh = getattr(scene, "REF", (REF_W, REF_H))
+        kw.setdefault("ref_w", rw)
+        kw.setdefault("ref_h", rh)
+        kw.setdefault("width", rw)
+        kw.setdefault("height", rh)
         return cls(**kw)
 
 
@@ -64,9 +87,9 @@ _NVENC_OK = None
 
 
 def _nvenc_available() -> bool:
-    """Probe h264_nvenc ONCE per process. GPU encode is the library default, so a missing or
-    busy NVENC must degrade to libx264 rather than kill a render mid-pipe. (Consumer NVENC
-    allows only 3-5 concurrent sessions - that is why render_five.ps1 caps at 3 lanes.)"""
+    """Probe h264_nvenc ONCE per process. GPU encode is the default, so a missing or busy
+    NVENC must degrade to libx264 rather than kill a render mid-pipe. (Consumer NVENC allows
+    only 3-5 concurrent sessions - cap a batch of renders at 3 lanes.)"""
     global _NVENC_OK
     if _NVENC_OK is None:
         try:
@@ -92,7 +115,7 @@ def encoder_args() -> list:
 
 
 def find_ffmpeg() -> str:
-    """FL_FFMPEG env -> local bin\\ffmpeg.exe -> the Chemistry bundled binary -> PATH."""
+    """FL_FFMPEG env -> local bin\\ffmpeg.exe -> PATH."""
     env = os.environ.get("FL_FFMPEG")
     if env and os.path.exists(env):
         return env
