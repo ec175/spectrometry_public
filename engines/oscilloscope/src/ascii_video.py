@@ -2,9 +2,10 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """ascii_video.py — video -> coloured ASCII -> the Oscilloscope CRT "screen" filter.
 
-Decodes an input clip, turns every frame into coloured ASCII (osc.asciivid, ported from the
-Ascii_Studio album-icon mapping), runs the result through crtfilm.FilmLook (the "filmed off a
-real CRT" SCREEN filter — NOT glitchfx), re-encodes, and muxes the source audio window back on.
+Decodes an input clip, turns every frame into coloured ASCII (osc.asciivid, ported from an
+album-icon mapping in another project of mine), runs the result through crtfilm.FilmLook (the
+"filmed off a real CRT" SCREEN filter — NOT glitchfx), re-encodes, and muxes the source audio
+window back on.
 
   .\.venv\Scripts\python.exe ascii_video.py IN.mp4 out\ascii\hers_ascii.mp4 --start 45 --dur 30
   # quick look:  --preview   (540x960, ~6 s)     raw ascii, no CRT:  --no-film

@@ -63,6 +63,20 @@ frame = look.process(rgb, 0)
 `film_config_for_phosphor()` derives the filter's colour behaviour from your trace colour, and it's
 cheap enough to call every frame, so a colour-changing scene needs no filter tuning at all.
 
+## Render a video
+
+Twelve compositions are in `src/osc/signals.py`:
+
+```bash
+cd engines/oscilloscope/src
+python cli.py list
+python cli.py wind_up --preview          # fast draft: 540x960, 15 fps
+python cli.py dimensional                # the star scene, 1080x1920 -> out/dimensional.mp4
+python cli.py lissajous_tour --seconds 6
+```
+
+The film filter above (`filter_cli.py`) works on any of these, or on anything else you've shot.
+
 ## The core is one idea
 
 The electron beam is stroked each frame into an intensity layer, which is added to a float buffer
@@ -202,15 +216,15 @@ and re-seed their statics per size.
 
 ## What is not here
 
-- **`osc/signals.py`** — the compositions, about 1,300 lines. [CATALOG.md](CATALOG.md) lists them
-  grouped by output family, with frames.
+- **The music compositions** — the radial-sound, spectral-falls and spectral-stack formats — which
+  are built around specific songs.
 - **`osc/attractors.py`** — the CRT attractor compositions. See the [attractors
   engine](../attractors/) for the swarm treatment of the same systems.
 - **`osc/polarline.py` and `osc/modes.py`** — a separate polar-sonification format, outside the
   scope of this catalogue.
-- **`build_circle_format.py`** — the builder for the split ASCII-cover-plus-scope format. It
-  imports the withheld compositions, so it could not ship; the format itself is described in the
-  catalogue and there are four frames from it.
+- **`build_circle_format.py`** — the builder for the split ASCII-cover-plus-scope format. It's built
+  around album art, so it stays with me; the format itself is described in the catalogue, with four
+  frames.
 - **The chemical-profile format**, which has its own engine: [chemical-scope](../chemical-scope/).
 
 ---

@@ -2,9 +2,10 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """asciivid.py — video frame -> coloured ASCII, vectorized via a glyph atlas.
 
-Ports the Ascii_Studio `ascii_art.frame_to_ascii` mapping (luminance -> ramp index, KEEP the
-source pixel colour, drop near-black cells) but renders a whole frame at once with a
-precomputed glyph atlas, so it's fast enough for full video instead of a per-cell blit loop:
+Ports an `ascii_art.frame_to_ascii` mapping from another project of mine (luminance -> ramp
+index, KEEP the source pixel colour, drop near-black cells) but renders a whole frame at once
+with a precomputed glyph atlas, so it's fast enough for full video instead of a per-cell blit
+loop:
 
     frame ──resize to (cols,rows)──> small RGB
           ──luminance ──> ramp-index grid (rows,cols)   (dark cells -> space)
@@ -17,7 +18,7 @@ The output frame is pure black except the ASCII band, so it feeds straight into
 `crtfilm.FilmLook` (the Oscilloscope "screen" filter) — the CRT glass halation/lens/camera
 model then makes it read as coloured ASCII glowing on a real CRT face.
 
-Look matches the Ascii_Studio album icon (same RAMP, same keep-colour rule); the only change
+Look matches that other project's album icon (same RAMP, same keep-colour rule); the only change
 is that a whole frame is assembled with numpy fancy-indexing rather than glyph-by-glyph.
 """
 from __future__ import annotations
@@ -27,14 +28,14 @@ import os
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
-# Luminance ramp (dark -> light) — the SAME one Ascii_Studio / the manim ASCII art use.
+# Luminance ramp (dark -> light) — the SAME one another project of mine / the manim ASCII art use.
 RAMP = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 
 _WINFONTS = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts")
 _FONT_CANDIDATES = [
-    # bundled with the Ascii_Studio project, then Windows Terminal's Cascadia, then Consolas.
-    os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..",
-                                  "Ascii_Studio", "assets", "fonts", "CascadiaMono.ttf")),
+    # a copy you drop into src/fonts/, then Windows Terminal's Cascadia, then Consolas.
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts",
+                 "CascadiaMono.ttf"),
     os.path.join(_WINFONTS, "CascadiaMono.ttf"),
     os.path.join(_WINFONTS, "CascadiaCode.ttf"),
     os.path.join(_WINFONTS, "consola.ttf"),

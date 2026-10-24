@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """audio.py — decode a song to mono, precompute per-band magnitudes, and mux audio onto a
-silent render. Pure numpy + ffmpeg (no manim). Ported from Ascii_Studio\\asciivid\\audio.py.
+silent render. Pure numpy + ffmpeg (no manim). Ported from an audio.py in another project of mine.
 
 CRITICAL sync rule (inherited): the `start` used to build the bands MUST equal the `-ss` used
 in `mux_audio`, so the trace and the audio begin at the same instant in the song.
