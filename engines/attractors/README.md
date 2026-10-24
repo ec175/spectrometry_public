@@ -49,6 +49,21 @@ When you draw it, `core.project` returns a 2-D position **and a depth**. Use the
 perspective divide plus depth-keyed size and brightness is enough to separate the front and back
 lobes.
 
+## Render a video
+
+All five compositions are in `src/at/scenes.py`:
+
+```bash
+cd engines/attractors/src
+python cli.py list
+python cli.py lorenz_swarm --still 3,8,14 --preview   # PNGs, no video
+python cli.py lorenz_swarm --preview                  # 540x960 @30
+python cli.py lorenz_swarm                            # 1080x1920 @60 -> out/lorenz_swarm.mp4
+```
+
+Point it at ffmpeg with `AT_FFMPEG` if it isn't on your PATH, and set `AT_NVENC=0` to force CPU
+encoding.
+
 ## Why a swarm and not an orbit
 
 A single trajectory shows you the **shape** of an attractor. A swarm shows you its **invariant
@@ -135,15 +150,12 @@ dynamics knows the aspect ratio. A landscape plate is a different `Canvas` size 
 
 ## What is not here
 
-- **`at/scenes.py`** — the five compositions. See [CATALOG.md](CATALOG.md); each one is a
-  different *measurement* rather than a different palette, and that distinction is the reusable
-  part.
-- One composition, a single true orbit drawn as a ribbon with a halo of particles it has captured,
-  was built but never rendered — so it has no frames.
+- **Frames for `lorenz_ribbon`.** Its code is here — a single true orbit drawn as a ribbon, with a
+  halo of the particles it has captured — but I never rendered it, so the catalogue has no stills.
 
-The oscilloscope engine has its own, unrelated attractor treatment: **one** beam tracing a single
-orbit, with the figure emerging from phosphor persistence, which is exactly what a real X-Y scope
-does with a pair of voltages. Same systems, opposite measurement.
+The oscilloscope engine has its own attractor treatment: **one** beam tracing a single orbit, with
+the figure emerging from phosphor persistence, which is exactly what a real X-Y scope does with a
+pair of voltages. Same systems, opposite measurement. (Those CRT compositions aren't included.)
 
 ---
 

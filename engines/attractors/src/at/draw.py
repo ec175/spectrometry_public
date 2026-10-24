@@ -4,14 +4,15 @@
 
 Forty thousand particles per frame is far past what PIL vector calls can draw, so nothing here is
 a draw call: every point is bilinearly SPLATTED into a float accumulation buffer with one
-`np.bincount`, exactly the device `Wind_Tunnel\\wt\\streaks.py` uses for its streak tails and
-`Field_Lines` uses for its density channel. It is genuinely additive, which matters - the bright
-filaments of an attractor are bright *because* many particles are there, and an overwriting
-rasteriser would show a uniform sheet instead.
+`np.bincount`, exactly the device `engines/wind-tunnel/src/wt/streaks.py` uses for its streak
+tails and the field-lines engine uses for its density channel. It is genuinely additive, which
+matters - the bright filaments of an attractor are bright *because* many particles are there,
+and an overwriting rasteriser would show a uniform sheet instead.
 
 A PERSISTENCE buffer sits on top (`trail`), decayed a little each frame. This is the same idea as
-the Oscilloscope's phosphor, and it does the same job for a different reason: a single frame of a
-particle swarm is a dusting of dots, and only the accumulation over ~10 frames reads as a surface.
+the oscilloscope engine's phosphor, and it does the same job for a different reason: a single
+frame of a particle swarm is a dusting of dots, and only the accumulation over ~10 frames reads
+as a surface.
 """
 from __future__ import annotations
 

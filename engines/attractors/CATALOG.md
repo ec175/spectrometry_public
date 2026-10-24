@@ -11,12 +11,14 @@ RK4 on an (N,3) array costs the same four function evaluations as RK4 on one poi
 
 ## Modules
 
-What each shipped file is. Compositions (`scenes.py` and friends) are deliberately not part of this repository — see the engine README.
+What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
 
 | module | kind | what it gives you |
 |---|---|---|
 | `at/core.py` | dynamics | The six flows, vectorised over an (N,3) array; `rk4`; `Swarm` (seeding, stepping, respawn, speed); `rot` and `project` — 3-D to screen with a mild perspective divide and a returned depth. |
 | `at/draw.py` | render | `Canvas` — an additive persistence buffer with per-frame decay, bilinear point splatting, a two-scale glow and an exposure tonemap — plus the five colour ramps. |
+| `cli.py` | entry point | `python cli.py list`, `<scene> --still T --preview`, `--preview`, full render. |
+| `at/scenes.py` | compositions | The five compositions and the `SCENES` registry. |
 
 
 ## Flows
@@ -67,15 +69,15 @@ Every one maps a MEASURED quantity, so all five are built monotone in luminance 
 
 ## Compositions
 
-Five compositions, and they are five different MEASUREMENTS rather than five palettes — each one shows something the others cannot. The compositions are not shipped; the list is here because the measurement each one makes is the reusable idea.
+Five compositions, and they are five different MEASUREMENTS rather than five palettes — each one shows something the others cannot. All five are in `src/at/scenes.py` and render with `python cli.py <name>`.
 
-| composition | what it does | status | frames |
-|---|---|---|---|
-| `lorenz_swarm` | The invariant measure, plainly. 46,000 particles coloured by local speed. Nothing is traced — every bright filament is just where particles crowd, so the image IS the measure. Speed colour makes the structure read three-dimensionally with no shading: the outer sweeps of each lobe are fast and hot, the slow crawl through the middle stays cool and dark. | shipped 15 s | [1](frames/lorenz_swarm_t020.jpg) [2](frames/lorenz_swarm_t055.jpg) [3](frames/lorenz_swarm_t085.jpg) |
-| `lorenz_ribbon` | One true orbit drawn as a bright ribbon, with a halo of particles it has captured. The halo runs under the SAME flow plus a weak spring toward the nearest point of the orbit — they are not stuck to it, the flow keeps tearing them off and the spring keeps gathering them back, so the halo breathes around the ribbon instead of coating it. | built, not rendered | — |
-| `lorenz_divergence` | Sensitive dependence. Two swarms launched from identical positions, same solver, differing by 1e-7. Colour is the distance between each particle and its twin, on a LOG scale — separation covers seven orders of magnitude in 15 s, and on a linear scale the whole clip is black and then white in one frame. It lights up first along the stretching directions, which is where the Lyapunov exponent lives. | shipped 15 s | [1](frames/lorenz_divergence_t020.jpg) [2](frames/lorenz_divergence_t055.jpg) [3](frames/lorenz_divergence_t085.jpg) |
-| `lorenz_capture` | An attractor attracting. Every other scene starts on the manifold; this one deliberately does not. 40,000 particles are seeded in a big uniform box and the flow does the rest — a structureless cloud collapsing onto a two-dimensional sheet in about four seconds, because the flow contracts volume everywhere. Colour is time-since-capture, so the sheet forms cool while stragglers stay hot. | shipped 15 s | [1](frames/lorenz_capture_t020.jpg) [2](frames/lorenz_capture_t055.jpg) [3](frames/lorenz_capture_t085.jpg) |
-| `attractor_tour` | Four attractors as ONE object, by interpolating the DERIVATIVE rather than the picture: dP/dt = (1-u)*f_A(P) + u*f_B(P). Because the blend is of the vector fields, every intermediate is a real dynamical system with its own trajectories — the swarm is never teleported and never cross-faded. Watching a Lorenz butterfly stretch into a Halvorsen knot through a sequence of attractors nobody has named is the whole reason to do it this way. | shipped 15 s | [1](frames/attractor_tour_t008.jpg) [2](frames/attractor_tour_t030.jpg) [3](frames/attractor_tour_t052.jpg) [4](frames/attractor_tour_t074.jpg) [5](frames/attractor_tour_t094.jpg) |
+| composition | what it does | code here? | status | frames |
+|---|---|---|---|---|
+| `lorenz_swarm` | The invariant measure, plainly. 46,000 particles coloured by local speed. Nothing is traced — every bright filament is just where particles crowd, so the image IS the measure. Speed colour makes the structure read three-dimensionally with no shading: the outer sweeps of each lobe are fast and hot, the slow crawl through the middle stays cool and dark. | ✅ yes | shipped 15 s | [1](frames/lorenz_swarm_t020.jpg) [2](frames/lorenz_swarm_t055.jpg) [3](frames/lorenz_swarm_t085.jpg) |
+| `lorenz_ribbon` | One true orbit drawn as a bright ribbon, with a halo of particles it has captured. The halo runs under the SAME flow plus a weak spring toward the nearest point of the orbit — they are not stuck to it, the flow keeps tearing them off and the spring keeps gathering them back, so the halo breathes around the ribbon instead of coating it. | ✅ yes | built, not rendered | — |
+| `lorenz_divergence` | Sensitive dependence. Two swarms launched from identical positions, same solver, differing by 1e-7. Colour is the distance between each particle and its twin, on a LOG scale — separation covers seven orders of magnitude in 15 s, and on a linear scale the whole clip is black and then white in one frame. It lights up first along the stretching directions, which is where the Lyapunov exponent lives. | ✅ yes | shipped 15 s | [1](frames/lorenz_divergence_t020.jpg) [2](frames/lorenz_divergence_t055.jpg) [3](frames/lorenz_divergence_t085.jpg) |
+| `lorenz_capture` | An attractor attracting. Every other scene starts on the manifold; this one deliberately does not. 40,000 particles are seeded in a big uniform box and the flow does the rest — a structureless cloud collapsing onto a two-dimensional sheet in about four seconds, because the flow contracts volume everywhere. Colour is time-since-capture, so the sheet forms cool while stragglers stay hot. | ✅ yes | shipped 15 s | [1](frames/lorenz_capture_t020.jpg) [2](frames/lorenz_capture_t055.jpg) [3](frames/lorenz_capture_t085.jpg) |
+| `attractor_tour` | Four attractors as ONE object, by interpolating the DERIVATIVE rather than the picture: dP/dt = (1-u)*f_A(P) + u*f_B(P). Because the blend is of the vector fields, every intermediate is a real dynamical system with its own trajectories — the swarm is never teleported and never cross-faded. Watching a Lorenz butterfly stretch into a Halvorsen knot through a sequence of attractors nobody has named is the whole reason to do it this way. | ✅ yes | shipped 15 s | [1](frames/attractor_tour_t008.jpg) [2](frames/attractor_tour_t030.jpg) [3](frames/attractor_tour_t052.jpg) [4](frames/attractor_tour_t074.jpg) [5](frames/attractor_tour_t094.jpg) |
 
 
 ## Parameters that matter

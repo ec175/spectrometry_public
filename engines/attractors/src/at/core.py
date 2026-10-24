@@ -2,8 +2,9 @@
 # From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
 """core.py - vectorised strange-attractor flows and a particle swarm that lives on them.
 
-The difference from `..\\Oscilloscope\\osc\\attractors.py` is the whole point of this project.
-There, ONE trajectory is traced by a beam and the picture is built by phosphor persistence. Here,
+The difference from the oscilloscope engine's own attractor mode (not included here) is the
+whole point of this project. There, ONE trajectory is traced by a beam and the picture is built
+by phosphor persistence. Here,
 tens of thousands of INDEPENDENT particles are integrated through the same vector field at once,
 and the picture is built by where they crowd.
 
@@ -14,7 +15,7 @@ where the dynamics dwell.
 
 Everything is a whole-swarm numpy op. RK4 on an (N,3) array costs the same four function calls as
 RK4 on one point, so 40 000 particles are essentially free next to the rasteriser - the same
-lockstep argument as Field_Lines' field-line integrator.
+lockstep argument as the field-lines engine's field-line integrator.
 """
 from __future__ import annotations
 
