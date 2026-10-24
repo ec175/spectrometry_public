@@ -653,7 +653,7 @@
       "what": "A vertically-stretched oval current turning about a central mass, with pellets injected into it.",
       "status": "CUT — the gravity fix was tested and does not work",
       "frames": [],
-      "public": true
+      "public": false
     },
     {
       "name": "surf_rates",

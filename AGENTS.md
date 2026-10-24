@@ -76,7 +76,7 @@ tools/             build_catalogs.py (regenerates CATALOG.md files and the still
 
 | engine | import | scenes (registry) | entry points |
 |---|---|---|---|
-| `wind-tunnel` | `wt` | `wt/scenes.py` (`SCENES`, 38) | `wt.lbm.LBM` (lattice-Boltzmann), `wt.cns` (compressible), `wt.shapes`, `wt.bodies`, `wt.render.Tunnel`; `tools/dbg.py <scene>` is the pre-render gate |
+| `wind-tunnel` | `wt` | `wt/scenes.py` (`SCENES`, 37) | `wt.lbm.LBM` (lattice-Boltzmann), `wt.cns` (compressible), `wt.shapes`, `wt.bodies`, `wt.render.Tunnel`; `tools/dbg.py <scene>` is the pre-render gate |
 | `field-lines` | `fl` | `fl/scenes.py` (5) | `fl.field` (fields as callables), `fl.lines.trace`, `fl.pulses`, `fl.render` |
 | `lattice-grid` | `lg` | `lg/scenes.py` + `lg/eyescene.py` (8) | `lg.lattice.build`, `lg.content`, `lg.rgbdelay`, `lg.render` |
 | `shape-physics` | `sim` | `sim/scenes.py` (11) | `sim.build` (shapes), `sim.world.World`, `sim.audio.Score`, `sim.render` |

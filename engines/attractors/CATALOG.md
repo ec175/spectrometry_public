@@ -11,7 +11,7 @@ RK4 on an (N,3) array costs the same four function evaluations as RK4 on one poi
 
 ## Modules
 
-What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
+What each file is. The Compositions table further down says which scenes ship as code — see the engine README to render one.
 
 | module | kind | what it gives you |
 |---|---|---|

@@ -11,7 +11,7 @@ A lattice is generated once and never moves. Each site carries a glyph — empty
 
 ## Modules
 
-What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
+What each file is. The Compositions table further down says which scenes ship as code — see the engine README to render one.
 
 | module | kind | what it gives you |
 |---|---|---|

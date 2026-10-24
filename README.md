@@ -156,7 +156,7 @@ everywhere, so you can skip the whole LaTeX install.
 <summary><b>Can I re-make your exact videos?</b></summary>
 <br>
 
-Most of them, yes. The scene scripts for 79 of my compositions are in the engines' `src/` folders,
+Most of them, yes. The scene scripts for 78 of my compositions are in the engines' `src/` folders,
 and `python cli.py list` shows them. Some are held back: scenes built on photos or music I
 don't own, the missile and ammunition studies, sets that aren't finished, and the "not public
 yet" engines above. Each

@@ -13,7 +13,7 @@ The same core also parses real instrument scans — the technique modules accept
 
 ## Modules
 
-What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
+What each file is, and what it gives you.
 
 | module | kind | what it gives you |
 |---|---|---|

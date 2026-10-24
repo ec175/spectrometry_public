@@ -11,7 +11,7 @@ Two solvers share one interface. `lbm.py` is a D2Q9 lattice-Boltzmann scheme wit
 
 ## Modules
 
-What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
+What each file is. The Compositions table further down says which scenes ship as code — see the engine README to render one.
 
 | module | kind | what it gives you |
 |---|---|---|
@@ -141,7 +141,7 @@ Most of these are in `src/wt/scenes.py` and render with `python cli.py <name>` -
 | `black_holes` | Three spinning holes, each dragging a disc of water round itself, falling together over twenty seconds and fusing like droplets when they meet. | ✅ yes | shipped | [1](frames/black_holes_t015.jpg) [2](frames/black_holes_t045.jpg) [3](frames/black_holes_t080.jpg) |
 | `black_holes_red` | The same clip in the red palette. | ✅ yes | shipped | [1](frames/black_holes_red_t035.jpg) [2](frames/black_holes_red_t075.jpg) |
 | `object_test` | The blue-pool TEMPLATE and test bed: drop objects in and see what the flow does to them before committing them to a real clip. | held back | template | — |
-| `orbit` | A vertically-stretched oval current turning about a central mass, with pellets injected into it. | ✅ yes | CUT — the gravity fix was tested and does not work | — |
+| `orbit` | A vertically-stretched oval current turning about a central mass, with pellets injected into it. | held back | CUT — the gravity fix was tested and does not work | — |
 | `surf_rates` | The three-rates clip with the fluid changed to water and the foils to surfboards. | ✅ yes | shipped | [1](frames/surf_rates_t035.jpg) [2](frames/surf_rates_t075.jpg) |
 | `surf_sweep` | A surfboard planing on a steady wave face. | ✅ yes | render interrupted | — |
 | `surf_wave` | The same board when the face starts curling — a wave peeling past, with a free-body diagram. | ✅ yes | shipped | [1](frames/surf_wave_t035.jpg) [2](frames/surf_wave_t075.jpg) |

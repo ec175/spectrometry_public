@@ -46,7 +46,7 @@ python cli.py <scene>              # full 1080x1920 -> out/<scene>.mp4
 
 | engine | scenes | a good first one |
 |---|---|---|
-| [Wind Tunnel](wind-tunnel/README.md#render-a-video) | 38 | `tri_foil_air_fast` (run `tools/dbg.py` on it first) |
+| [Wind Tunnel](wind-tunnel/README.md#render-a-video) | 37 | `tri_foil_air_fast` (run `tools/dbg.py` on it first) |
 | [Field Lines](field-lines/README.md#render-a-video) | 5 | `dipole_flower` |
 | [Lattice Grid](lattice-grid/README.md#render-a-video) | 8 | `circuit_hex` |
 | [Shape Physics](shape-physics/README.md#render-a-video) | 11 | `plinko` |

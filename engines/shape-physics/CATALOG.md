@@ -11,7 +11,7 @@ Discs against analytic surfaces. Three primitives — a hollow ring with gaps, a
 
 ## Modules
 
-What each file in `src/` is. The Compositions table below says which scenes ship as part of this repository — see the engine README.
+What each file is. The Compositions table further down says which scenes ship as code — see the engine README to render one.
 
 | module | kind | what it gives you |
 |---|---|---|

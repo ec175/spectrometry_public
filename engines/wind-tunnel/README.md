@@ -58,7 +58,7 @@ in `src/requirements.txt`), but it all runs on the CPU too.
 
 ## Render a video
 
-38 of my compositions are in `src/wt/scenes.py`. Everything below runs from the engine's `src`
+37 of my compositions are in `src/wt/scenes.py`. Everything below runs from the engine's `src`
 folder:
 
 ```bash
