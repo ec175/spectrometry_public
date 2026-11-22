@@ -47,12 +47,7 @@ show up here when it is. Follow along on
 <a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/gas-lab.webp" width="32%" alt="Gas Lab (not public yet): gas molecules compressed and ignited inside an engine cylinder"></a>
 <a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/orbital-lab.webp" width="32%" alt="Orbital Lab (not public yet): a glowing electron orbital morphing between shapes"></a>
 <a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/plume-lab.webp" width="32%" alt="Plume Lab (not public yet): three rocket exhaust plumes with shock diamonds"></a>
-<a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/mechanics-board.webp" width="32%" alt="Mechanics Board (not public yet): a physics problem drawn and solved on white paper"></a>
-<a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/cinematic.webp" width="32%" alt="Cinematic (not public yet): a title card over a swirling blue field"></a>
-<a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/elements.webp" width="32%" alt="Elements (not public yet): the carbon tile from the 118 element series"></a>
-<a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/field-notes.webp" width="32%" alt="Field Notes (not public yet): creatures swimming through a living blue ecosystem"></a>
 <a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/bio-lab.webp" width="32%" alt="Bio Lab (not public yet): a colony of glowing green and yellow cells"></a>
-<a href="https://instagram.com/spectrometry.mp4"><img src="docs/media/cow-launch.webp" width="32%" alt="Cow Launch (not public yet): a cow riding a rocket plume into the sky"></a>
 </p>
 
 Seen a video that isn't on either list?
@@ -142,6 +137,26 @@ the CPU if anything is missing. All the timings in these docs came from one RTX 
 i7-9700K, so read them as rough ratios.
 
 </details>
+
+## Run the repository checks
+
+From the repository root, run the dependency-light structural checks with:
+
+```bash
+python -m compileall -q engines tools tests
+python -m unittest discover -s tests -v
+```
+
+The Wind Tunnel compressible solver also has two reference checks:
+
+```bash
+cd engines/wind-tunnel/src
+python tools/sod_check.py
+python tools/shock_check.py
+```
+
+GitHub Actions runs these checks for Python 3.10–3.12. Full scene renders remain manual because
+they require ffmpeg, can be expensive, and may use optional GPU encoders.
 
 <details>
 <summary><b>Do I need LaTeX?</b></summary>

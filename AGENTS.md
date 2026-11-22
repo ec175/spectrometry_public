@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Notes for AI coding agents (Claude Code, Codex, Cursor, Copilot, and the rest) working with this
+Notes for AI coding agents (Codex, Cursor, Copilot, and the rest) working with this
 repository, and for the people directing them. Humans are welcome too: the [README](README.md) is the
 friendlier version.
 

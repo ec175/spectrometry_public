@@ -45,6 +45,16 @@ python chemical_profile.py Morphine --preview     # one molecule, fast
 python render_optimal.py                          # the whole set, three GPU lanes
 ```
 
+## Neon molecule drawing kit
+
+The drawing kit is part of this engine: `src/osc/chemscope.py` traces the molecular bonds in
+phosphor light, places element and functional-group symbols over the structure, and clears the
+bond trace beneath each symbol so the labels stay legible. The runnable `chemical_profile.py`
+examples above use that kit with molecules from `src/chemical_data.py`; the frame gallery shows
+examples including serotonin, dopamine, ibuprofen, and indigo. This engine uses curated structure
+and illustrative spectrum data at render time; RDKit is used by the separate Academia chemistry
+tools for molecule generation and analysis.
+
 `render_optimal.py` is the high-quality path. It splits every molecule into frame chunks and
 **work-steals** them across three GPU lanes, so idle lanes pick up the next chunk and the tail stays
 balanced. The pieces join seamlessly because each chunk warms the phosphor first and the film
