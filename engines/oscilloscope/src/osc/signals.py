@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """signals.py — the scenes. Each scene yields, for a given time t, one or more beam paths.
 
 A "beam" is (pts, gain, closed): pts = Nx2 in normalised scope space [-1,1], gain = brightness

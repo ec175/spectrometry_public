@@ -41,11 +41,13 @@ Then render one:
 
 ```bash
 cd engines/chemical-scope/src
-python chemical_profile.py Morphine --preview     # one molecule, fast
+python chemical_profile.py Serotonin --preview --flat
 python render_optimal.py                          # the whole set, three GPU lanes
 ```
 
 ## Neon molecule drawing kit
+
+The cover uses the flat render above. Omit `--flat` to apply the original glass and camera filter.
 
 The drawing kit is part of this engine: `src/osc/chemscope.py` traces the molecular bonds in
 phosphor light, places element and functional-group symbols over the structure, and clears the

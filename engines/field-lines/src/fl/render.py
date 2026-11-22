@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """render.py - frame clock, compositor and the ffmpeg pipe.
 
 Frames are driven by REAL SECONDS (t = i/fps), never by frame index. That is what makes a
@@ -154,9 +154,14 @@ def render_scene(scene, cfg, out=None, seconds=None):
         rc = proc.wait()
     except BaseException:
         try:
-            proc.stdin.close()
-            proc.kill()
+            if proc.poll() is None:
+                proc.kill()
+            proc.wait()
         finally:
+            try:
+                proc.stdin.close()
+            except OSError:
+                pass
             if os.path.exists(part):
                 os.remove(part)
         raise
@@ -165,9 +170,11 @@ def render_scene(scene, cfg, out=None, seconds=None):
         if os.path.exists(part):
             os.remove(part)
         raise RuntimeError(f"ffmpeg exited {rc}")
-    if os.path.exists(out):
-        os.remove(out)
-    os.replace(part, out)                     # atomic: a final name is always playable
+    try:
+        os.replace(part, out)
+    finally:
+        if os.path.exists(part):
+            os.remove(part)
     el = time.time() - t0
     print(f"[done] {out}   {el:.0f}s  ({el/n*1000:.0f} ms/frame)")
     return out

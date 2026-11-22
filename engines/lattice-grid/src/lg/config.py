@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """config.py - render config + ffmpeg/NVENC resolution.
 
 A shared find_ffmpeg chain and a one-time NVENC probe with automatic libx264 fallback. Env

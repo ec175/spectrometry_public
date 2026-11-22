@@ -21,6 +21,16 @@ filter.
 <a href="frames/look_dimensional2d_t045.jpg"><img src="frames/look_dimensional2d_t045.jpg" width="24%" alt="Oscilloscope still"></a>
 </p>
 
+## Render a neon molecule
+
+From this engine's `src/` folder, after installing its requirements:
+
+```sh
+python drug_profile.py Ibuprofen --preview --no-film
+```
+
+You can also try Proline, Dopamine, Serotonin, or Indigo. The drawing code is in [drugscope.py](src/osc/drugscope.py). It draws neon bonds and places functional group symbols so they remain legible. The spectra are illustrative. For the separate FTIR and Raman format, see [Chemical Scope](../chemical-scope/).
+
 ## Start here
 
 From the repo root, inside a virtual environment:
@@ -225,7 +235,7 @@ and re-seed their statics per size.
 - **`build_circle_format.py`** — the builder for the split ASCII-cover-plus-scope format. It's built
   around album art, so it stays with me; the format itself is described in the catalogue, with four
   frames.
-- **The chemical-profile format**, which has its own engine: [chemical-scope](../chemical-scope/).
+- **The FTIR and Raman sequence** lives in [Chemical Scope](../chemical-scope/).
 
 ---
 

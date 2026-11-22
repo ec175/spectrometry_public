@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """eyescene.py - the holofoil eye.
 
 A different composition from `circuit_*`, built on the same substrate. Four things change:

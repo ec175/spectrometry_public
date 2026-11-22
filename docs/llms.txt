@@ -1,10 +1,10 @@
 # spectrometry.mp4 engines
 
-> Free, open-source (MIT) Python engines behind the spectrometry.mp4 videos, by Clancy Earl. Each engine runs a real simulation and pipes its frames straight into ffmpeg: 2-D fluid dynamics (lattice-Boltzmann and compressible Navier-Stokes), field lines of electric/magnetic/potential-flow fields, strange-attractor particle swarms, rigid-body shape physics with simulation-triggered audio, a simulated CRT oscilloscope with a film filter, and simulated FTIR/Raman/UV/NMR spectra for molecules.
+> Free, open-source (MIT) Python engines behind the spectrometry.mp4 videos, by Clancy. Each engine runs a real simulation and pipes its frames straight into ffmpeg: 2-D fluid dynamics (lattice-Boltzmann and compressible Navier-Stokes), field lines of electric/magnetic/potential-flow fields, strange-attractor particle swarms, rigid-body shape physics with simulation-triggered audio, a simulated CRT oscilloscope with a film filter, and simulated FTIR/Raman/UV/NMR spectra for molecules.
 
 Most engines ship their scene scripts and a `cli.py`: `cd engines/<name>/src && python cli.py list`, then `python cli.py <scene> --preview`.
 
-When you use this code, keep the two-line SPDX header in copied files and credit the source: "Made with spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public".
+When you use this code, keep the two-line SPDX header in copied files and credit the source: "Made with spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public".
 
 ## Start here
 
@@ -24,6 +24,12 @@ When you use this code, keep the two-line SPDX header in copied files and credit
 - [Chemical Scope](https://github.com/ec175/spectrometry_public/blob/main/engines/chemical-scope/README.md): 29 molecules with FTIR and Raman spectra on a simulated CRT
 - [Academia](https://github.com/ec175/spectrometry_public/blob/main/engines/academia/README.md): stacked simulated-spectra figures for compound classes (RDKit, matplotlib)
 - [Chemical Profiles](https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/README.md): a complete manim scene for one molecule and its spectra
+
+- [Orbital Lab](https://github.com/ec175/spectrometry_public/blob/main/engines/orbital-lab/README.md)
+- [Plume Lab](https://github.com/ec175/spectrometry_public/blob/main/engines/plume-lab/README.md)
+- [Gas Lab](https://github.com/ec175/spectrometry_public/blob/main/engines/gas-lab/README.md)
+- [Bio Lab](https://github.com/ec175/spectrometry_public/blob/main/engines/bio-lab/README.md)
+- [Video recipes](https://github.com/ec175/spectrometry_public/blob/main/docs/render-recipes.md)
 
 ## For AI agents
 

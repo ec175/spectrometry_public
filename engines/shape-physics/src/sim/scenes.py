@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """scenes.py - the scene catalogue. A scene is geometry + materials + audio choice, nothing
 more; it cannot place a ball on a path (see world.py's note).
 

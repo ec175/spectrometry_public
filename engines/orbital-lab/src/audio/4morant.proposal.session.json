@@ -1,0 +1,213 @@
+{
+  "trim": {
+    "start": 11.0,
+    "end": 35.0,
+    "seconds": 24.0,
+    "frames": 1440
+  },
+  "schedule": [
+    {
+      "t": 11.0,
+      "state": "s",
+      "lm": [
+        0,
+        0
+      ],
+      "pulse": null,
+      "shell": true,
+      "snapped": false,
+      "morph": 0.0
+    },
+    {
+      "t": 13.0085,
+      "state": "p_z",
+      "lm": [
+        1,
+        0
+      ],
+      "pulse": 0,
+      "shell": true,
+      "snapped": true,
+      "morph": 0.7942,
+      "held_before": 1.214
+    },
+    {
+      "t": 15.3789,
+      "state": "p_x",
+      "lm": [
+        1,
+        1
+      ],
+      "pulse": 4,
+      "shell": false,
+      "snapped": false,
+      "morph": 0.5295,
+      "held_before": 1.841
+    },
+    {
+      "t": 17.7512,
+      "state": "d_z2",
+      "lm": [
+        2,
+        0
+      ],
+      "pulse": 9,
+      "shell": true,
+      "snapped": true,
+      "morph": 0.7942,
+      "held_before": 1.578
+    },
+    {
+      "t": 19.6901,
+      "state": "d_xz",
+      "lm": [
+        2,
+        1
+      ],
+      "pulse": 13,
+      "shell": false,
+      "snapped": true,
+      "morph": 0.5295,
+      "held_before": 1.409
+    },
+    {
+      "t": 21.8205,
+      "state": "d_xy",
+      "lm": [
+        2,
+        2
+      ],
+      "pulse": 17,
+      "shell": false,
+      "snapped": true,
+      "morph": 0.5295,
+      "held_before": 1.601
+    },
+    {
+      "t": 24.1151,
+      "state": "f_z3",
+      "lm": [
+        3,
+        0
+      ],
+      "pulse": 21,
+      "shell": true,
+      "snapped": false,
+      "morph": 0.7942,
+      "held_before": 1.5
+    },
+    {
+      "t": 25.4388,
+      "state": "f_xz2",
+      "lm": [
+        3,
+        1
+      ],
+      "pulse": 23,
+      "shell": false,
+      "snapped": false,
+      "morph": 0.5295,
+      "held_before": 0.794
+    },
+    {
+      "t": 26.9405,
+      "state": "f_xyz",
+      "lm": [
+        3,
+        2
+      ],
+      "pulse": 26,
+      "shell": false,
+      "snapped": true,
+      "morph": 0.5295,
+      "held_before": 0.972
+    },
+    {
+      "t": 28.3509,
+      "state": "f_x3",
+      "lm": [
+        3,
+        3
+      ],
+      "pulse": 29,
+      "shell": false,
+      "snapped": false,
+      "morph": 0.5295,
+      "held_before": 0.881
+    },
+    {
+      "t": 29.9475,
+      "state": "g_z4",
+      "lm": [
+        4,
+        0
+      ],
+      "pulse": 32,
+      "shell": true,
+      "snapped": true,
+      "morph": 0.7942,
+      "held_before": 0.802
+    },
+    {
+      "t": 31.7924,
+      "state": "g_xz",
+      "lm": [
+        4,
+        2
+      ],
+      "pulse": 35,
+      "shell": false,
+      "snapped": false,
+      "morph": 0.5295,
+      "held_before": 1.315
+    },
+    {
+      "t": 33.6511,
+      "state": "g_xy",
+      "lm": [
+        4,
+        4
+      ],
+      "pulse": 39,
+      "shell": false,
+      "snapped": true,
+      "morph": 0.5295,
+      "held_before": 1.329,
+      "held_after": 1.349
+    }
+  ],
+  "pulse": {
+    "period": 0.52947,
+    "phase": 0.28902,
+    "bpm": 113.32,
+    "first": 12.9963,
+    "count": 42,
+    "on_grid": 21,
+    "onsets": 47,
+    "resid_ms": 7.0
+  },
+  "grade": {
+    "hue": 64,
+    "sat": 1.18,
+    "mid_bias": -0.91,
+    "white": 1,
+    "core_hue": 2,
+    "core_sat": 0.44
+  },
+  "tones": {
+    "tone1": [
+      237.0,
+      479.0,
+      721.0
+    ],
+    "tone2": [
+      285.0,
+      571.0
+    ],
+    "tone3": [
+      318.0,
+      641.0
+    ]
+  },
+  "wav": "4morant.wav"
+}

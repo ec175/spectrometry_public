@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spectrometry.mp4 engines: the code behind the videos</title>
 <meta name="description" content="Free, open-source Python engines behind the spectrometry.mp4 videos: 2-D fluid dynamics, electric field lines, strange-attractor particle swarms, bouncing-shape physics, a simulated CRT oscilloscope and molecule spectra, rendered straight to video with ffmpeg.">
-<meta name="author" content="Clancy Earl">
+<meta name="author" content="Clancy">
 <meta name="keywords" content="spectrometry.mp4, simulation video, fluid simulation, lattice Boltzmann, field lines, strange attractor, oscilloscope, CRT filter, manim, spectroscopy, generative art, creative coding, python, ffmpeg">
 <link rel="canonical" href="https://ec175.github.io/spectrometry_public/">
 <meta name="theme-color" content="#0b0f14">
@@ -39,7 +39,7 @@
   "keywords": ["simulation", "fluid dynamics", "lattice Boltzmann", "field lines", "strange attractors", "oscilloscope", "spectroscopy", "manim", "ffmpeg", "generative art"],
   "author": {
     "@type": "Person",
-    "name": "Clancy Earl",
+    "name": "Clancy",
     "alternateName": "spectrometry.mp4",
     "sameAs": [
       "https://github.com/ec175",
@@ -147,53 +147,17 @@
     <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/chemical-scope/README.md"><img src="media/chemical-scope.webp" loading="lazy" alt="Chemical Scope: serotonin and its FTIR spectrum on a green CRT"></a>
     <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/README.md"><img src="media/chemical-profiles.webp" loading="lazy" alt="Chemical Profiles: caffeine with its FTIR spectrum, animated in manim"></a>
     <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/academia/README.md"><img src="media/academia.webp" loading="lazy" alt="Academia: stacked simulated spectra for a class of molecules"></a>
-  </div>
-</section>
-
-<section id="soon">
-  <h2>Not public yet</h2>
-  <p class="sub">These made some of my newer videos. Their code shows up on GitHub once it's cleaned
-     up for sharing.</p>
-  <div class="grid">
-    <a class="card" href="https://instagram.com/spectrometry.mp4"><img src="media/gas-lab.webp" loading="lazy" alt="Gas Lab: gas molecules compressed and ignited in an engine cylinder"></a>
-    <a class="card" href="https://instagram.com/spectrometry.mp4"><img src="media/orbital-lab.webp" loading="lazy" alt="Orbital Lab: a glowing electron orbital morphing between shapes"></a>
-    <a class="card" href="https://instagram.com/spectrometry.mp4"><img src="media/plume-lab.webp" loading="lazy" alt="Plume Lab: three rocket exhaust plumes with shock diamonds"></a>
-    <a class="card" href="https://instagram.com/spectrometry.mp4"><img src="media/bio-lab.webp" loading="lazy" alt="Bio Lab: a colony of glowing green and yellow cells"></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/gas-lab/README.md"><img src="media/gas-lab.webp" loading="lazy" alt="Gas Lab: gas molecules compressed and ignited in an engine cylinder"></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/orbital-lab/README.md"><img src="media/orbital-lab.webp" loading="lazy" alt="Orbital Lab: a glowing electron orbital morphing between shapes"></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/plume-lab/README.md"><img src="media/plume-lab.webp" loading="lazy" alt="Plume Lab: three rocket exhaust plumes with shock diamonds"></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/bio-lab/README.md"><img src="media/bio-lab.webp" loading="lazy" alt="Bio Lab: a colony of glowing green and yellow cells"></a>
   </div>
 </section>
 
 <section id="try">
-  <h2>Try one in five minutes</h2>
-  <p class="sub">You need Python 3.10+ and ffmpeg. A GPU helps, but nothing needs one.</p>
-  <div class="steps">
-    <div class="panel">
-      <h3>1. Get the code</h3>
-      <pre><code>git clone https://github.com/ec175/spectrometry_public.git
-cd spectrometry_public
-python -m venv .venv</code></pre>
-      <p style="margin:10px 0 0">Then turn it on: <code>.venv\Scripts\activate</code> on Windows,
-         <code>source .venv/bin/activate</code> on macOS and Linux.</p>
-    </div>
-    <div class="panel">
-      <h3>2. Render one of my scenes</h3>
-      <p>Every engine has a <code>cli.py</code>. This is the wind tunnel clip above, at preview size.</p>
-      <pre><code>pip install -r engines/wind-tunnel/src/requirements.txt
-cd engines/wind-tunnel/src
-python cli.py list
-python cli.py tri_foil_air_fast --preview</code></pre>
-    </div>
-    <div class="panel">
-      <h3>…or make a molecule video</h3>
-      <pre><code>pip install -r chemical_profiles/requirements.txt
-cd chemical_profiles
-manim -ql -r 540,960 chemical_profile.py VerticalProfile_Aspirin</code></pre>
-    </div>
-    <div class="panel">
-      <h3>…or put the CRT look on your own clip</h3>
-      <pre><code>pip install -r engines/oscilloscope/src/requirements.txt
-python engines/oscilloscope/src/filter_cli.py your_clip.mp4 filmed.mp4 --glitch 0.8</code></pre>
-    </div>
-  </div>
+  <h2>Render a scene</h2>
+  <p class="sub">Choose an engine above for setup and a first preview. To recreate a specific clip,
+    start with the <a href="https://github.com/ec175/spectrometry_public/blob/main/docs/render-recipes.md">video recipes</a>.</p>
 </section>
 
 <section id="credit">
@@ -205,7 +169,7 @@ python engines/oscilloscope/src/filter_cli.py your_clip.mp4 filmed.mp4 --glitch 
       <li>Credit it in your project or your video description:</li>
     </ul>
     <div class="credit" style="margin-top:10px">
-      <pre id="credit-line"><code>Made with spectrometry.mp4 engines by Clancy Earl - github.com/ec175/spectrometry_public</code></pre>
+      <pre id="credit-line"><code>Made with spectrometry.mp4 engines by Clancy - github.com/ec175/spectrometry_public</code></pre>
       <button class="copy" type="button" data-copy="credit-line">Copy</button>
     </div>
     <p style="margin:12px 0 0">Using an AI coding agent? Point it at
@@ -217,7 +181,7 @@ python engines/oscilloscope/src/filter_cli.py your_clip.mp4 filmed.mp4 --glitch 
 </main>
 
 <footer class="wrap">
-  Made by Clancy Earl ·
+  Made by Clancy ·
   <a href="https://github.com/ec175/spectrometry_public">GitHub</a> ·
   <a href="https://github.com/ec175/spectrometry_public/blob/main/LICENSE">MIT license</a> ·
   <a href="https://github.com/ec175/spectrometry_public/blob/main/engines/CATALOG.md">Full catalogue</a>

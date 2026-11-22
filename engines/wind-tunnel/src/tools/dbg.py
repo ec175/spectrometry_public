@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """Run a scene to completion at preview resolution and report the FIRST thing to break: the
 lattice (max|u| blowing up / NaN) or a body's own state. Nothing is drawn or encoded.
 

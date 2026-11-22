@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """scenes.py - five ways to look at a Lorenz attractor.
 
 The brief was "beautiful ways to demonstrate Lorenz attractors - particles attracted to the path,

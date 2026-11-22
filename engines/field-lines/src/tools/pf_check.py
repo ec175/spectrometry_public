@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """pf_check.py - is a `PotentialFlow.cylinder` actually a cylinder?
 
 The exact solution has two properties that a wrongly-oriented doublet destroys, and neither is

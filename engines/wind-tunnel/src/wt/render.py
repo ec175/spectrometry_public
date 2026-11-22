@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """render.py — the pipeline: solve -> colourise -> streaks -> body -> film -> ffmpeg.
 
 manim-free, same shape as the oscilloscope engine's render.py: this module owns the clock and the rawvideo

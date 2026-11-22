@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """scenes.py - the scenes, and the per-frame composition.
 
 A scene is (substrate, content, illumination, palette, exposure). `compose` is shared by all of

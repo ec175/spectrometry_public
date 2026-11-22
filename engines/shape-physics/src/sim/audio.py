@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """audio.py - EVENT-TRIGGERED progressive song playback, plus decode/mux.
 
 `decode_*` and `mux_track` use a plain ffmpeg invocation, with the same atomic

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """texture_check.py - does the render have the source's TEXTURE?
 
 The third blind spot. `look_check` measures one frame's bulk statistics; `motion_check`

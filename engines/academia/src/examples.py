@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """examples.py — runnable end-to-end demos for every technique.
 
 Each function shows the canonical flow: pull/parse data through the library,
@@ -15,6 +15,7 @@ unreachable — measured data is not part of this repository.
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import os
 from pathlib import Path
 
 import spectra as sp
@@ -111,7 +112,10 @@ def nmr_demos():
 
 def dsc_demo():
     """DSC: load + smooth + plot a single [step] heating trace."""
-    files = [{"label": "PVP29kDa", "url": MAIN + "DSC/Earl/2025_10_06_PVP29_5Cmin_n60C_200C_x3.csv",
+    url = os.environ.get("SPECTROMETRY_DSC_URL")
+    if not url:
+        raise ValueError("Set SPECTROMETRY_DSC_URL to a PVP29 DSC trace CSV URL.")
+    files = [{"label": "PVP29kDa", "url": url,
               "y_scale": 6, "x_min": 60, "x_max": 200}]
     traces = dsc.load_dsc_traces(files, -15, 200)
     offset = dsc.apply_per_trace_offset(traces, files, offset_step=0.2)

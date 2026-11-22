@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """chemical_profile.py — render a CRT-scope "chemical profile" short (molecule above, spectrum below).
 
 manim-free remake of the vertical chemical profiles, drawn as an oscilloscope screen and finished
@@ -27,7 +27,7 @@ from chemical_data import MOLECULES
 
 def render_one(name, *, preview=False, seconds=None, fps=30, bow=0.05, glow=1.2,
                ambient=0.18, seed=7, bevel=0.52, bevel_frac=0.05,
-               frame_lo=None, frame_hi=None, warm=24, out_path=None):
+               frame_lo=None, frame_hi=None, warm=24, out_path=None, flat=False):
     """Render `name`. If frame_lo/frame_hi are given, render ONLY that absolute frame range
     (one parallel lane / chunk of the whole video): the phosphor persistence buffer is first
     warmed up over `warm` frames before frame_lo (decay 0.8/frame -> ~gone in 20), so the chunk
@@ -44,9 +44,11 @@ def render_one(name, *, preview=False, seconds=None, fps=30, bow=0.05, glow=1.2,
 
     scope = ChemScope(mol, w=w, h=h, duration=dur)
     # multi-colour content (green trace + blue/red atoms) -> neutral-white phosphor film config
-    cfg = film_config_for_phosphor((255, 255, 255), halation_boost=glow)
-    look = FilmLook(w, h, fps, n, seed=seed, ambient_gain=ambient, barrel_k=bow,
-                    bevel=bevel, bevel_frac=bevel_frac, **cfg)
+    look = None
+    if not flat:
+        cfg = film_config_for_phosphor((255, 255, 255), halation_boost=glow)
+        look = FilmLook(w, h, fps, n, seed=seed, ambient_gain=ambient, barrel_k=bow,
+                        bevel=bevel, bevel_frac=bevel_frac, **cfg)
 
     if out_path is None:
         out_path = os.path.join(OUT, f"chemical_scope_{name.lower()}{'_preview' if preview else ''}.mp4")
@@ -63,7 +65,8 @@ def render_one(name, *, preview=False, seconds=None, fps=30, bow=0.05, glow=1.2,
             scope.render_frame(i, fps)
         for i in range(lo, hi):
             frame = scope.render_frame(i, fps)
-            frame = look.process(frame, i)
+            if look is not None:
+                frame = look.process(frame, i)
             proc.stdin.write(np.ascontiguousarray(frame).tobytes())
             if i % fps == 0:
                 print(f"  frame {i}/{hi}", flush=True)
@@ -89,6 +92,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("name", help="molecule name (Morphine, Indigo, ...) or 'all'")
     ap.add_argument("--preview", action="store_true")
+    ap.add_argument("--flat", action="store_true", help="skip the CRT glass and camera filter")
     ap.add_argument("--seconds", type=float, default=None)
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--bow", type=float, default=0.05, help="glass bow-out (subtle main-face bow)")
@@ -113,7 +117,8 @@ def main():
         render_one(match, preview=args.preview, seconds=args.seconds, fps=args.fps,
                    bow=args.bow, glow=args.glow, ambient=args.ambient,
                    bevel=args.bevel, bevel_frac=args.bevel_frac,
-                   frame_lo=frame_lo, frame_hi=frame_hi, warm=args.warm, out_path=args.out)
+                   frame_lo=frame_lo, frame_hi=frame_hi, warm=args.warm, out_path=args.out,
+                   flat=args.flat)
 
 
 if __name__ == "__main__":

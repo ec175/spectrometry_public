@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """look_check.py - does the render actually LOOK like the source?
 
 `cli.py --dry` answers "how many elements are lit", which is necessary and not sufficient: a

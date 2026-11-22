@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """motion_check.py - does the render MOVE like the source, and carry its VFX layer?
 
 `look_check.py` measures single frames: luminance, palette, contrast. It is blind to

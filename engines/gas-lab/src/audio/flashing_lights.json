@@ -1,0 +1,190 @@
+{
+  "bpm": 90.5,
+  "window": [
+    26.4,
+    36.4
+  ],
+  "plan": {
+    "mode": "marks",
+    "period_units": 0,
+    "period": 0.6323,
+    "phase": 0.0,
+    "n_fires": 15,
+    "fires": [
+      {
+        "t": 0.5488,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 1.0977,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 1.6465,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 2.1954,
+        "on_vocal": true,
+        "sub": -1,
+        "strength": 0.608,
+        "kind": "a"
+      },
+      {
+        "t": 2.8107,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 3.426,
+        "on_vocal": true,
+        "sub": -1,
+        "strength": 0.527,
+        "kind": "b"
+      },
+      {
+        "t": 4.0917,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 4.7573,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 5.423,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 6.0886,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 6.7543,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 7.4199,
+        "on_vocal": true,
+        "sub": -1,
+        "strength": 0.694,
+        "kind": "a"
+      },
+      {
+        "t": 8.1107,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      },
+      {
+        "t": 8.8015,
+        "on_vocal": true,
+        "sub": -1,
+        "strength": 0.523,
+        "kind": "b"
+      },
+      {
+        "t": 9.4008,
+        "on_vocal": false,
+        "sub": -1,
+        "strength": 0.0,
+        "kind": ""
+      }
+    ],
+    "flashes": [
+      {
+        "t": 2.1954,
+        "kind": "a",
+        "strength": 0.608,
+        "primary": true
+      },
+      {
+        "t": 3.426,
+        "kind": "b",
+        "strength": 0.527,
+        "primary": true
+      },
+      {
+        "t": 4.0065,
+        "kind": "b",
+        "strength": 0.811,
+        "primary": false
+      },
+      {
+        "t": 4.1459,
+        "kind": "b",
+        "strength": 0.69,
+        "primary": false
+      },
+      {
+        "t": 5.3185,
+        "kind": "b",
+        "strength": 0.895,
+        "primary": false
+      },
+      {
+        "t": 5.4694,
+        "kind": "b",
+        "strength": 0.492,
+        "primary": false
+      },
+      {
+        "t": 5.9222,
+        "kind": "b",
+        "strength": 0.45,
+        "primary": false
+      },
+      {
+        "t": 7.4199,
+        "kind": "a",
+        "strength": 0.694,
+        "primary": true
+      },
+      {
+        "t": 8.8015,
+        "kind": "b",
+        "strength": 0.523,
+        "primary": true
+      },
+      {
+        "t": 9.3587,
+        "kind": "b",
+        "strength": 0.863,
+        "primary": false
+      }
+    ],
+    "covered": 4,
+    "of_onsets": 10,
+    "score": 0.0,
+    "gap_min": 0.5488,
+    "gap_max": 0.6908,
+    "words_source": "out/notes/radial_core_rays_v2.notes.json"
+  },
+  "wav": "flashing_lights.wav"
+}

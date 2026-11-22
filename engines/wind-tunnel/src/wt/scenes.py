@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """scenes.py - what is in the tunnel and what it does over time.
 
 A scene is deliberately thin: it owns a duration and a `bodies(t)` method returning closed

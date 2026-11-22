@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# From spectrometry.mp4 engines by Clancy Earl - https://github.com/ec175/spectrometry_public
+# From spectrometry.mp4 engines by Clancy - https://github.com/ec175/spectrometry_public
 """asciivid.py — video frame -> coloured ASCII, vectorized via a glyph atlas.
 
 Ports an `ascii_art.frame_to_ascii` mapping from another project of mine (luminance -> ramp
