@@ -4,7 +4,7 @@ Compare how exhaust plumes look as the surrounding pressure changes. Scene prese
 
 [All engines](../README.md) · [Video recipes](../../docs/render-recipes.md)
 
-<img src="../../docs/media/plume-lab.webp" width="220" alt="Plume Lab preview">
+<img src="../../docs/media/icons/plume-lab.webp" width="176" alt="Plume Lab preview">
 
 ## Render a scene
 

@@ -6,23 +6,30 @@ Simulation engines and video scenes by Clancy. Explore fluid flow, electric fiel
 
 ## Find the engine behind a video
 
-Select a clip to open its engine guide. The [video recipes](docs/render-recipes.md) list scene names, render commands, and any media you need to supply.
+Select an engine to open its guide. The [video recipes](docs/render-recipes.md) list scene names, render commands, and any media you need to supply.
 
-<p align="center">
-<a href="engines/wind-tunnel/README.md"><img src="docs/media/wind-tunnel.webp" width="32%" alt="Wind Tunnel: three airfoils shedding vortices, coloured by flow speed"></a>
-<a href="engines/field-lines/README.md"><img src="docs/media/field-lines.webp" width="32%" alt="Field Lines: glowing blue electric field lines around moving charges"></a>
-<a href="engines/lattice-grid/README.md"><img src="docs/media/lattice-grid.webp" width="32%" alt="Lattice Grid: a honeycomb of tiny coloured circuit symbols flickering to a beat"></a>
-<a href="engines/shape-physics/README.md"><img src="docs/media/shape-physics.webp" width="32%" alt="Shape Physics: balls breaking out of a spinning pink ring"></a>
-<a href="engines/attractors/README.md"><img src="docs/media/attractors.webp" width="32%" alt="Attractors: a Lorenz butterfly drawn by thousands of glowing particles"></a>
-<a href="engines/oscilloscope/README.md"><img src="docs/media/oscilloscope.webp" width="32%" alt="Oscilloscope: a green phosphor rose pattern on a simulated CRT"></a>
-<a href="engines/chemical-scope/README.md"><img src="docs/media/chemical-scope.webp" width="32%" alt="Chemical Scope: serotonin and its FTIR spectrum drawn on a green CRT"></a>
-<a href="chemical_profiles/README.md"><img src="docs/media/chemical-profiles.webp" width="32%" alt="Chemical Profiles: caffeine with its FTIR spectrum, animated in manim"></a>
-<a href="engines/academia/README.md"><img src="docs/media/academia.webp" width="32%" alt="Academia: stacked simulated spectra for a whole class of molecules"></a>
-<a href="engines/gas-lab/README.md"><img src="docs/media/gas-lab.webp" width="32%" alt="Gas Lab: gas molecules compressed and ignited inside an engine cylinder"></a>
-<a href="engines/orbital-lab/README.md"><img src="docs/media/orbital-lab.webp" width="32%" alt="Orbital Lab: a glowing electron orbital morphing between shapes"></a>
-<a href="engines/plume-lab/README.md"><img src="docs/media/plume-lab.webp" width="32%" alt="Plume Lab: three rocket exhaust plumes with shock diamonds"></a>
-<a href="engines/bio-lab/README.md"><img src="docs/media/bio-lab.webp" width="32%" alt="Bio Lab: a colony of glowing green and yellow cells"></a>
-</p>
+<table>
+<tr>
+<td align="center"><a href="engines/wind-tunnel/README.md"><img src="docs/media/icons/wind-tunnel.webp" width="88" height="88" alt=""><br><strong>Wind Tunnel</strong></a></td>
+<td align="center"><a href="engines/field-lines/README.md"><img src="docs/media/icons/field-lines.webp" width="88" height="88" alt=""><br><strong>Field Lines</strong></a></td>
+<td align="center"><a href="engines/gas-lab/README.md"><img src="docs/media/icons/gas-lab.webp" width="88" height="88" alt=""><br><strong>Gas Lab</strong></a></td>
+<td align="center"><a href="engines/plume-lab/README.md"><img src="docs/media/icons/plume-lab.webp" width="88" height="88" alt=""><br><strong>Plume Lab</strong></a></td>
+</tr>
+<tr>
+<td align="center"><a href="engines/lattice-grid/README.md"><img src="docs/media/icons/lattice-grid.webp" width="88" height="88" alt=""><br><strong>Lattice Grid</strong></a></td>
+<td align="center"><a href="engines/shape-physics/README.md"><img src="docs/media/icons/shape-physics.webp" width="88" height="88" alt=""><br><strong>Shape Physics</strong></a></td>
+<td align="center"><a href="engines/attractors/README.md"><img src="docs/media/icons/attractors.webp" width="88" height="88" alt=""><br><strong>Attractors</strong></a></td>
+<td align="center"><a href="engines/orbital-lab/README.md"><img src="docs/media/icons/orbital-lab.webp" width="88" height="88" alt=""><br><strong>Orbital Lab</strong></a></td>
+</tr>
+<tr>
+<td align="center"><a href="engines/oscilloscope/README.md"><img src="docs/media/icons/oscilloscope.webp" width="88" height="88" alt=""><br><strong>Oscilloscope</strong></a></td>
+<td align="center"><a href="engines/chemical-scope/README.md"><img src="docs/media/icons/chemical-scope.webp" width="88" height="88" alt=""><br><strong>Chemical Scope</strong></a></td>
+<td align="center"><a href="engines/bio-lab/README.md"><img src="docs/media/icons/bio-lab.webp" width="88" height="88" alt=""><br><strong>Bio Lab</strong></a></td>
+<td align="center"><a href="engines/academia/README.md"><img src="docs/media/icons/academia.webp" width="88" height="88" alt=""><br><strong>Academia</strong></a></td>
+</tr>
+</table>
+
+For the standalone Manim scene, see [Chemical Profiles](chemical_profiles/README.md).
 
 ## Render your first scene
 

@@ -4,7 +4,7 @@ Watch orbital shapes morph as the camera moves around them. The scene presets in
 
 [All engines](../README.md) · [Video recipes](../../docs/render-recipes.md)
 
-<img src="../../docs/media/orbital-lab.webp" width="220" alt="Orbital Lab preview">
+<img src="../../docs/media/icons/orbital-lab.webp" width="176" alt="Orbital Lab preview">
 
 ## Render a scene
 

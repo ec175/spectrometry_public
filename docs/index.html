@@ -85,13 +85,22 @@
   section{padding:36px 0 4px}
   h2{margin:0 0 6px;font-size:1.35rem}
   .sub{margin:0 0 18px;color:var(--muted)}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr);gap:10px} }
-  .card{display:block;border-radius:var(--radius);overflow:hidden;background:#05070a;
-        border:1px solid var(--line);aspect-ratio:9/16;transition:transform .15s ease}
-  .card:hover{transform:translateY(-3px)}
-  .card img{display:block;width:100%;height:100%;object-fit:cover}
-  @media (prefers-reduced-motion: reduce){ .card{transition:none} .card:hover{transform:none} }
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .card{display:flex;align-items:center;gap:12px;padding:8px;min-height:70px;
+        border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
+        text-decoration:none;font-weight:650;line-height:1.25;
+        transition:border-color .15s ease,transform .15s ease}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card img{width:54px;height:54px;flex:none;border-radius:8px;background:#05070a}
+  .card span{overflow-wrap:anywhere}
+  .extra{margin:12px 0 0;color:var(--muted);font-size:.9rem}
+  @media (max-width:760px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:540px){
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .card{gap:8px;min-height:58px;font-size:.875rem}
+    .card img{width:40px;height:40px}
+  }
+  @media (prefers-reduced-motion: reduce){.card{transition:none}.card:hover{transform:none}}
 
   .steps{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
   .panel{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
@@ -136,22 +145,22 @@
 
 <section id="engines">
   <h2>Find the engine behind a video</h2>
-  <p class="sub">Tap the one that looks like what you saw.</p>
-  <div class="grid">
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/wind-tunnel/README.md"><img src="media/wind-tunnel.webp" loading="lazy" alt="Wind Tunnel: three airfoils shedding vortices, coloured by flow speed"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/field-lines/README.md"><img src="media/field-lines.webp" loading="lazy" alt="Field Lines: glowing blue electric field lines around moving charges"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/lattice-grid/README.md"><img src="media/lattice-grid.webp" loading="lazy" alt="Lattice Grid: a honeycomb of coloured circuit symbols flickering to a beat"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/shape-physics/README.md"><img src="media/shape-physics.webp" loading="lazy" alt="Shape Physics: balls breaking out of a spinning pink ring"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/attractors/README.md"><img src="media/attractors.webp" loading="lazy" alt="Attractors: a Lorenz butterfly drawn by thousands of glowing particles"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/oscilloscope/README.md"><img src="media/oscilloscope.webp" loading="lazy" alt="Oscilloscope: a green phosphor rose pattern on a simulated CRT"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/chemical-scope/README.md"><img src="media/chemical-scope.webp" loading="lazy" alt="Chemical Scope: serotonin and its FTIR spectrum on a green CRT"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/README.md"><img src="media/chemical-profiles.webp" loading="lazy" alt="Chemical Profiles: caffeine with its FTIR spectrum, animated in manim"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/academia/README.md"><img src="media/academia.webp" loading="lazy" alt="Academia: stacked simulated spectra for a class of molecules"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/gas-lab/README.md"><img src="media/gas-lab.webp" loading="lazy" alt="Gas Lab: gas molecules compressed and ignited in an engine cylinder"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/orbital-lab/README.md"><img src="media/orbital-lab.webp" loading="lazy" alt="Orbital Lab: a glowing electron orbital morphing between shapes"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/plume-lab/README.md"><img src="media/plume-lab.webp" loading="lazy" alt="Plume Lab: three rocket exhaust plumes with shock diamonds"></a>
-    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/bio-lab/README.md"><img src="media/bio-lab.webp" loading="lazy" alt="Bio Lab: a colony of glowing green and yellow cells"></a>
-  </div>
+  <p class="sub">Choose an engine to see how it works and render a scene.</p>
+  <nav class="grid" aria-label="Engine guides">
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/wind-tunnel/README.md"><img src="media/icons/wind-tunnel.webp" width="176" height="176" alt="" loading="lazy"><span>Wind Tunnel</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/field-lines/README.md"><img src="media/icons/field-lines.webp" width="176" height="176" alt="" loading="lazy"><span>Field Lines</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/gas-lab/README.md"><img src="media/icons/gas-lab.webp" width="176" height="176" alt="" loading="lazy"><span>Gas Lab</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/plume-lab/README.md"><img src="media/icons/plume-lab.webp" width="176" height="176" alt="" loading="lazy"><span>Plume Lab</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/lattice-grid/README.md"><img src="media/icons/lattice-grid.webp" width="176" height="176" alt="" loading="lazy"><span>Lattice Grid</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/shape-physics/README.md"><img src="media/icons/shape-physics.webp" width="176" height="176" alt="" loading="lazy"><span>Shape Physics</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/attractors/README.md"><img src="media/icons/attractors.webp" width="176" height="176" alt="" loading="lazy"><span>Attractors</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/orbital-lab/README.md"><img src="media/icons/orbital-lab.webp" width="176" height="176" alt="" loading="lazy"><span>Orbital Lab</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/oscilloscope/README.md"><img src="media/icons/oscilloscope.webp" width="176" height="176" alt="" loading="lazy"><span>Oscilloscope</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/chemical-scope/README.md"><img src="media/icons/chemical-scope.webp" width="176" height="176" alt="" loading="lazy"><span>Chemical Scope</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/bio-lab/README.md"><img src="media/icons/bio-lab.webp" width="176" height="176" alt="" loading="lazy"><span>Bio Lab</span></a>
+    <a class="card" href="https://github.com/ec175/spectrometry_public/blob/main/engines/academia/README.md"><img src="media/icons/academia.webp" width="176" height="176" alt="" loading="lazy"><span>Academia</span></a>
+  </nav>
+  <p class="extra">Standalone Manim scene · <a href="https://github.com/ec175/spectrometry_public/blob/main/chemical_profiles/README.md">Chemical Profiles</a></p>
 </section>
 
 <section id="try">

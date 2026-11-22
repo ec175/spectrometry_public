@@ -4,7 +4,7 @@ Render stylized cell colonies with growth, movement, and competition. The JSON f
 
 [All engines](../README.md) · [Video recipes](../../docs/render-recipes.md)
 
-<img src="../../docs/media/bio-lab.webp" width="220" alt="Bio Lab preview">
+<img src="../../docs/media/icons/bio-lab.webp" width="176" alt="Bio Lab preview">
 
 ## Render a scene
 

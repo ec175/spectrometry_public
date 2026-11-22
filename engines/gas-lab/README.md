@@ -4,7 +4,7 @@ Follow the motion of gas through animated piston engines. The scene presets incl
 
 [All engines](../README.md) · [Video recipes](../../docs/render-recipes.md)
 
-<img src="../../docs/media/gas-lab.webp" width="220" alt="Gas Lab preview">
+<img src="../../docs/media/icons/gas-lab.webp" width="176" alt="Gas Lab preview">
 
 ## Render a scene
 
